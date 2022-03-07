@@ -12,6 +12,7 @@ import (
 
 func autoMigrate(db *gorm.DB) {
 	db.AutoMigrate(&entities.User{})
+	db.AutoMigrate(&entities.Patient{})
 }
 
 func InitDB(config *configs.AppConfig) *gorm.DB {

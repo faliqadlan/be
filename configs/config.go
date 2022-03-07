@@ -25,9 +25,9 @@ var synchronizer = &sync.Mutex{}
 var appConfig *AppConfig
 
 func initConfig() *AppConfig {
-	if err := godotenv.Load("be-deploy.env"); err != nil {
-		log.Info(err)
-	}
+	// if err := godotenv.Load("be-deploy.yaml"); err != nil {
+	// 	log.Info(err)
+	// }
 
 	exConfig := AppConfig{}
 

@@ -36,5 +36,6 @@ require (
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	golang.org/x/sys v0.0.0-20211103235746-7861aae1554b // indirect
+	gorm.io/datatypes v1.0.6
 	gorm.io/driver/mysql v1.3.2
 )
