@@ -43,20 +43,20 @@ jobs:
       - name: "Delete the previews namespace"
         uses: okteto/delete-namespace@latest
         with:
-          namespace: faliqadlan
+          namespace: mrclinic-faliqadlan
       
       - name: "Create devlopment environments namespace"
         uses: okteto/create-namespace@latest
         with:
-          namespace: faliqadlan
+          namespace: mrclinic-faliqadlan
       
       - name:  "Activate personal namespace"
         uses: okteto/namespace@latest
         with:
-          namespace: faliqadlan
+          namespace: mrclinic-faliqadlan
       
       - name: "create deployment"
         uses: okteto/apply@latest
         with:
-          namespace: faliqadlan
+          namespace: mrclinic-faliqadlan
           manifest: be-deploy.yaml
