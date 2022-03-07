@@ -33,7 +33,7 @@ jobs:
           tags: faliqadlan/img-be:latest
 
       - name: checkout
-        uses: actions/checkout@latest
+        uses: actions/checkout@master
       
       - name: login okteto
         uses: okteto/login@latest
