@@ -33,19 +33,19 @@ jobs:
           tags: faliqadlan/img-be:latest
 
       - name: checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@latest
       
       - name: login okteto
-        uses: okteto/login@master
+        uses: okteto/login@latest
         with:
           token: ${{ secrets.OKTETO_TOKEN }}
       
       - name:  "Activate personal namespace"
-        uses: okteto/namespace@master
+        uses: okteto/namespace@latest
         with:
           namespace: faliqadlan
       
       - name: "create deployment"
-        uses: okteto/apply@master
+        uses: okteto/apply@latest
         with:
           manifest: be-deploy.yaml
