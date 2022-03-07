@@ -40,23 +40,19 @@ jobs:
         with:
           token: ${{ secrets.OKTETO_TOKEN }}
       
-      - name: "Delete the previews namespace"
-        uses: okteto/delete-namespace@latest
-        with:
-          namespace: mrclinic-faliqadlan
-      
-      - name: "Create devlopment environments namespace"
-        uses: okteto/create-namespace@latest
-        with:
-          namespace: mrclinic-faliqadlan
-      
       - name:  "Activate personal namespace"
         uses: okteto/namespace@latest
         with:
-          namespace: mrclinic-faliqadlan
+          namespace: faliqadlan
       
       - name: "create deployment"
         uses: okteto/apply@latest
         with:
-          namespace: mrclinic-faliqadlan
+          namespace: faliqadlan
           manifest: be-deploy.yaml
+      
+      - uses: actions-hub/kubectl@master
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        with:
+          args:  kubectl rollout restart deployment go-app-deployment
