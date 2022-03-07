@@ -49,3 +49,8 @@ jobs:
         uses: okteto/apply@latest
         with:
           manifest: be-deploy.yaml
+      
+      - name: "Push changes"
+        uses: okteto/push@latest
+        with:
+          manifest: be-deploy.yaml
