@@ -40,10 +40,10 @@ jobs:
         with:
           token: ${{ secrets.OKTETO_TOKEN }}
       
-      - name: "Delete the previews namespace"
-        uses: okteto/delete-namespace@latest
-        with:
-          namespace: mrclinic-faliqadlan
+#       - name: "Delete the previews namespace"
+#         uses: okteto/delete-namespace@latest
+#         with:
+#           namespace: mrclinic-faliqadlan
       
       - name: "Create devlopment environments namespace"
         uses: okteto/create-namespace@latest
