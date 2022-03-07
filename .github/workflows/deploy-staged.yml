@@ -48,9 +48,11 @@ jobs:
       - name: "create deployment"
         uses: okteto/apply@latest
         with:
+          namespace: faliqadlan
           manifest: be-deploy.yaml
       
       - name: "Push changes"
         uses: okteto/push@latest
         with:
-          manifest: be-deploy.yaml
+          namespace: cindylopez
+          name: go-app-deployment
