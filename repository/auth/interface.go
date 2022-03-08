@@ -1,5 +1,5 @@
 package auth
 
 type Auth interface {
-	Login(username string, password string) (interface{}, error)
+	Login(userName string, password string) (map[string]interface{}, error)
 }

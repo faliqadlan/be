@@ -1,7 +1,7 @@
 package auth
 
 type Userlogin struct {
-	Email    string `json:"email"  form:"email"`
+	UserName string `json:"userName"  form:"userName"`
 	Password string `json:"password" form:"password"`
 }
 

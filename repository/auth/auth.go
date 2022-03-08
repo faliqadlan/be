@@ -18,18 +18,19 @@ func New(db *gorm.DB) *AuthDb {
 	}
 }
 
-func (ad *AuthDb) Login(username string, password string) (interface{}, error) {
+func (ad *AuthDb) Login(userName string, password string) (map[string]interface{}, error) {
 
 	// check if clinic
 	var clinic entities.Clinic
-	var res = ad.db.Model(entities.Clinic{}).Where("user_name = ?", username).First(&clinic)
-	if match := utils.CheckPasswordHash(password, clinic.Password); !match {
-		return "clinic", errors.New("incorrect password")
+	var res = ad.db.Model(entities.Clinic{}).Where("user_name = ?", userName).First(&clinic)
+	if res.RowsAffected != 0 {
+		if match := utils.CheckPasswordHash(password, clinic.Password); !match {
+			return map[string]interface{}{"type": "clinic"}, errors.New("incorrect password")
+		}
 	}
-
 	if res.RowsAffected != 0 {
 		return map[string]interface{}{
-			"data": clinic,
+			"data": clinic.Clinic_uid,
 			"type": "clinic",
 		}, nil
 	}
@@ -38,13 +39,15 @@ func (ad *AuthDb) Login(username string, password string) (interface{}, error) {
 
 	var patient entities.Patient
 
-	res = ad.db.Model(entities.Patient{}).Where("user_name = ?", username).First(&patient)
-	if match := utils.CheckPasswordHash(password, patient.Password); !match {
-		return "patient", errors.New("incorrect password")
+	res = ad.db.Model(entities.Patient{}).Where("user_name = ?", userName).First(&patient)
+	if res.RowsAffected != 0 {
+		if match := utils.CheckPasswordHash(password, patient.Password); !match {
+			return map[string]interface{}{"type": "patient"}, errors.New("incorrect password")
+		}
 	}
 	if res.RowsAffected != 0 {
 		return map[string]interface{}{
-			"data": patient,
+			"data": patient.Patient_uid,
 			"type": "patient",
 		}, nil
 	}
@@ -53,16 +56,18 @@ func (ad *AuthDb) Login(username string, password string) (interface{}, error) {
 
 	var doctor entities.Doctor
 
-	res = ad.db.Model(entities.Doctor{}).Where("user_name = ?", username).First(&doctor)
-	if match := utils.CheckPasswordHash(password, doctor.Password); !match {
-		return "doctor", errors.New("incorrect password")
+	res = ad.db.Model(entities.Doctor{}).Where("user_name = ?", userName).First(&doctor)
+	if res.RowsAffected != 0 {
+		if match := utils.CheckPasswordHash(password, doctor.Password); !match {
+			return map[string]interface{}{"type": "doctor"}, errors.New("incorrect password")
+		}
 	}
 	if res.RowsAffected != 0 {
 		return map[string]interface{}{
-			"data": doctor,
+			"data": doctor.Doctor_uid,
 			"type": "doctor",
 		}, nil
 	}
 
-	return "all", errors.New(gorm.ErrRecordNotFound.Error())
+	return map[string]interface{}{"type": "all"}, errors.New(gorm.ErrRecordNotFound.Error())
 }

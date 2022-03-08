@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"be/entities"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -11,25 +10,21 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 type MockAuthLib struct{}
 
-func (m *MockAuthLib) Login(UserLogin entities.User) (entities.User, error) {
-	return entities.User{Model: gorm.Model{ID: 1}, Email: UserLogin.Email, Password: UserLogin.Password}, nil
+func (m *MockAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
+	return map[string]interface{}{
+		"data": "abc",
+		"type": "clinic",
+	}, nil
 }
 
 type MockFailAuthLib struct{}
 
-func (m *MockFailAuthLib) Login(UserLogin entities.User) (entities.User, error) {
-	return entities.User{}, errors.New("")
-}
-
-type MockAuthLibFailToken struct{}
-
-func (m *MockAuthLibFailToken) Login(UserLogin entities.User) (entities.User, error) {
-	return entities.User{}, nil
+func (m *MockFailAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
+	return map[string]interface{}{}, errors.New("")
 }
 
 func TestLogin(t *testing.T) {
@@ -60,7 +55,7 @@ func TestLogin(t *testing.T) {
 		e := echo.New()
 
 		reqBody, _ := json.Marshal(map[string]string{
-			"email":    "anonim@123",
+			"userName": "anonim@123",
 			"password": "anonim123",
 		})
 
@@ -80,35 +75,11 @@ func TestLogin(t *testing.T) {
 		assert.Equal(t, 500, resp.Code)
 	})
 
-	t.Run("error in process token", func(t *testing.T) {
-		e := echo.New()
-
-		reqBody, _ := json.Marshal(map[string]string{
-			"email":    "anonim@123",
-			"password": "anonim123",
-		})
-
-		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		res := httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-
-		context := e.NewContext(req, res)
-		context.SetPath("/login")
-
-		authCont := New(&MockAuthLibFailToken{})
-		authCont.Login()(context)
-
-		resp := LoginRespFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
-		assert.Equal(t, 406, resp.Code)
-	})
-
 	t.Run("success login", func(t *testing.T) {
 		e := echo.New()
 
 		reqBody, _ := json.Marshal(map[string]string{
-			"email":    "anonim@123",
+			"userName": "anonim@123",
 			"password": "anonim123",
 		})
 
@@ -126,6 +97,7 @@ func TestLogin(t *testing.T) {
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
 		assert.Equal(t, 200, resp.Code)
+		// log.Info(resp)
 	})
 
 }

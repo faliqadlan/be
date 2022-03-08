@@ -2,25 +2,18 @@ package middlewares
 
 import (
 	"be/configs"
-	"be/entities"
-	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
-func GenerateToken(u entities.User) (string, error) {
-	if u.ID == 0 {
-		return "cannot Generate token", errors.New("id == 0")
-	}
+func GenerateToken(uid string) (string, error) {
 
 	codes := jwt.MapClaims{
-		"user_uid": u.User_uid,
-		"email":    u.Email,
-		"password": u.Password,
-		"exp":      time.Now().Add(time.Hour * 24 * 7).Unix(),
-		"auth":     true,
+		"uid":  uid,
+		"exp":  time.Now().Add(time.Hour * 24 * 7).Unix(),
+		"auth": true,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, codes)
@@ -32,8 +25,8 @@ func ExtractTokenUserUid(e echo.Context) string {
 	user := e.Get("user").(*jwt.Token) //convert to jwt token from interface
 	if user.Valid {
 		codes := user.Claims.(jwt.MapClaims)
-		user_uid := codes["user_uid"].(string)
-		return user_uid
+		uid := codes["uid"].(string)
+		return uid
 	}
 	return ""
 }
