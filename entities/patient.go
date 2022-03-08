@@ -8,10 +8,11 @@ import (
 )
 
 type Patient struct {
+	ID          uint `gorm:"primaryKey"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	Patient_uid string         `gorm:"index;type:varchar(22);primaryKey"`
+	Patient_uid string         `gorm:"index;type:varchar(22)"`
 	UserName    string         `gorm:"index;not null;type:varchar(100)"`
 	Email       string         `gorm:"index;not null;type:varchar(100)"`
 	Password    string         `gorm:"not null;type:varchar(100)"`

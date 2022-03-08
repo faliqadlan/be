@@ -56,12 +56,15 @@ func initConfig() *AppConfig {
 }
 
 func defaultConfig() *AppConfig {
-
+	defaultConfig := AppConfig{}
 	if err := godotenv.Load("local.env"); err != nil {
 		log.Info(err)
+
+		defaultConfig = AppConfig{PORT: 8080, DB: "mysql", DB_NAME: "crud_api_test", DB_PORT: 3306, DB_HOST: "localhost", DB_USERNAME: "root", DB_PASSWORD: "root", DB_LOC: "Local"}
+		return &defaultConfig
 	}
 
-	defaultConfig := AppConfig{}
+	defaultConfig = AppConfig{}
 
 	res, err := strconv.Atoi(os.Getenv("PORT"))
 

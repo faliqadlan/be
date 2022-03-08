@@ -7,10 +7,11 @@ import (
 )
 
 type Clinic struct {
+	ID         uint `gorm:"primaryKey"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
-	Clinic_uid string         `gorm:"index;type:varchar(22);primaryKey"`
+	Clinic_uid string         `gorm:"index;type:varchar(22)"`
 	UserName   string         `gorm:"index;not null;type:varchar(100)"`
 	Email      string         `gorm:"index;not null;type:varchar(100)"`
 	Password   string         `gorm:"not null;type:varchar(100)"`
