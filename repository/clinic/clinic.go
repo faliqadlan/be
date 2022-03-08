@@ -24,12 +24,10 @@ func (r *Repo) Create(clinicReq entities.Clinic) (entities.Clinic, error) {
 	// check username
 
 	type userNameCheck struct {
-		UserNameC string
-		UserNameP string
-		UserNameD string
+		UserName string
 	}
 
-	var checkUserName = r.db.Model(&entities.Clinic{}).Select("clinics.user_name as UserNameC, patients.user_name as UserNameP, doctors.user_name as UserNameD").Where("clinics.user_name = ? or patients.user_name = ? or doctors.user_name = ?", clinicReq.UserName, clinicReq.UserName, clinicReq.UserName).Joins("left join doctors on 1=1").Joins("left join patients on 1=1").Find(&userNameCheck{})
+	var checkUserName = r.db.Raw("? union all ? union all ?", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", clinicReq.UserName), r.db.Model(&entities.Clinic{}).Select("user_name").Where("user_name = ?", clinicReq.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", clinicReq.UserName)).Scan(&userNameCheck{})
 	if checkUserName.RowsAffected != 0 {
 		return entities.Clinic{}, errors.New("user name already exist")
 	}
@@ -96,12 +94,11 @@ func (r *Repo) Update(clinic_uid string, up entities.Clinic) (entities.Clinic, e
 	// check username
 
 	type userNameCheck struct {
-		UserNameC string
-		UserNameP string
-		UserNameD string
+		UserName string
 	}
 
-	var checkUserName = r.db.Model(&entities.Clinic{}).Select("clinics.user_name as UserNameC, patients.user_name as UserNameP, doctors.user_name as UserNameD").Where("clinics.user_name = ? or patients.user_name = ? or doctors.user_name = ?", up.UserName, up.UserName, up.UserName).Joins("left join doctors on 1=1").Joins("left join patients on 1=1").Find(&userNameCheck{})
+	var checkUserName = r.db.Raw("? union all ? union all ?", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", up.UserName), r.db.Model(&entities.Clinic{}).Select("user_name").Where("user_name = ?", up.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", up.UserName)).Scan(&userNameCheck{})
+
 	if checkUserName.RowsAffected != 0 {
 		tx.Rollback()
 		return entities.Clinic{}, errors.New("user name already exist")

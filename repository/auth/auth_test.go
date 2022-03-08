@@ -3,36 +3,59 @@ package auth
 import (
 	"be/configs"
 	"be/entities"
-	"be/repository/user"
+	"be/repository/clinic"
+	"be/repository/patient"
 	"be/utils"
 	"testing"
 
+	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestLogin(t *testing.T) {
-	config := configs.GetConfig()
-	db := utils.InitDB(config)
-	repo := New(db)
-	db.Migrator().DropTable(&entities.User{})
-	db.AutoMigrate(&entities.User{})
+	var config = configs.GetConfig()
+	var db = utils.InitDB(config)
+	var r = New(db)
+	db.Migrator().DropTable(&entities.Clinic{})
+	db.Migrator().DropTable(&entities.Patient{})
+	db.Migrator().DropTable(&entities.Doctor{})
+	db.Migrator().DropTable(&entities.Visit{})
+	db.AutoMigrate(&entities.Clinic{})
+	db.AutoMigrate(&entities.Doctor{})
+	db.AutoMigrate(&entities.Patient{})
 
-	t.Run("success run login", func(t *testing.T) {
-		mockUser := entities.User{Name: "anonim123", Email: "anonim@123", Password: "anonim123"}
-		_, err := user.New(db).Create(mockUser)
+	t.Run("success run login clinic", func(t *testing.T) {
+		var mock1 = entities.Clinic{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
+
+		var _, err = clinic.New(db).Create(mock1)
 		if err != nil {
-			t.Fail()
+			log.Info(err)
+			t.Fatal()
 		}
-		mockLogin := entities.User{Email: "anonim@123", Password: "anonim123"}
-		res, err := repo.Login(mockLogin)
-		assert.Nil(t, err)
-		assert.Equal(t, "anonim@123", res.Email)
+		var res1, err1 = r.Login(mock1.UserName, mock1.Password)
+		assert.Nil(t, err1)
+		assert.NotNil(t, res1)
+		log.Info(res1)
 	})
 
-	t.Run("fail run login", func(t *testing.T) {
-		mockLogin := entities.User{Email: "anonim@456", Password: "anonim456"}
-		_, err := repo.Login(mockLogin)
-		assert.NotNil(t, err)
+	t.Run("success run login patient", func(t *testing.T) {
+		var mock1 = entities.Patient{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
+
+		var _, err = patient.New(db).Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+		var res1, err1 = r.Login(mock1.UserName, mock1.Password)
+		assert.Nil(t, err1)
+		assert.NotNil(t, res1)
+		log.Info(res1)
 	})
+
+	// t.Run("fail run login", func(t *testing.T) {
+	// 	mockLogin := entities.User{Email: "anonim@456", Password: "anonim456"}
+	// 	_, err := repo.Login(mockLogin)
+	// 	assert.NotNil(t, err)
+	// })
 
 }

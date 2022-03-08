@@ -24,12 +24,10 @@ func (r *Repo) Create(doctorReq entities.Doctor) (entities.Doctor, error) {
 	// check username
 
 	type userNameCheck struct {
-		UserNameC string
-		UserNameP string
-		UserNameD string
+		UserName string
 	}
 
-	var checkUserName = r.db.Model(&entities.Doctor{}).Select("clinics.user_name as UserNameC, patients.user_name as UserNameP, doctors.user_name as UserNameD").Where("clinics.user_name = ? or patients.user_name = ? or doctors.user_name = ?", doctorReq.UserName, doctorReq.UserName, doctorReq.UserName).Joins("left join patients on 1=1 ").Joins("left join clinics on 1=1").Find(&userNameCheck{})
+	var checkUserName = r.db.Raw("? union all ? union all ?", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", doctorReq.UserName), r.db.Model(&entities.Clinic{}).Select("user_name").Where("user_name = ?", doctorReq.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", doctorReq.UserName)).Scan(&userNameCheck{})
 
 	if checkUserName.RowsAffected != 0 {
 		return entities.Doctor{}, errors.New("user name already exist")
