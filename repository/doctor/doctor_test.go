@@ -3,7 +3,6 @@ package doctor
 import (
 	"be/configs"
 	"be/entities"
-	"be/repository/clinic"
 	"be/repository/patient"
 	"be/utils"
 	"testing"
@@ -16,50 +15,140 @@ func TestCreate(t *testing.T) {
 	var config = configs.GetConfig()
 	var db = utils.InitDB(config)
 	var r = New(db)
-	db.Migrator().DropTable(&entities.Clinic{})
 	db.Migrator().DropTable(&entities.Patient{})
 	db.Migrator().DropTable(&entities.Doctor{})
 	db.Migrator().DropTable(&entities.Visit{})
-	db.AutoMigrate(&entities.Clinic{})
 	db.AutoMigrate(&entities.Doctor{})
 	db.AutoMigrate(&entities.Patient{})
 
 	t.Run("success run Create", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
 
-		var mock1 = entities.Clinic{UserName: "anonim", Email: "anonim@", Password: "anonim"}
-
-		var res1, err1 = clinic.New(db).Create(mock1)
-		if err1 != nil {
-			t.Log()
-			t.Fatal()
-		}
-
-		var mock2 = entities.Doctor{Clinic_uid: res1.Clinic_uid, UserName: "doctor1", Email: "doctor1@", Password: "doctor"}
-
-		var res, err = r.Create(mock2)
+		var res, err = r.Create(mock1)
 		assert.Nil(t, err)
 		assert.NotNil(t, res)
+		// log.Info(res)
 	})
 
 	t.Run("success handle username", func(t *testing.T) {
-
 		var mock = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
 
 		if _, err := patient.New(db).Create(mock); err != nil {
 			t.Log()
 			t.Fatal()
 		}
-		var mock1 = entities.Clinic{UserName: "anonim1", Email: "anonim@", Password: "anonim"}
 
-		var res1, err1 = clinic.New(db).Create(mock1)
-		if err1 != nil {
-			log.Info(err1)
+		var mock1 = entities.Doctor{UserName: "patient2", Email: "clinic@", Password: "clinic"}
+
+		var _, err = r.Create(mock1)
+		assert.NotNil(t, err)
+	})
+}
+
+func TestUpdate(t *testing.T) {
+	var config = configs.GetConfig()
+	var db = utils.InitDB(config)
+	var r = New(db)
+	db.Migrator().DropTable(&entities.Patient{})
+	db.Migrator().DropTable(&entities.Doctor{})
+	db.Migrator().DropTable(&entities.Visit{})
+	db.AutoMigrate(&entities.Doctor{})
+	db.AutoMigrate(&entities.Patient{})
+
+	t.Run("success update", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
 			t.Fatal()
 		}
 
-		var mock2 = entities.Doctor{Clinic_uid: res1.Clinic_uid, UserName: "patient2", Email: "doctor1@", Password: "doctor"}
+		mock1 = entities.Doctor{Name: "clinic"}
 
-		var _, err = r.Create(mock2)
+		res, err = r.Update(res.Doctor_uid, mock1)
+		assert.Nil(t, err)
+		assert.NotNil(t, res)
+		// log.Info(res.ClinicName)
+	})
+
+	t.Run("success handle username", func(t *testing.T) {
+		var mock = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
+
+		if _, err := patient.New(db).Create(mock); err != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock1 = entities.Doctor{UserName: "clinic2", Email: "clinic@", Password: "clinic"}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Doctor{Name: "clinic", UserName: "patient2"}
+
+		_, err = r.Update(res.Doctor_uid, mock1)
+		assert.NotNil(t, err)
+		// log.Info(err)
+	})
+
+	t.Run("error input uid", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic3", Email: "clinic@", Password: "clinic"}
+
+		var _, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Doctor{Name: "clinic"}
+
+		_, err = r.Update("", mock1)
+		assert.NotNil(t, err)
+		// log.Info(err)
+	})
+
+}
+
+func TestDelete(t *testing.T) {
+	var config = configs.GetConfig()
+	var db = utils.InitDB(config)
+	var r = New(db)
+	db.Migrator().DropTable(&entities.Patient{})
+	db.Migrator().DropTable(&entities.Doctor{})
+	db.Migrator().DropTable(&entities.Visit{})
+	db.AutoMigrate(&entities.Doctor{})
+	db.AutoMigrate(&entities.Patient{})
+
+	t.Run("success delete", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		res, err = r.Delete(res.Doctor_uid)
+		assert.Nil(t, err)
+		assert.Equal(t, true, res.DeletedAt.Valid)
+		// log.Info(res.ClinicName)
+	})
+
+	t.Run("error input uid", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic3", Email: "clinic@", Password: "clinic"}
+
+		var _, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+
+		_, err = r.Delete("")
 		assert.NotNil(t, err)
 		// log.Info(err)
 	})

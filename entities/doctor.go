@@ -3,27 +3,23 @@ package entities
 import (
 	"time"
 
-	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
 type Doctor struct {
-	ID                  uint `gorm:"primaryKey"`
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
-	DeletedAt           gorm.DeletedAt `gorm:"index"`
-	Doctor_uid          string         `gorm:"index;type:varchar(22)"`
-	Clinic_uid          string         `gorm:"index;type:varchar(22)"`
-	UserName            string         `gorm:"index;not null;type:varchar(100)"`
-	Email               string         `gorm:"index;not null;type:varchar(100)"`
-	Password            string         `gorm:"not null;type:varchar(100)"`
-	Nik                 string         `gorm:"type:varchar(16)"`
-	FullName            string
-	Address             string `gorm:"not null"`
-	PlaceBirth          string `gorm:"type:varchar(100)"`
-	Dob                 datatypes.Date
-	NoDegreeCertificate string
-	Status              string  `gorm:"type:enum('belumKawin', 'kawin', 'ceraiHidup', 'ceraiMati', 'lainnya');default:'lainnya'"`
-	Religion            string  `gorm:"type:enum('islam', 'krister', 'katolik', 'budha', 'hindu', 'konghuchu', 'lainnya');default:'lainnya'"`
-	Visits              []Visit `gorm:"foreignKey:Doctor_uid;references:Doctor_uid"`
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeletedAt  gorm.DeletedAt `gorm:"index"`
+	Doctor_uid string         `gorm:"index;type:varchar(22)"`
+	UserName   string         `gorm:"index;not null;type:varchar(100)"`
+	Email      string         `gorm:"index;not null;type:varchar(100)"`
+	Password   string         `gorm:"not null;type:varchar(100)"`
+	Name       string
+	Image      string `gorm:"default:'https://www.teralogistics.com/wp-content/uploads/2020/12/default.png'"`
+	Address    string
+	Status     string `gorm:"type:enum('available', 'unAvailable');default:'available'"`
+	OpenDay    string `gorm:"type:enum('senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu');default:'senin'"`
+	CloseDay   string `gorm:"type:enum('senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu');default:'senin'"`
+	Capacity   int
+	Visits     []Visit `gorm:"foreignKey:Doctor_uid;references:Doctor_uid"`
 }

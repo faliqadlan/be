@@ -8,7 +8,6 @@ import (
 	"be/delivery/middlewares"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 )
 
 type AuthController struct {
@@ -35,7 +34,7 @@ func (ac *AuthController) Login() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server error for login user "+err.Error(), err))
 		}
 
-		log.Info(checkedUser)
+		// log.Info(checkedUser)
 		token, err := middlewares.GenerateToken(checkedUser["data"].(string))
 
 		if err != nil {

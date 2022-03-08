@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,6 +26,15 @@ type MockFailAuthLib struct{}
 
 func (m *MockFailAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
 	return map[string]interface{}{}, errors.New("")
+}
+
+type MockAuthLibFailToken struct{}
+
+func (m *MockAuthLibFailToken) Login(userName string, password string) (map[string]interface{}, error) {
+	return map[string]interface{}{
+		"data": "",
+		"type": "clinic",
+	}, nil
 }
 
 func TestLogin(t *testing.T) {
@@ -75,6 +85,30 @@ func TestLogin(t *testing.T) {
 		assert.Equal(t, 500, resp.Code)
 	})
 
+	t.Run("error in process token", func(t *testing.T) {
+		e := echo.New()
+
+		reqBody, _ := json.Marshal(map[string]string{
+			"userName": "anonim@123",
+			"password": "anonim123",
+		})
+
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		res := httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/login")
+
+		authCont := New(&MockAuthLibFailToken{})
+		authCont.Login()(context)
+
+		resp := LoginRespFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
+		assert.Equal(t, 406, resp.Code)
+	})
+
 	t.Run("success login", func(t *testing.T) {
 		e := echo.New()
 
@@ -97,7 +131,7 @@ func TestLogin(t *testing.T) {
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
 		assert.Equal(t, 200, resp.Code)
-		// log.Info(resp)
+		log.Info(resp)
 	})
 
 }

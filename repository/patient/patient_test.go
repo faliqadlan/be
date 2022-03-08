@@ -3,7 +3,7 @@ package patient
 import (
 	"be/configs"
 	"be/entities"
-	"be/repository/clinic"
+	"be/repository/doctor"
 	"be/utils"
 	"testing"
 
@@ -14,11 +14,9 @@ func TestCreate(t *testing.T) {
 	var config = configs.GetConfig()
 	var db = utils.InitDB(config)
 	var r = New(db)
-	db.Migrator().DropTable(&entities.Clinic{})
 	db.Migrator().DropTable(&entities.Patient{})
 	db.Migrator().DropTable(&entities.Doctor{})
 	db.Migrator().DropTable(&entities.Visit{})
-	db.AutoMigrate(&entities.Clinic{})
 	db.AutoMigrate(&entities.Doctor{})
 	db.AutoMigrate(&entities.Patient{})
 
@@ -32,9 +30,9 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("success handle username", func(t *testing.T) {
-		var mock = entities.Clinic{UserName: "patient2", Email: "patient@", Password: "patient"}
+		var mock = entities.Doctor{UserName: "patient2", Email: "patient@", Password: "patient"}
 
-		if _, err := clinic.New(db).Create(mock); err != nil {
+		if _, err := doctor.New(db).Create(mock); err != nil {
 			t.Log()
 			t.Fatal()
 		}

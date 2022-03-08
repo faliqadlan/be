@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"be/configs"
+	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -9,6 +10,9 @@ import (
 )
 
 func GenerateToken(uid string) (string, error) {
+	if uid == "" {
+		return "cannot Generate token", errors.New("uid is empyty")
+	}
 
 	codes := jwt.MapClaims{
 		"uid":  uid,
@@ -27,17 +31,6 @@ func ExtractTokenUserUid(e echo.Context) string {
 		codes := user.Claims.(jwt.MapClaims)
 		uid := codes["uid"].(string)
 		return uid
-	}
-	return ""
-}
-
-func ExtractTokenAdmin(e echo.Context) (result string) {
-	user := e.Get("user").(*jwt.Token) //convert to jwt token from interface
-	if user.Valid {
-		codes := user.Claims.(jwt.MapClaims)
-		result = codes["email"].(string)
-		// result[1] = codes["password"].(string)
-		return result
 	}
 	return ""
 }
