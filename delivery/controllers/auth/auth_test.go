@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"be/entities"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -10,26 +9,32 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 type MockAuthLib struct{}
 
-func (m *MockAuthLib) Login(UserLogin entities.User) (entities.User, error) {
-	return entities.User{Model: gorm.Model{ID: 1}, Email: UserLogin.Email, Password: UserLogin.Password}, nil
+func (m *MockAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
+	return map[string]interface{}{
+		"data": "abc",
+		"type": "clinic",
+	}, nil
 }
 
 type MockFailAuthLib struct{}
 
-func (m *MockFailAuthLib) Login(UserLogin entities.User) (entities.User, error) {
-	return entities.User{}, errors.New("")
+func (m *MockFailAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
+	return map[string]interface{}{}, errors.New("")
 }
 
 type MockAuthLibFailToken struct{}
 
-func (m *MockAuthLibFailToken) Login(UserLogin entities.User) (entities.User, error) {
-	return entities.User{}, nil
+func (m *MockAuthLibFailToken) Login(userName string, password string) (map[string]interface{}, error) {
+	return map[string]interface{}{
+		"data": "",
+		"type": "clinic",
+	}, nil
 }
 
 func TestLogin(t *testing.T) {
@@ -60,7 +65,7 @@ func TestLogin(t *testing.T) {
 		e := echo.New()
 
 		reqBody, _ := json.Marshal(map[string]string{
-			"email":    "anonim@123",
+			"userName": "anonim@123",
 			"password": "anonim123",
 		})
 
@@ -84,7 +89,7 @@ func TestLogin(t *testing.T) {
 		e := echo.New()
 
 		reqBody, _ := json.Marshal(map[string]string{
-			"email":    "anonim@123",
+			"userName": "anonim@123",
 			"password": "anonim123",
 		})
 
@@ -108,7 +113,7 @@ func TestLogin(t *testing.T) {
 		e := echo.New()
 
 		reqBody, _ := json.Marshal(map[string]string{
-			"email":    "anonim@123",
+			"userName": "anonim@123",
 			"password": "anonim123",
 		})
 
@@ -126,6 +131,7 @@ func TestLogin(t *testing.T) {
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
 		assert.Equal(t, 200, resp.Code)
+		log.Info(resp)
 	})
 
 }
