@@ -19,7 +19,7 @@ func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc
 	}))
 	/* no jwt */
 
-	e.GET("", func(c echo.Context) error {
+	e.GET("/test", func(c echo.Context) error {
 		return c.HTML(http.StatusOK, "<strong>Hello, World!</strong>")
 	})
 
@@ -37,7 +37,9 @@ func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc
 
 	// with jwt
 
-	var g = e.Group("", middlewares.JwtMiddleware())
+	var g = e.Group("")
+
+	g.Use(middlewares.JwtMiddleware())
 
 	// doctor =================================
 
