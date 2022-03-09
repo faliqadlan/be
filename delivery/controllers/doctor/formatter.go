@@ -3,16 +3,16 @@ package doctor
 import "be/entities"
 
 type Req struct {
-	UserName string `json:"userName" validate:"required"`
+	UserName string `json:"userName" form:"userName" validate:"required"`
 	Email    string `json:"email" form:"email" validate:"required"`
 	Password string `json:"password" form:"password" validate:"required"`
-	Name     string `json:"Name"`
-	Image    string `json:"image"`
-	Address  string `json:"address"`
-	Status   string `json:"status"`
-	OpenDay  string `json:"openDay"`
-	CloseDay string `json:"closeDay"`
-	Capacity int    `json:"capacity"`
+	Name     string `json:"Name" form:"Name"`
+	Image    string `json:"image" form:"image"`
+	Address  string `json:"address" form:"address"`
+	Status   string `json:"status" form:"status"`
+	OpenDay  string `json:"openDay" form:"openDay"`
+	CloseDay string `json:"closeDay" form:"closeDay"`
+	Capacity int    `json:"capacity" form:"capacity"`
 }
 
 func (r *Req) ToDoctor() *entities.Doctor {

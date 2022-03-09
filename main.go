@@ -4,9 +4,11 @@ import (
 	"be/configs"
 	"be/delivery/controllers/auth"
 	"be/delivery/controllers/doctor"
+	"be/delivery/controllers/patient"
 	"be/delivery/routes"
 	authRepo "be/repository/auth"
 	doctorRepo "be/repository/doctor"
+	patientRepo "be/repository/patient"
 	"be/utils"
 	"fmt"
 
@@ -25,9 +27,12 @@ func main() {
 	var doctorRepo = doctorRepo.New(db)
 	var doctorCont = doctor.New(doctorRepo)
 
+	var patientRepo = patientRepo.New(db)
+	var patientCont = patient.New(patientRepo)
+
 	var e = echo.New()
 
-	routes.RoutesPath(e, authCont, doctorCont)
+	routes.RoutesPath(e, authCont, doctorCont, patientCont)
 
 	log.Fatal(e.Start(fmt.Sprintf(":%d", config.PORT)))
 

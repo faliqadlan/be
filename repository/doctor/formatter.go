@@ -3,7 +3,6 @@ package doctor
 type ProfileResp struct {
 	UserName string `json:"userName"`
 	Email    string `json:"email"`
-	Password string `json:"password"`
 	Name     string `json:"name"`
 	Image    string `json:"image"`
 	Address  string `json:"address"`
@@ -27,10 +26,10 @@ type PatientsResp struct {
 
 type Visit struct {
 	Patient_uid string `json:"patient_uid"`
-	Name   string `json:"name"`
-	Gender string `json:"gender"`
-	Nik    string `json:"nik"`
-	Status string `json:"status"`
+	Name        string `json:"name"`
+	Gender      string `json:"gender"`
+	Nik         string `json:"nik"`
+	Status      string `json:"status"`
 }
 
 type Dashboard struct {
