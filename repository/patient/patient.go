@@ -5,7 +5,6 @@ import (
 	"be/utils"
 	"errors"
 
-	"github.com/labstack/gommon/log"
 	"github.com/lithammer/shortuuid"
 	"gorm.io/gorm"
 )
