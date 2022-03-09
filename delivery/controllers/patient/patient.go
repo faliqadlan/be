@@ -34,6 +34,8 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error validator for add patient "+err.(validator.ValidationErrors).Error(), nil))
 		}
 		// log.Info(req.Dob, req.ToPatient().Dob)
+		// log.Info(req)
+		// log.Info(req.ToPatient())
 		var res, err = cont.r.Create(*req.ToPatient())
 
 		if err != nil {

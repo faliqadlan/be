@@ -27,10 +27,7 @@ func (r *Req) ToPatient() *entities.Patient {
 
 	var layout = "02-01-2006"
 
-	var dateConv, err = time.Parse(layout, r.Dob)
-	if err != nil {
-		return &entities.Patient{}
-	}
+	var dateConv, _ = time.Parse(layout, r.Dob)
 	// log.Info(dateConv)
 	return &entities.Patient{
 		UserName:   r.UserName,

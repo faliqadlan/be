@@ -5,6 +5,7 @@ import (
 	"be/utils"
 	"errors"
 
+	"github.com/labstack/gommon/log"
 	"github.com/lithammer/shortuuid"
 	"gorm.io/gorm"
 )
@@ -20,7 +21,7 @@ func New(db *gorm.DB) *Repo {
 }
 
 func (r *Repo) Create(req entities.Patient) (entities.Patient, error) {
-
+	// log.Info(req)
 	if req.Nik == "" && req.UserName == "" {
 		return entities.Patient{}, errors.New("nik must filled")
 	}
