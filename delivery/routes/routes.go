@@ -4,6 +4,7 @@ import (
 	"be/delivery/controllers/auth"
 	"be/delivery/controllers/doctor"
 	"be/delivery/controllers/patient"
+	"be/delivery/controllers/visit"
 	"be/delivery/middlewares"
 	"net/http"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc *patient.Controller) {
+func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc *patient.Controller, vc *visit.Controller) {
 	e.Use(middleware.CORS())
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -48,6 +49,7 @@ func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc
 	g.GET("/doctor/profile", dc.GetProfile())
 	g.GET("/doctor/patient/all", dc.GetPatients())
 	g.GET("/doctor/dashboard", dc.GetDashboard())
+	g.GET("/doctor/all", dc.GetAll())
 
 	// patient ===================================
 
@@ -57,5 +59,12 @@ func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc
 	g.GET("/patient/record", pc.GetRecords())
 	g.GET("/patient/history", pc.GetHistories())
 	g.GET("/patient/appontment", pc.GetAppointMent())
+
+	// visit
+
+	g.POST("/visit", vc.Create())
+	g.PUT("/visit/:visit_uid", vc.Update())
+	g.DELETE("/visit/:visit_uid", vc.Delete())
+	g.GET("/visit", vc.GetVisits())
 
 }

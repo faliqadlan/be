@@ -135,3 +135,13 @@ func (r *Repo) GetDashboard(doctor_uid string) (Dashboard, error) {
 
 	return dashResp, nil
 }
+
+func (r *Repo) GetAll() (All, error) {
+	var all All
+
+	if res := r.db.Model(&entities.Doctor{}).Find(&all.Doctors); res.Error != nil {
+		return All{}, res.Error
+	}
+
+	return all, nil
+}

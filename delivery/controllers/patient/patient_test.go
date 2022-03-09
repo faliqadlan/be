@@ -89,34 +89,33 @@ func (m *MockAuthLib) Login(userName string, password string) (map[string]interf
 }
 
 func TestCreate(t *testing.T) {
-	t.Run("success Create", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			var e = echo.New()
 
-			var reqBody, _ = json.Marshal(map[string]interface{}{
-				"userName": "doctor1",
-				"email":    "doctor@",
-				"password": "a",
-				"nik":      "123",
-				"dob":      "05-05-2000",
-			})
+	t.Run("success", func(t *testing.T) {
+		var e = echo.New()
 
-			var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-			var res = httptest.NewRecorder()
-			req.Header.Set("Content-Type", "application/json")
-
-			context := e.NewContext(req, res)
-			context.SetPath("/doctor")
-
-			var controller = New(&mockSuccess{})
-			controller.Create()(context)
-
-			var response = ResponseFormat{}
-
-			json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-			assert.Equal(t, 201, response.Code)
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": "a",
+			"nik":      "123",
+			"dob":      "05-05-2000",
 		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 201, response.Code)
 	})
 
 	t.Run("binding", func(t *testing.T) {

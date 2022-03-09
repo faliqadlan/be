@@ -296,7 +296,7 @@ func TestHistories(t *testing.T) {
 			t.Fatal()
 		}
 
-		if _, err := visit.New(db).Create(res.Doctor_uid, res2.Patient_uid, "05-05-2022", entities.Visit{Complaint: "complain2", Action: "action2", Status: "done"}); err != nil {
+		if _, err := visit.New(db).Create(res.Doctor_uid, res2.Patient_uid, "05-05-2022", entities.Visit{Complaint: "complain2", Action: "action2", Status: "ready"}); err != nil {
 			log.Info(err)
 			t.Fatal()
 		}
@@ -319,7 +319,7 @@ func TestAppontment(t *testing.T) {
 	db.Migrator().DropTable(&entities.Visit{})
 	db.AutoMigrate(&entities.Doctor{})
 	db.AutoMigrate(&entities.Patient{})
-	db./* Set("gorm:table_options", "lc_time_names = 'id_ID'") */AutoMigrate(&entities.Visit{})
+	db. /* Set("gorm:table_options", "lc_time_names = 'id_ID'") */ AutoMigrate(&entities.Visit{})
 
 	t.Run("success get records", func(t *testing.T) {
 		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic", Name: "doctor name"}

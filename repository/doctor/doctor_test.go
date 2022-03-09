@@ -177,7 +177,7 @@ func TestGetProfile(t *testing.T) {
 		var res1, err1 = r.GetProfile(res.Doctor_uid)
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
-		log.Info(res1)
+		// log.Info(res1)
 	})
 }
 
@@ -341,6 +341,43 @@ func TestGetDashboard(t *testing.T) {
 		}
 
 		var res1, err1 = r.GetDashboard(res.Doctor_uid)
+		assert.Nil(t, err1)
+		assert.NotNil(t, res1)
+		// log.Info(res1)
+	})
+}
+
+func TestGetAll(t *testing.T) {
+	var config = configs.GetConfig()
+	var db = utils.InitDB(config)
+	var r = New(db)
+	db.Migrator().DropTable(&entities.Patient{})
+	db.Migrator().DropTable(&entities.Doctor{})
+	db.Migrator().DropTable(&entities.Visit{})
+	db.AutoMigrate(&entities.Doctor{})
+	db.AutoMigrate(&entities.Patient{})
+
+	t.Run("success get all", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
+
+		if _, err := r.Create(mock1); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Doctor{UserName: "doctor1", Email: "clinic@", Password: "clinic"}
+		if _, err := r.Create(mock1); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Doctor{UserName: "doctor2", Email: "clinic@", Password: "clinic"}
+		if _, err := r.Create(mock1); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		var res1, err1 = r.GetAll()
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
 		// log.Info(res1)

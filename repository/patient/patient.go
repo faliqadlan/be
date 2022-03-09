@@ -131,7 +131,7 @@ func (r *Repo) GetHistories(patient_uid string) (Histories, error) {
 
 	var histories Histories
 
-	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Where("patients.nik = ? and visits.status = 'ready' or visits.status = 'done'", resInit.Nik).Select("date_format(visits.date, '%d-%m-%Y') as Date, doctors.name as Name, doctors.address as Adress, main_diagnose as MainDiagnose, addition_diagnose as AdditionDiagnose, recipe as Recipe").Find(&histories.Histories); res.Error != nil {
+	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Where("patients.nik = ? and visits.status = 'ready'", resInit.Nik).Select("date_format(visits.date, '%d-%m-%Y') as Date, doctors.name as Name, doctors.address as Adress, main_diagnose as MainDiagnose, addition_diagnose as AdditionDiagnose, recipe as Recipe").Find(&histories.Histories); res.Error != nil {
 		return Histories{}, res.Error
 	}
 
