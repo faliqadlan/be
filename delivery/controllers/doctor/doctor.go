@@ -129,3 +129,17 @@ func (cont *Controller) GetDashboard() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, templates.Success(nil, "success get all doctor's patient", res))
 	}
 }
+
+func (cont *Controller) GetAll() echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		var res, err = cont.r.GetAll()
+
+		if err != nil {
+			// log.Info(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for get all Doctor's patient "+err.Error(), nil))
+		}
+
+		return c.JSON(http.StatusOK, templates.Success(nil, "success get all doctor's patient", res))
+	}
+}

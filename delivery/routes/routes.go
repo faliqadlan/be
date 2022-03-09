@@ -49,6 +49,7 @@ func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc
 	g.GET("/doctor/profile", dc.GetProfile())
 	g.GET("/doctor/patient/all", dc.GetPatients())
 	g.GET("/doctor/dashboard", dc.GetDashboard())
+	g.GET("/doctor/all", dc.GetAll())
 
 	// patient ===================================
 

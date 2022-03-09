@@ -9,4 +9,5 @@ type Doctor interface {
 	GetProfile(doctor_uid string) (ProfileResp, error)
 	GetPatients(doctor_uid string) (PatientsResp, error)
 	GetDashboard(doctor_uid string) (Dashboard, error)
+	GetAll() (All, error)
 }
