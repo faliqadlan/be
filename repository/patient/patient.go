@@ -86,7 +86,6 @@ func (r *Repo) Update(patient_uid string, req entities.Patient) (entities.Patien
 	return resInit, nil
 }
 
-
 func (r *Repo) Delete(patient_uid string) (entities.Patient, error) {
 	var resInit entities.Patient
 
@@ -98,10 +97,27 @@ func (r *Repo) Delete(patient_uid string) (entities.Patient, error) {
 }
 
 func (r *Repo) GetProfile(patient_uid string) (Profile, error) {
-	var profile Profile
+	var profileResp Profile
 
-	
+	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
+		return Profile{}, gorm.ErrRecordNotFound
+	}
 
-	return profile, nil
+	return profileResp, nil
 }
 
+func (r *Repo) GetRecords(patient_uid string) (Records, error) {
+	var resInit entities.Patient
+
+	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {
+		return Records{}, errors.New(gorm.ErrRecordNotFound.Error())
+	}
+
+	var records Records
+
+	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Where("patients.nik = ?", resInit.Nik).Find(&records.Records); res.Error != nil {
+		return Records{}, res.Error
+	}
+
+	return records, nil
+}
