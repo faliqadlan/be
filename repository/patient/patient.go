@@ -121,3 +121,19 @@ func (r *Repo) GetRecords(patient_uid string) (Records, error) {
 
 	return records, nil
 }
+
+func (r *Repo) GetHistories(patient_uid string) (Histories, error) {
+	var resInit entities.Patient
+
+	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {
+		return Histories{}, errors.New(gorm.ErrRecordNotFound.Error())
+	}
+
+	var histories Histories
+
+	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Where("patients.nik = ? and status = 'pending' or status = 'done'", resInit.Nik).Select("date_format(visits.date, %d  ").Find(&histories.Histories); res.Error != nil {
+		return Histories{}, res.Error
+	}
+
+	return histories, nil
+}
