@@ -131,9 +131,34 @@ func (r *Repo) GetHistories(patient_uid string) (Histories, error) {
 
 	var histories Histories
 
-	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Where("patients.nik = ? and status = 'pending' or status = 'done'", resInit.Nik).Select("date_format(visits.date, %d  ").Find(&histories.Histories); res.Error != nil {
+	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Where("patients.nik = ? and visits.status = 'ready' or visits.status = 'done'", resInit.Nik).Select("date_format(visits.date, '%d-%m-%Y') as Date, doctors.name as Name, doctors.address as Adress, main_diagnose as MainDiagnose, addition_diagnose as AdditionDiagnose, recipe as Recipe").Find(&histories.Histories); res.Error != nil {
 		return Histories{}, res.Error
 	}
 
 	return histories, nil
+}
+
+func (r *Repo) GetAppointMent(Patient_uid string) (Apppoinment, error) {
+
+	tx := r.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if res := tx.Raw("set lc_time_names = 'id_ID'"); res.Error != nil {
+		tx.Rollback()
+		return Apppoinment{}, res.Error
+	}
+
+	var appoinment Apppoinment
+
+	if res := tx.Model(&entities.Visit{}).Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Where("patient_uid = ? and visits.status = 'pending'", Patient_uid).Select("dayname(date) as Day, date_format(visits.date, '%d-%m-%Y') as Date ,  doctors.name as Name, doctors.address as Adress").Find(&appoinment); res.Error != nil {
+		tx.Rollback()
+		return Apppoinment{}, res.Error
+	}
+
+	return appoinment, tx.Commit().Error
 }

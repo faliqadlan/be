@@ -176,7 +176,7 @@ func TestGetProfile(t *testing.T) {
 		var res1, err1 = r.GetProfile(res.Patient_uid)
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
-		log.Info(res1)
+		// log.Info(res1)
 	})
 }
 
@@ -238,15 +238,42 @@ func TestRecords(t *testing.T) {
 
 		var uid = res2.Patient_uid
 
-		mock2 = entities.Patient{UserName: "patient3", Email: "patient@", Password: "patient", Nik: "3", Name: "name3"}
+		var res1, err1 = r.GetRecords(uid)
+		assert.Nil(t, err1)
+		assert.NotNil(t, res1)
+		// log.Info(res1)
+	})
+}
 
-		res2, err2 = r.Create(mock2)
+func TestHistories(t *testing.T) {
+	var config = configs.GetConfig()
+	var db = utils.InitDB(config)
+	var r = New(db)
+	db.Migrator().DropTable(&entities.Patient{})
+	db.Migrator().DropTable(&entities.Doctor{})
+	db.Migrator().DropTable(&entities.Visit{})
+	db.AutoMigrate(&entities.Doctor{})
+	db.AutoMigrate(&entities.Patient{})
+	db.AutoMigrate(&entities.Visit{})
+
+	t.Run("success get histories", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic", Name: "doctor name"}
+
+		var res, err = doctor.New(db).Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		var mock2 = entities.Patient{UserName: "patient1", Email: "patient@", Password: "patient", Nik: "1", Name: "name 1"}
+
+		var res2, err2 = r.Create(mock2)
 		if err2 != nil {
 			log.Info(err2)
 			t.Fatal()
 		}
 
-		if _, err := visit.New(db).Create(res.Doctor_uid, res2.Patient_uid, "05-05-2022", entities.Visit{Complaint: "complain1", Action: "action1"}); err != nil {
+		if _, err := visit.New(db).Create(res.Doctor_uid, res2.Patient_uid, "05-05-2022", entities.Visit{Complaint: "complain1", Action: "action1", Status: "ready"}); err != nil {
 			log.Info(err)
 			t.Fatal()
 		}
@@ -256,7 +283,69 @@ func TestRecords(t *testing.T) {
 			t.Fatal()
 		}
 
-		var res1, err1 = r.GetRecords(uid)
+		mock2 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient", Nik: "1", Name: "name2"}
+
+		res2, err2 = r.Create(mock2)
+		if err2 != nil {
+			log.Info(err2)
+			t.Fatal()
+		}
+
+		if _, err := visit.New(db).Create(res.Doctor_uid, res2.Patient_uid, "05-05-2022", entities.Visit{Complaint: "complain1", Action: "action1", Status: "ready"}); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		if _, err := visit.New(db).Create(res.Doctor_uid, res2.Patient_uid, "05-05-2022", entities.Visit{Complaint: "complain2", Action: "action2", Status: "done"}); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		var uid = res2.Patient_uid
+
+		var res1, err1 = r.GetHistories(uid)
+		assert.Nil(t, err1)
+		assert.NotNil(t, res1)
+		// log.Info(res1)
+	})
+}
+
+func TestAppontment(t *testing.T) {
+	var config = configs.GetConfig()
+	var db = utils.InitDB(config)
+	var r = New(db)
+	db.Migrator().DropTable(&entities.Patient{})
+	db.Migrator().DropTable(&entities.Doctor{})
+	db.Migrator().DropTable(&entities.Visit{})
+	db.AutoMigrate(&entities.Doctor{})
+	db.AutoMigrate(&entities.Patient{})
+	db./* Set("gorm:table_options", "lc_time_names = 'id_ID'") */AutoMigrate(&entities.Visit{})
+
+	t.Run("success get records", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic", Name: "doctor name"}
+
+		var res, err = doctor.New(db).Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		var mock2 = entities.Patient{UserName: "patient1", Email: "patient@", Password: "patient", Nik: "1", Name: "name 1"}
+
+		var res2, err2 = r.Create(mock2)
+		if err2 != nil {
+			log.Info(err2)
+			t.Fatal()
+		}
+
+		if _, err := visit.New(db).Create(res.Doctor_uid, res2.Patient_uid, "05-05-2022", entities.Visit{Complaint: "complain1", Action: "action1", Status: "pending"}); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		var uid = res2.Patient_uid
+
+		var res1, err1 = r.GetAppointMent(uid)
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
 		log.Info(res1)
