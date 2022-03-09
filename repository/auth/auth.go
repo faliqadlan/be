@@ -20,26 +20,11 @@ func New(db *gorm.DB) *AuthDb {
 
 func (ad *AuthDb) Login(userName string, password string) (map[string]interface{}, error) {
 
-	// check if clinic
-	var clinic entities.Clinic
-	var res = ad.db.Model(entities.Clinic{}).Where("user_name = ?", userName).First(&clinic)
-	if res.RowsAffected != 0 {
-		if match := utils.CheckPasswordHash(password, clinic.Password); !match {
-			return map[string]interface{}{"type": "clinic"}, errors.New("incorrect password")
-		}
-	}
-	if res.RowsAffected != 0 {
-		return map[string]interface{}{
-			"data": clinic.Clinic_uid,
-			"type": "clinic",
-		}, nil
-	}
-
 	// check if patient
 
 	var patient entities.Patient
 
-	res = ad.db.Model(entities.Patient{}).Where("user_name = ?", userName).First(&patient)
+	var res = ad.db.Model(entities.Patient{}).Where("user_name = ?", userName).First(&patient)
 	if res.RowsAffected != 0 {
 		if match := utils.CheckPasswordHash(password, patient.Password); !match {
 			return map[string]interface{}{"type": "patient"}, errors.New("incorrect password")

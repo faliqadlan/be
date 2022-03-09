@@ -3,10 +3,10 @@ package main
 import (
 	"be/configs"
 	"be/delivery/controllers/auth"
-	"be/delivery/controllers/clinic"
+	"be/delivery/controllers/doctor"
 	"be/delivery/routes"
 	authRepo "be/repository/auth"
-	clinicRepo "be/repository/clinic"
+	doctorRepo "be/repository/doctor"
 	"be/utils"
 	"fmt"
 
@@ -15,19 +15,19 @@ import (
 )
 
 func main() {
-	config := configs.GetConfig()
-	db := utils.InitDB(config)
+	var config = configs.GetConfig()
+	var db = utils.InitDB(config)
 	// log.Info(db)
 
-	authRepo := authRepo.New(db)
-	authCont := auth.New(authRepo)
+	var authRepo = authRepo.New(db)
+	var authCont = auth.New(authRepo)
 
-	clinicRepo := clinicRepo.New(db)
-	clinicCont := clinic.New(clinicRepo)
+	var doctorRepo = doctorRepo.New(db)
+	var doctorCont = doctor.New(doctorRepo)
 
-	e := echo.New()
+	var e = echo.New()
 
-	routes.RoutesPath(e, authCont, clinicCont)
+	routes.RoutesPath(e, authCont, doctorCont)
 
 	log.Fatal(e.Start(fmt.Sprintf(":%d", config.PORT)))
 

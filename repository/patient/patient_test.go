@@ -21,7 +21,7 @@ func TestCreate(t *testing.T) {
 	db.AutoMigrate(&entities.Patient{})
 
 	t.Run("succress run Create", func(t *testing.T) {
-		var mock1 = entities.Patient{UserName: "anonim", Email: "anonim@", Password: "anonim"}
+		var mock1 = entities.Patient{UserName: "anonim", Email: "anonim@", Password: "anonim", Nik: "1"}
 
 		var res, err = r.Create(mock1)
 		assert.Nil(t, err)
@@ -37,7 +37,7 @@ func TestCreate(t *testing.T) {
 			t.Fatal()
 		}
 
-		var mock1 = entities.Patient{UserName: "patient2", Email: "clinic@", Password: "clinic"}
+		var mock1 = entities.Patient{UserName: "patient2", Email: "clinic@", Password: "clinic", Nik: "1"}
 
 		var _, err = r.Create(mock1)
 		assert.NotNil(t, err)

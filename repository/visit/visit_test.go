@@ -7,8 +7,8 @@ import (
 	"be/repository/patient"
 	"be/utils"
 	"testing"
+	"time"
 
-	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,14 +36,16 @@ func TestCreate(t *testing.T) {
 			t.Fatal()
 		}
 
-		var date = "05-05-2022"
+		var layDate = "02-01-2006"
+
+		var dateNow = time.Now().Local().Format(layDate)
 
 		var mock2 = entities.Visit{Complaint: "sick"}
 
-		var res3, err3 = r.Create(res.Doctor_uid, res1.Patient_uid, date, mock2)
+		var res3, err3 = r.Create(res.Doctor_uid, res1.Patient_uid, dateNow, mock2)
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
-		log.Info(res3)
+		// log.Info(res3)
 	})
 
 }
