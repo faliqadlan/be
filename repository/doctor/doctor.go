@@ -75,9 +75,9 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		return entities.Doctor{}, gorm.ErrRecordNotFound
 	}
 
-	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {
-		return entities.Doctor{}, errors.New(gorm.ErrRecordNotFound.Error())
-	}
+	// if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {
+	// 	return entities.Doctor{}, errors.New(gorm.ErrRecordNotFound.Error())
+	// }
 
 	return resInit, nil
 }
