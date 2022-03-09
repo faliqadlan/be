@@ -64,5 +64,7 @@ func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc
 
 	g.POST("/visit", vc.Create())
 	g.PUT("/visit/:visit_uid", vc.Update())
+	g.DELETE("/visit/:visit_uid", vc.Delete())
+	g.GET("/visit", vc.GetVisits())
 
 }

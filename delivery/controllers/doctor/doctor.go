@@ -143,3 +143,4 @@ func (cont *Controller) GetAll() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, templates.Success(nil, "success get all doctor's patient", res))
 	}
 }
+

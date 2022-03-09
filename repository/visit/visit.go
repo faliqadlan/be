@@ -139,3 +139,23 @@ func (r *Repo) Update(visit_uid string, req entities.Visit) (entities.Visit, err
 
 	return resInit, tx.Commit().Error
 }
+
+func (r *Repo) Delete(visit_uid string) (entities.Visit, error) {
+	var resInit entities.Visit
+
+	if res := r.db.Model(&entities.Visit{}).Where("visit_uid = ?", visit_uid).Delete(&resInit); res.Error != nil || res.RowsAffected == 0 {
+		return entities.Visit{}, errors.New(gorm.ErrRecordNotFound.Error())
+	}
+
+	return resInit, nil
+}
+
+func (r *Repo) GetVisits(doctor_uid, status string) (Visits, error) {
+	var visits Visits
+
+	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Where("doctor_uid = ? and visits.status = ?", doctor_uid, status).Select("visit_uid as Visit_uid, name as Name, nik as Nik, gender as Gender, date_format(visits.date, '%d-%m-%Y') as Date, recipe as Recipe, main_diagnose as Diagnose").Find(&visits.Visits); res.Error != nil {
+		return Visits{}, res.Error
+	}
+
+	return visits, nil
+}

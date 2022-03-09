@@ -2,12 +2,12 @@ package visit
 
 import (
 	"be/delivery/controllers/templates"
+	"be/delivery/middlewares"
 	"be/repository/visit"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 )
 
 type Controller struct {
@@ -25,7 +25,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		var req Req
 
 		if err := c.Bind(&req); err != nil {
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error binding for add patient "+err.Error(), nil))
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error binding for add visit "+err.Error(), nil))
 		}
 
 		var v = validator.New()
@@ -39,7 +39,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for add visit "+err.Error(), nil))
 		}
 
-		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add patient", res.Complaint))
+		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add visit", res.Complaint))
 	}
 }
 
@@ -51,7 +51,7 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		if err := c.Bind(&req); err != nil {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error binding for update visit "+err.Error(), nil))
 		}
-		log.Info(uid)
+		// log.Info(uid)
 		var res, err = cont.r.Update(uid, *req.ToVisit())
 
 		if err != nil {
@@ -59,6 +59,39 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for update visit "+err.Error(), nil))
 		}
 
-		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update patient", res.Complaint))
+		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update visit", res.Complaint))
+	}
+}
+
+func (cont *Controller) Delete() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var uid = c.Param("visit_uid")
+
+		var res, err = cont.r.Delete(uid)
+
+		if err != nil {
+			// log.Info(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for delete visit "+err.Error(), nil))
+		}
+
+		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success delete visit", res.DeletedAt))
+	}
+}
+
+func (cont *Controller) GetVisits() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var status = c.QueryParam("status")
+		var uid = middlewares.ExtractTokenUid(c)
+
+		// log.Info(uid, status)
+
+		var res, err = cont.r.GetVisits(uid, status)
+
+		if err != nil {
+			// log.Info(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for get list visit "+err.Error(), nil))
+		}
+
+		return c.JSON(http.StatusOK, templates.Success(http.StatusOK, "success get list visit", res))
 	}
 }
