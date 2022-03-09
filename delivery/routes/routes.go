@@ -32,7 +32,7 @@ func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller) {
 
 	g.PUT("/doctor", dc.Update())
 	g.DELETE("/doctor", dc.Delete())
-	g.GET("//doctor/profile", dc.GetProfile())
+	g.GET("/doctor/profile", dc.GetProfile())
 	g.GET("/doctor/patient/all", dc.GetPatients())
 	g.GET("/doctor/dashboard", dc.GetDashboard())
 
