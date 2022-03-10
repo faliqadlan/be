@@ -55,7 +55,10 @@ func InitConfig(client_id, client_secret string) *http.Client {
 		ClientID:     client_id,
 		ClientSecret: client_secret,
 		Endpoint:     google.Endpoint,
-		Scopes:       []string{"mrClinic"},
+		Scopes: []string{
+			"https://www.googleapis.com/auth/bigquery",
+			"https://www.googleapis.com/auth/blogger",
+		},
 	}
 
 	ctx := context.Background()
