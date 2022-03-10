@@ -1,7 +1,6 @@
 package main
 
 import (
-	"be/api"
 	"be/configs"
 	"be/delivery/controllers/auth"
 	"be/delivery/controllers/doctor"
@@ -39,13 +38,6 @@ func main() {
 	var e = echo.New()
 
 	routes.RoutesPath(e, authCont, doctorCont, patientCont, visitCont)
-
-	res := api.CreteTokenJson(config.CLIENT_ID, config.PROJECT_ID, config.AUTH_URI, config.TOKEN_URI, config.Auth_provider_x509_cert_url, config.CLIENT_SECRET)
-
-	log.Info(res)
-
-	res1 := api.TestApi(config.CLIENT_ID, config.CLIENT_SECRET)
-	log.Info(res1)
 
 	log.Fatal(e.Start(fmt.Sprintf(":%d", config.PORT)))
 
