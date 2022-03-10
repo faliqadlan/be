@@ -4,19 +4,24 @@ import (
 	"be/delivery/controllers/templates"
 	"be/delivery/middlewares"
 	"be/repository/doctor"
+	"be/utils"
 	"net/http"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 )
 
 type Controller struct {
-	r doctor.Doctor
+	r    doctor.Doctor
+	conf *session.Session
 }
 
-func New(r doctor.Doctor) *Controller {
+func New(r doctor.Doctor, awsS3 *session.Session) *Controller {
 	return &Controller{
-		r: r,
+		r:    r,
+		conf: awsS3,
 	}
 }
 
@@ -33,6 +38,16 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error validator for add Doctor "+err.(validator.ValidationErrors).Error(), nil))
 		}
 
+		var file, err1 = c.FormFile("file")
+		if err1 != nil {
+			log.Info(err1)
+		}
+		if err1 == nil {
+			var link = utils.UploadFileToS3(cont.conf, *file)
+
+			req.Image = link
+		}
+
 		var res, err = cont.r.Create(*req.ToDoctor())
 
 		if err != nil {
@@ -46,7 +61,10 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		// 	return c.JSON(http.StatusNotAcceptable, templates.BadRequest(http.StatusNotAcceptable, "error in process token "+err.Error(), err))
 		// }
 
-		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add Doctor", res.Name))
+		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add Doctor", map[string]interface{}{
+			"name": res.Name,
+			/* "link": res.Image, */
+		}))
 	}
 }
 
@@ -143,4 +161,3 @@ func (cont *Controller) GetAll() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, templates.Success(nil, "success get all doctor's patient", res))
 	}
 }
-

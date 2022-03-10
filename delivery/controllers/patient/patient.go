@@ -4,20 +4,24 @@ import (
 	"be/delivery/controllers/templates"
 	"be/delivery/middlewares"
 	"be/repository/patient"
+	"be/utils"
 	"net/http"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
 
 type Controller struct {
-	r patient.Patient
+	r    patient.Patient
+	conf *session.Session
 }
 
-func New(r patient.Patient) *Controller {
+func New(r patient.Patient, awsS3 *session.Session) *Controller {
 	return &Controller{
-		r: r,
+		r:    r,
+		conf: awsS3,
 	}
 }
 
@@ -33,9 +37,15 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		if err := v.Struct(req); err != nil {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error validator for add patient "+err.(validator.ValidationErrors).Error(), nil))
 		}
-		// log.Info(req.Dob, req.ToPatient().Dob)
-		// log.Info(req)
-		// log.Info(req.ToPatient())
+		var file, err1 = c.FormFile("file")
+		if err1 != nil {
+			log.Info(err1)
+		}
+		if err1 == nil {
+			var link = utils.UploadFileToS3(cont.conf, *file)
+
+			req.Image = link
+		}
 		var res, err = cont.r.Create(*req.ToPatient())
 
 		if err != nil {
