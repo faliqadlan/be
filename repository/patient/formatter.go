@@ -3,6 +3,7 @@ package patient
 type Profile struct {
 	Nik        string `json:"nik"`
 	Name       string `json:"name"`
+	Image      string `json:"image"`
 	Gender     string `json:"gender"`
 	Address    string `json:"address"`
 	PlaceBirth string `json:"placeBirth"`

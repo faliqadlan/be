@@ -46,6 +46,21 @@ spec:
                   name: go-app-secret
             - name: "DB_LOC"
               value: "Asia%2FJakarta"
+            - name: "S3_REGION"
+              valueFrom:
+                secretKeyRef:
+                  key: S3_REGION
+                  name: go-app-secret
+            - name: "S3_ID"
+              valueFrom:
+                secretKeyRef:
+                  key: S3_ID
+                  name: go-app-secret
+            - name: "S3_SECRET"
+              valueFrom:
+                secretKeyRef:
+                  key: S3_SECRET
+                  name: go-app-secret
           ports:
             - containerPort: 8000
 ---
