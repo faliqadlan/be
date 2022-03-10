@@ -39,9 +39,13 @@ func main() {
 
 	routes.RoutesPath(e, authCont, doctorCont, patientCont, visitCont)
 
-	// var res = api.TestApi(config.CLIENT_ID, config.CLIENT_SECRET)
+
+	res := api.CreteTokenJson(config.CLIENT_ID, config.PROJECT_ID, config.AUTH_URI, config.TOKEN_URI, config.Auth_provider_x509_cert_url, config.CLIENT_SECRET)
 
 	// log.Info(res)
+
+	res1 := api.TestApi(config.CLIENT_ID, config.CLIENT_SECRET)
+	log.Info(res1)
 
 	log.Fatal(e.Start(fmt.Sprintf(":%d", config.PORT)))
 

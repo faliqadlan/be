@@ -10,19 +10,23 @@ import (
 )
 
 type AppConfig struct {
-	PORT          int
-	DB            string
-	DB_NAME       string
-	DB_PORT       int
-	DB_HOST       string
-	DB_USERNAME   string
-	DB_PASSWORD   string
-	DB_LOC        string
-	S3_REGION     string
-	S3_ID         string
-	S3_SECRET     string
-	CLIENT_ID     string
-	CLIENT_SECRET string
+	PORT                        int
+	DB                          string
+	DB_NAME                     string
+	DB_PORT                     int
+	DB_HOST                     string
+	DB_USERNAME                 string
+	DB_PASSWORD                 string
+	DB_LOC                      string
+	S3_REGION                   string
+	S3_ID                       string
+	S3_SECRET                   string
+	CLIENT_ID                   string
+	CLIENT_SECRET               string
+	PROJECT_ID                  string
+	AUTH_URI                    string
+	TOKEN_URI                   string
+	Auth_provider_x509_cert_url string
 }
 
 var synchronizer = &sync.Mutex{}
@@ -61,6 +65,10 @@ func initConfig() *AppConfig {
 	exConfig.S3_SECRET = os.Getenv("S3_SECRET")
 	exConfig.CLIENT_ID = os.Getenv("CLIENT_ID")
 	exConfig.CLIENT_SECRET = os.Getenv("CLIENT_SECRET")
+	exConfig.PROJECT_ID = os.Getenv("PROJECT_ID")
+	exConfig.AUTH_URI = os.Getenv("AUTH_URI")
+	exConfig.TOKEN_URI = os.Getenv("TOKEN_URI")
+	exConfig.Auth_provider_x509_cert_url = os.Getenv("auth_provider_x509_cert_url")
 
 	return &exConfig
 }
@@ -101,6 +109,10 @@ func defaultConfig() *AppConfig {
 	defaultConfig.S3_SECRET = os.Getenv("S3_SECRET")
 	defaultConfig.CLIENT_ID = os.Getenv("CLIENT_ID")
 	defaultConfig.CLIENT_SECRET = os.Getenv("CLIENT_SECRET")
+	defaultConfig.PROJECT_ID = os.Getenv("PROJECT_ID")
+	defaultConfig.AUTH_URI = os.Getenv("AUTH_URI")
+	defaultConfig.TOKEN_URI = os.Getenv("TOKEN_URI")
+	defaultConfig.Auth_provider_x509_cert_url = os.Getenv("auth_provider_x509_cert_url")
 
 	return &defaultConfig
 }
@@ -115,5 +127,3 @@ func GetConfig() *AppConfig {
 	}
 	return appConfig
 }
-
-
