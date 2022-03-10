@@ -61,6 +61,16 @@ spec:
                 secretKeyRef:
                   key: S3_SECRET
                   name: go-app-secret
+            - name: "CLIENT_ID"
+              valueFrom:
+                secretKeyRef:
+                  key: CLIENT_ID
+                  name: go-app-secret
+            - name: "CLIENT_SECRET"
+              valueFrom:
+                secretKeyRef:
+                  key: CLIENT_SECRET
+                  name: go-app-secret
           ports:
             - containerPort: 8000
 ---

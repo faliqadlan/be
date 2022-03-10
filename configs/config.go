@@ -10,17 +10,19 @@ import (
 )
 
 type AppConfig struct {
-	PORT        int
-	DB          string
-	DB_NAME     string
-	DB_PORT     int
-	DB_HOST     string
-	DB_USERNAME string
-	DB_PASSWORD string
-	DB_LOC      string
-	S3_REGION   string
-	S3_ID       string
-	S3_SECRET   string
+	PORT          int
+	DB            string
+	DB_NAME       string
+	DB_PORT       int
+	DB_HOST       string
+	DB_USERNAME   string
+	DB_PASSWORD   string
+	DB_LOC        string
+	S3_REGION     string
+	S3_ID         string
+	S3_SECRET     string
+	CLIENT_ID     string
+	CLIENT_SECRET string
 }
 
 var synchronizer = &sync.Mutex{}
@@ -57,6 +59,8 @@ func initConfig() *AppConfig {
 	exConfig.S3_REGION = os.Getenv("S3_REGION")
 	exConfig.S3_ID = os.Getenv("S3_ID")
 	exConfig.S3_SECRET = os.Getenv("S3_SECRET")
+	exConfig.CLIENT_ID = os.Getenv("CLIENT_ID")
+	exConfig.CLIENT_SECRET = os.Getenv("CLIENT_SECRET")
 
 	return &exConfig
 }
@@ -95,6 +99,8 @@ func defaultConfig() *AppConfig {
 	defaultConfig.S3_REGION = os.Getenv("S3_REGION")
 	defaultConfig.S3_ID = os.Getenv("S3_ID")
 	defaultConfig.S3_SECRET = os.Getenv("S3_SECRET")
+	defaultConfig.CLIENT_ID = os.Getenv("CLIENT_ID")
+	defaultConfig.CLIENT_SECRET = os.Getenv("CLIENT_SECRET")
 
 	return &defaultConfig
 }
@@ -110,17 +116,4 @@ func GetConfig() *AppConfig {
 	return appConfig
 }
 
-// type S3Config struct {
-// 	S3_REGION string
-// 	S3_ID     string
-// 	S3_SECRET string
-// }
 
-// var s3Config *S3Config
-
-// func initConfigS3() *S3Config {
-// 	var exConfig S3Config
-
-// 	exConfig.S3_REGION = os.Getenv("S3_REGION")
-// 	exConfig.s
-// }

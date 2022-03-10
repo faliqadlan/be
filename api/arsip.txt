@@ -1,0 +1,24 @@
+func TestApiKey(apiKey string) string {
+	var ctx = context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{
+		Transport: &transport.APIKey{
+			Key:       apiKey,
+			Transport: nil,
+		},
+	})
+
+	var conf, err0 = google.
+
+	var oauthConfig = &oauth2.Config{}
+	var token, err = oauthConfig.Exchange(ctx, "test")
+	if err != nil {
+		log.Info(err)
+	}
+	var httpClient = oauthConfig.Client(ctx, token)
+	var svc, err1 = urlshortener.New(httpClient)
+	if err1 != nil {
+		log.Info(err)
+	}
+
+	log.Info(svc)
+	return "test done"
+}
