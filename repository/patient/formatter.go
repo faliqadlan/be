@@ -1,16 +1,17 @@
 package patient
 
 type Profile struct {
-	Nik        string `json:"nik"`
-	Name       string `json:"name"`
-	Image      string `json:"image"`
-	Gender     string `json:"gender"`
-	Address    string `json:"address"`
-	PlaceBirth string `json:"placeBirth"`
-	Dob        string `json:"dob"`
-	Religion   string `json:"religion"`
-	Status     string `json:"status"`
-	Job        string `json:"job"`
+	Patient_uid string `json:"patient_uid"`
+	Nik         string `json:"nik"`
+	Name        string `json:"name"`
+	Image       string `json:"image"`
+	Gender      string `json:"gender"`
+	Address     string `json:"address"`
+	PlaceBirth  string `json:"placeBirth"`
+	Dob         string `json:"dob"`
+	Religion    string `json:"religion"`
+	Status      string `json:"status"`
+	Job         string `json:"job"`
 }
 
 type Record struct {

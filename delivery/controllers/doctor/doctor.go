@@ -83,19 +83,25 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			log.Error(err1)
 		}
 
-		var nameFile = res1.Image
-
-		nameFile = strings.Replace(nameFile, "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/", "", -1)
-
 		var file, err2 = c.FormFile("file")
 		if err2 != nil {
 			log.Info(err1)
 		}
 
 		if err2 == nil {
-			var res = utils.UpdateFileS3(cont.conf, nameFile, *file)
-			if res != "success" {
-				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for update Doctor "+res, nil))
+			if res1.Image != "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png" {
+				var nameFile = res1.Image
+
+				nameFile = strings.Replace(nameFile, "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/", "", -1)
+
+				var res = utils.UpdateFileS3(cont.conf, nameFile, *file)
+				if res != "success" {
+					return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for update Doctor "+res, nil))
+				}
+			} else {
+				var link = utils.UploadFileToS3(cont.conf, *file)
+
+				req.Image = link
 			}
 		}
 
