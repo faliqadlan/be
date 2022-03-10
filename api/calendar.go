@@ -17,7 +17,7 @@ func TestApi(client_id, client_secret string) string {
 	// 	ClientSecret: "https://console.developers.google.com/project/mrclinic/apiui/" + client_secret,
 	// 	Scopes:       []string{urlshortener.UrlshortenerScope},
 	// 	Endpoint:     google.Endpoint,
-	// 	RedirectURL: "https://oauth2.example.com/code",
+	// 	RedirectURL:  "https://oauth2.example.com/code",
 	// }
 
 	// url := conf.AuthCodeURL("state", oauth2.AccessTypeOffline)
