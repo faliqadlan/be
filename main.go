@@ -1,7 +1,6 @@
 package main
 
 import (
-	"be/api"
 	"be/configs"
 	"be/delivery/controllers/auth"
 	"be/delivery/controllers/doctor"
@@ -40,9 +39,9 @@ func main() {
 
 	routes.RoutesPath(e, authCont, doctorCont, patientCont, visitCont)
 
-	var res = api.TestApi(config.CLIENT_ID, config.CLIENT_SECRET)
+	// var res = api.TestApi(config.CLIENT_ID, config.CLIENT_SECRET)
 
-	log.Info(res)
+	// log.Info(res)
 
 	log.Fatal(e.Start(fmt.Sprintf(":%d", config.PORT)))
 
