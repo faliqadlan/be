@@ -41,6 +41,8 @@ func main() {
 
 	var googleCont = google.New(googleConf, visitRepo)
 
+	api.Calendar()
+
 	var e = echo.New()
 
 	routes.RoutesPath(e, authCont, doctorCont, patientCont, visitCont, googleCont)
