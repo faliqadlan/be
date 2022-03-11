@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 	"golang.org/x/oauth2"
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"
@@ -35,9 +34,9 @@ func (cont *Controller) GoogleLogin() echo.HandlerFunc {
 
 		// log.Info(oauthState)
 		var url = cont.conf.AuthCodeURL( /* oauthState */ "randomstate")
-		log.Info(url)
+		// log.Info(url)
 		res := c.Redirect(http.StatusSeeOther, url)
-		log.Info(res)
+		// log.Info(res)
 		if res != nil {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error Redirect to sign in "+res.Error(), nil))
 		}
@@ -49,7 +48,10 @@ func (cont *Controller) GoogleLogin() echo.HandlerFunc {
 func (cont *Controller) GoogleCallback() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		state := c.Request().URL.Query()["state"][0]
-		log.Info(state)
+		// log.Info(state)
+		if state != "state" {
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error cookie "+state, nil))
+		}
 
 		// var err =api.ReadCookie(c)
 		// log.Info(err)
@@ -64,7 +66,7 @@ func (cont *Controller) GoogleCallback() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error in callback "+err.Error(), nil))
 		}
 
-		log.Info(string(data))
+		// log.Info(string(data))
 		return c.JSON(http.StatusOK, templates.Success(nil, "success redirect to sign in", string(data)))
 	}
 }
@@ -72,8 +74,10 @@ func (cont *Controller) GoogleCallback() echo.HandlerFunc {
 func (cont *Controller) GoogleCalendar() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var ctx = context.Background()
-		state := c.Request().URL.Query()["state"][0]
-		log.Info(state)
+		// state := c.Request().URL.Query()["state"][0]
+		// if state != "state" {
+		// 	return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error cookie "+state, nil))
+		// }
 
 		var code = c.FormValue("code")
 		token, err := cont.conf.Exchange(context.Background(), code)

@@ -6,10 +6,15 @@ import (
 )
 
 func SetupConfig(clientId, clientScret string) *oauth2.Config {
+
+	// var urls = []string{"http://localhost:8080/google/callback, https://faliqadlan.cloud.okteto.net/google/callback"}
+
+	// var url = urls[0]
+
 	conf := &oauth2.Config{
 		ClientID:     clientId,
 		ClientSecret: clientScret,
-		RedirectURL:  "http://localhost:8080/google/callback",
+		RedirectURL:  "https://faliqadlan.cloud.okteto.net/google/callback",
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
 			"https://www.googleapis.com/auth/userinfo.profile",
