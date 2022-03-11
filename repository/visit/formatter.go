@@ -1,13 +1,29 @@
 package visit
 
 type VisitResp struct {
-	Visit_uid string `json:"visit_uid"`
-	Name      string `json:"name"`
-	Nik       string `json:"nik"`
-	Gender    string `json:"gender"`
-	Date      string `json:"date"`
-	Recipe    string `json:"recipe"`
-	Diagnose  string `json:"diagnose"`
+	Visit_uid        string `json:"visit_uid"`
+	Date             string `json:"date" form:"date" validate:"required"`
+	Status           string `json:"status" form:"status"`
+	Complaint        string `json:"complaint" form:"complaint"`
+	MainDiagnose     string `json:"mainDiagnose" form:"mainDiagnose"`
+	AdditionDiagnose string `json:"addiditonDiagnose" form:"addiditonDiagnose"`
+	Action           string `json:"action" form:"action"`
+	Recipe           string `json:"recipe" form:"recipe"`
+	BloodPressure    string `json:"bloodPressuse" form:"bloodPressuse"`
+	HeartRate        string `json:"heartRate" form:"heartRate"`
+	O2Saturate       string `json:"o2Saturate" form:"o2Saturate"`
+	Weight           string `json:"weight" form:"weight"`
+	Height           string `json:"height" form:"height"`
+	Bmi              string `json:"bmi" form:"bmi"`
+
+	Doctor_uid    string `json:"doctor_uid"`
+	DoctorName    string `json:"doctorName"`
+	DoctorAddress string `json:"doctorAddress"`
+
+	Patient_uid string `json:"patient_uid"`
+	PatientName string `json:"patientName"`
+	Gender      string `json:"gender"`
+	Nik         string `json:"nik"`
 }
 
 type Visits struct {
