@@ -32,6 +32,7 @@ func (r *Req) ToVisit() *entities.Visit {
 
 	return &entities.Visit{
 		Date:             datatypes.Date(dateConv),
+		Status:           r.Status,
 		Complaint:        r.Complaint,
 		MainDiagnose:     r.MainDiagnose,
 		AdditionDiagnose: r.AdditionDiagnose,
