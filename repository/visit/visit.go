@@ -159,3 +159,13 @@ func (r *Repo) GetVisits(doctor_uid, status string) (Visits, error) {
 
 	return visits, nil
 }
+
+func (r *Repo) GetVisitList(email, status string) (VisitCalendar, error) {
+	var visits VisitCalendar
+
+	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Where("patients.email = ? and visits.status = ?", email, status).Select("doctors.address as Address, complaint as Complaint, date_format(visits.date, '%d-%m-%Y') as Date, doctors.name as DoctorName, patients.name as PatientName, doctors.email as DoctorEmail").Last(&visits); res.Error != nil || res.RowsAffected == 0 {
+		return VisitCalendar{}, gorm.ErrRecordNotFound
+	}
+
+	return visits, nil
+}

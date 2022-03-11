@@ -13,3 +13,12 @@ type VisitResp struct {
 type Visits struct {
 	Visits []VisitResp `json:"visits"`
 }
+
+type VisitCalendar struct {
+	Address     string `json:"address"`
+	Complaint   string `json:"complaint"`
+	Date        string `json:"date"`
+	DoctorName  string `json:"doctorName"`
+	PatientName string `json:"patientName"`
+	DoctorEmail string `json:"doctorEmail"`
+}

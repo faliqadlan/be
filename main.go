@@ -37,9 +37,9 @@ func main() {
 	var visitRepo = visitRepo.New(db)
 	var visitCont = visit.New(visitRepo)
 
-	var googleConf = api.SetupConfig(config.CLIENT_ID, config.CLIENT_SECRET)
+	var googleConf = api.SetupConfig(config.DB_USERNAME, config.CLIENT_ID, config.CLIENT_SECRET)
 
-	var googleCont = google.New(googleConf)
+	var googleCont = google.New(googleConf, visitRepo)
 
 	var e = echo.New()
 
