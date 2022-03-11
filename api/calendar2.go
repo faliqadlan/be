@@ -15,6 +15,38 @@ import (
 	"google.golang.org/api/option"
 )
 
+const (
+	cacheTokenDir  = "./tmp/google_tokens"
+	credentialPath = "credentials.json"
+)
+
+func cacheToken(token *oauth2.Token) error {
+	tokenByte, err := json.Marshal(token)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(cacheTokenDir, tokenByte, 0644)
+}
+
+func generateNewToken(config *oauth2.Config) (*oauth2.Token, error) {
+	fmt.Println("fetching new google token")
+	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	fmt.Printf("Go to the following link in your browser then type the authorization code: \n%v\n", authURL)
+	var authCode string
+	if _, err := fmt.Scan(&authCode); err != nil {
+		log.Fatalf("Unable to read authorization code: %v", err)
+	}
+
+	token, err := config.Exchange(context.TODO(), authCode)
+	fmt.Println(token)
+	if err != nil {
+		log.Fatalf("Unable to retrieve token from web: %v", err)
+	}
+	cacheToken(token)
+	return token, nil
+
+}
+
 func TokenFromFile(file string) (*oauth2.Token, error) {
 	f, err := os.Open(file)
 	if err != nil {
@@ -37,14 +69,14 @@ func Calendar() {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 
-	token, err := TokenFromFile("token.json")
+	tokenInit, err := generateNewToken(config)
 	if err != nil {
-		log.Info(err)
+		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 
-	client := config.Client(ctx, token)
+	
 
-	srv, err := calendar.NewService(ctx, option.WithHTTPClient(client))
+	srv, err := calendar.NewService(ctx, option.WithTokenSource(config.TokenSource(ctx, tokenInit)))
 	if err != nil {
 		log.Fatalf("Unable to retrieve Calendar client: %v", err)
 	}
