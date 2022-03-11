@@ -3,7 +3,6 @@ package routes
 import (
 	"be/delivery/controllers/auth"
 	"be/delivery/controllers/doctor"
-	"be/delivery/controllers/google"
 	"be/delivery/controllers/patient"
 	"be/delivery/controllers/visit"
 	"be/delivery/middlewares"
@@ -13,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc *patient.Controller, vc *visit.Controller, gc* google.Controller) {
+func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc *patient.Controller, vc *visit.Controller) {
 	e.Use(middleware.CORS())
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -39,10 +38,6 @@ func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc
 	e.POST("/patient", pc.Create())
 
 	// google
-
-	e.GET("/google/login", gc.GoogleLogin())
-	e.GET("google/callback", gc.GoogleCalendar())
-	
 
 	// with jwt
 

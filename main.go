@@ -5,7 +5,6 @@ import (
 	"be/configs"
 	"be/delivery/controllers/auth"
 	"be/delivery/controllers/doctor"
-	"be/delivery/controllers/google"
 	"be/delivery/controllers/patient"
 	"be/delivery/controllers/visit"
 	"be/delivery/routes"
@@ -37,13 +36,11 @@ func main() {
 	var visitRepo = visitRepo.New(db)
 	var visitCont = visit.New(visitRepo)
 
-	var googleConf = api.SetupConfig(config.DB_USERNAME, config.CLIENT_ID, config.CLIENT_SECRET)
-
-	var googleCont = google.New(googleConf, visitRepo)
+	api.Calendar()
 
 	var e = echo.New()
 
-	routes.RoutesPath(e, authCont, doctorCont, patientCont, visitCont, googleCont)
+	routes.RoutesPath(e, authCont, doctorCont, patientCont, visitCont)
 
 	log.Fatal(e.Start(fmt.Sprintf(":%d", config.PORT)))
 
