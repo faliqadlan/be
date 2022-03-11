@@ -164,6 +164,7 @@ func TestGetProfile(t *testing.T) {
 	db.Migrator().DropTable(&entities.Visit{})
 	db.AutoMigrate(&entities.Doctor{})
 	db.AutoMigrate(&entities.Patient{})
+	db.AutoMigrate(&entities.Visit{})
 
 	t.Run("success get profile", func(t *testing.T) {
 		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
@@ -343,7 +344,9 @@ func TestGetDashboard(t *testing.T) {
 		var res1, err1 = r.GetDashboard(res.Doctor_uid)
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
-		// log.Info(res1)
+		log.Info(res1)
+		res3, err2 := r.GetProfile(res.Doctor_uid)
+		log.Info(res3)
 	})
 }
 

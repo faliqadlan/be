@@ -96,7 +96,13 @@ func (r *Repo) GetProfile(doctor_uid string) (ProfileResp, error) {
 
 	var profileResp ProfileResp
 
-	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
+	var query = "doctor_uid as Doctor_uid, user_name as UserName, email as Email, name as Name, image as Image, address as Address, status as Status, open_day as OpenDay, close_day as CloseDay, capacity as Capacity, "
+
+	var sub = " capacity - (select count(*) from visits where visits.doctor_uid = ? and visits.status = 'pending') as LeftCapacity"
+
+	query = query + sub
+	// log.Info(query)
+	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Select(query, doctor_uid).Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
 		return ProfileResp{}, gorm.ErrRecordNotFound
 	}
 
@@ -129,9 +135,9 @@ func (r *Repo) GetDashboard(doctor_uid string) (Dashboard, error) {
 		return Dashboard{}, res.Error
 	}
 
-	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ?", doctor_uid).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Select("patients.patient_uid as Patient_uid, patients.name as Name, patients.gender as Gender, patients.nik as Nik, visits.status as Status ").Find(&dashResp.Visits); res.Error != nil {
-		return Dashboard{}, res.Error
-	}
+	// if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ?", doctor_uid).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Select("patients.patient_uid as Patient_uid, patients.name as Name, patients.gender as Gender, patients.nik as Nik, visits.status as Status ").Find(&dashResp.Visits); res.Error != nil {
+	// 	return Dashboard{}, res.Error
+	// }
 
 	return dashResp, nil
 }
@@ -139,7 +145,7 @@ func (r *Repo) GetDashboard(doctor_uid string) (Dashboard, error) {
 func (r *Repo) GetAll() (All, error) {
 	var all All
 
-	if res := r.db.Model(&entities.Doctor{}).Find(&all.Doctors); res.Error != nil {
+	if res := r.db.Model(&entities.Doctor{}).Select("doctor_uid as Doctor_uid, name as Name, image as Image, address as Address, status as Status").Find(&all.Doctors); res.Error != nil {
 		return All{}, res.Error
 	}
 

@@ -74,9 +74,9 @@ func (r *Repo) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (en
 	req.Visit_uid = uid
 	req.Doctor_uid = doctor_uid
 	req.Patient_uid = patient_uid
-	if req.Height != 0 {
-		req.Bmi = req.Weight / req.Height
-	}
+	// if req.Height != 0 {
+	// 	req.Bmi = req.Weight / req.Height
+	// }
 
 	if res := r.db.Model(&entities.Visit{}).Create(&req); res.Error != nil {
 		return entities.Visit{}, res.Error
@@ -116,9 +116,9 @@ func (r *Repo) Update(visit_uid string, req entities.Visit) (entities.Visit, err
 		tx.Rollback()
 		return entities.Visit{}, res.Error
 	}
-	if req.Height != 0 {
-		req.Bmi = req.Weight / req.Height
-	}
+	// if req.Height != 0 {
+	// 	req.Bmi = req.Weight / req.Height
+	// }
 	if res := tx.Model(&entities.Visit{}).Where("visit_uid = ?", visit_uid).Updates(entities.Visit{
 		Status:           req.Status,
 		Complaint:        req.Complaint,
@@ -150,21 +150,37 @@ func (r *Repo) Delete(visit_uid string) (entities.Visit, error) {
 	return resInit, nil
 }
 
-func (r *Repo) GetVisits(doctor_uid, status string) (Visits, error) {
-	var visits Visits
-
-	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Where("doctor_uid = ? and visits.status = ?", doctor_uid, status).Select("visit_uid as Visit_uid, name as Name, nik as Nik, gender as Gender, date_format(visits.date, '%d-%m-%Y') as Date, recipe as Recipe, main_diagnose as Diagnose").Find(&visits.Visits); res.Error != nil {
-		return Visits{}, res.Error
-	}
-
-	return visits, nil
-}
-
 func (r *Repo) GetVisitList(email, status string) (VisitCalendar, error) {
 	var visits VisitCalendar
 
 	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Where("patients.email = ? and visits.status = ?", email, status).Select("doctors.address as Address, complaint as Complaint, date_format(visits.date, '%d-%m-%Y') as Date, doctors.name as DoctorName, patients.name as PatientName, doctors.email as DoctorEmail").Last(&visits); res.Error != nil || res.RowsAffected == 0 {
 		return VisitCalendar{}, gorm.ErrRecordNotFound
+	}
+
+	return visits, nil
+}
+
+func (r *Repo) GetVisitsVer1(kind, uid, status, signStatus string) (Visits, error) {
+
+	switch kind {
+	case "patient":
+		kind = "patients.nik"
+	case "doctor":
+		kind = "visits.doctor_uid"
+	}
+
+	switch signStatus {
+	case "equal":
+		signStatus = " = "
+	case "notequal":
+		signStatus = " != "
+	}
+
+	var visits Visits
+
+	var condition = kind + " = '" + uid + "' and visits.status" + signStatus + "'" + status + "'"
+	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Where(condition).Select("visit_uid as Visit_uid,  date_format(visits.date, '%d-%m-%Y') as Date, visits.status as Status, complaint as Complaint, main_diagnose as MainDiagnose, addition_diagnose as AdditionDiagnose, action as Action, recipe as Recipe, blood_pressure as BloodPressure, heart_rate as HeartRate, o2_saturate as O2Saturate, weight as Weight, height as Height, bmi as Bmi, visits.doctor_uid as Doctor_uid, doctors.name as DoctorName, doctors.address as DoctorAddress, visits.patient_uid as Patient_uid, patients.name as PatientName, patients.gender as Gender, patients.nik as Nik").Find(&visits.Visits); res.Error != nil {
+		return Visits{}, res.Error
 	}
 
 	return visits, nil

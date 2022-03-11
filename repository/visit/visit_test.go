@@ -190,106 +190,6 @@ func TestDelete(t *testing.T) {
 	})
 
 }
-
-func TestGetVisits(t *testing.T) {
-	var config = configs.GetConfig()
-	var db = utils.InitDB(config)
-	var r = New(db)
-	db.Migrator().DropTable(&entities.Patient{})
-	db.Migrator().DropTable(&entities.Doctor{})
-	db.Migrator().DropTable(&entities.Visit{})
-	db.AutoMigrate(&entities.Visit{})
-
-	t.Run("success run update", func(t *testing.T) {
-		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
-
-		var res, err = doctor.New(db).Create(mock1)
-		if err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		var mock2 = entities.Patient{UserName: "patient1", Email: "patient@", Password: "patient", Nik: "1", Name: "name 1"}
-
-		var res2, err2 = patient.New(db).Create(mock2)
-		if err2 != nil {
-			log.Info(err2)
-			t.Fatal()
-		}
-
-		var layDate = "02-01-2006"
-
-		var dateNow = time.Now().Local().Format(layDate)
-
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1"}); err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2", Status: "ready"}); err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		mock2 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient", Nik: "1", Name: "name2"}
-
-		res2, err2 = patient.New(db).Create(mock2)
-		if err2 != nil {
-			log.Info(err2)
-			t.Fatal()
-		}
-
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1", Status: "ready"}); err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2"}); err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		mock2 = entities.Patient{UserName: "patient3", Email: "patient@", Password: "patient", Nik: "3", Name: "name3"}
-
-		res2, err2 = patient.New(db).Create(mock2)
-		if err2 != nil {
-			log.Info(err2)
-			t.Fatal()
-		}
-
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1", Status: "cancelled"}); err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2"}); err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		var count int
-		var res3, err3 = r.GetVisits(res.Doctor_uid, "pending")
-		assert.Nil(t, err3)
-		assert.NotNil(t, res3)
-		count += len(res3.Visits)
-		// log.Info(res3)
-
-		res3, err3 = r.GetVisits(res.Doctor_uid, "ready")
-		assert.Nil(t, err3)
-		assert.NotNil(t, res3)
-		count += len(res3.Visits)
-		// log.Info(res3)
-
-		res3, err3 = r.GetVisits(res.Doctor_uid, "cancelled")
-		assert.Nil(t, err3)
-		assert.NotNil(t, res3)
-		count += len(res3.Visits)
-		assert.Equal(t, 6, count)
-		// log.Info(res3)
-		// log.Info(count)
-	})
-}
-
 func TestGetVisitsList(t *testing.T) {
 	var config = configs.GetConfig()
 	var db = utils.InitDB(config)
@@ -380,6 +280,103 @@ func TestGetVisitsList(t *testing.T) {
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
 		log.Info(res3)
+		// log.Info(res3)
+		// log.Info(count)
+	})
+
+}
+
+func TestGetVisitsVer1(t *testing.T) {
+	var config = configs.GetConfig()
+	var db = utils.InitDB(config)
+	var r = New(db)
+	db.Migrator().DropTable(&entities.Patient{})
+	db.Migrator().DropTable(&entities.Doctor{})
+	db.Migrator().DropTable(&entities.Visit{})
+	db.AutoMigrate(&entities.Visit{})
+
+	t.Run("success", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
+
+		var res, err = doctor.New(db).Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		var mock2 = entities.Patient{UserName: "patient1", Email: "patient@", Password: "patient", Nik: "1", Name: "name 1"}
+
+		var res2, err2 = patient.New(db).Create(mock2)
+		if err2 != nil {
+			log.Info(err2)
+			t.Fatal()
+		}
+
+		var layDate = "02-01-2006"
+
+		var dateNow = time.Now().Local().Format(layDate)
+
+		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1"}); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2", Status: "ready"}); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock2 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient", Nik: "1", Name: "name2"}
+
+		res2, err2 = patient.New(db).Create(mock2)
+		if err2 != nil {
+			log.Info(err2)
+			t.Fatal()
+		}
+
+		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1", Status: "ready"}); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2"}); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock2 = entities.Patient{UserName: "patient3", Email: "patient@", Password: "patient", Nik: "3", Name: "name3"}
+
+		res2, err2 = patient.New(db).Create(mock2)
+		if err2 != nil {
+			log.Info(err2)
+			t.Fatal()
+		}
+
+		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1", Status: "cancelled"}); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2"}); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		var res3, err3 = r.GetVisitsVer1("patient", res2.Nik, "pending", "equal")
+		assert.Nil(t, err3)
+		assert.NotNil(t, res3)
+		// log.Info(len(res3.Visits))
+		// log.Info(res3)
+
+		res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "ready", "equal")
+		assert.Nil(t, err3)
+		assert.NotNil(t, res3)
+		// log.Info(res3)
+
+		res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "cancelled", "notequal")
+		assert.Nil(t, err3)
+		assert.NotNil(t, res3)
+		// log.Info(res3)
 		// log.Info(res3)
 		// log.Info(count)
 	})
