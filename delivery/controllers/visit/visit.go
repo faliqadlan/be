@@ -84,7 +84,7 @@ func (cont *Controller) GetVisits() echo.HandlerFunc {
 		var kind = c.QueryParam("kind")
 		var uid = c.QueryParam("uid")
 		var status = c.QueryParam("status")
-		var signStatus = c.QueryParam("sign_status")
+		var signStatus = c.QueryParam("signStatus")
 
 		// log.Info(uid, status)
 
