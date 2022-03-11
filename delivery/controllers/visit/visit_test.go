@@ -37,6 +37,10 @@ func (m *mockSuccess) GetVisits(doctor_uid, status string) (visit.Visits, error)
 	return visit.Visits{}, nil
 }
 
+func (m *mockSuccess) GetVisitList(email, status string) (visit.VisitCalendar, error) {
+	return visit.VisitCalendar{}, nil
+}
+
 type mockFail struct{}
 
 func (m *mockFail) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (entities.Visit, error) {
@@ -53,6 +57,10 @@ func (m *mockFail) Delete(visit_uid string) (entities.Visit, error) {
 
 func (m *mockFail) GetVisits(doctor_uid, status string) (visit.Visits, error) {
 	return visit.Visits{}, errors.New("")
+}
+
+func (m *mockFail) GetVisitList(email, status string) (visit.VisitCalendar, error) {
+	return visit.VisitCalendar{}, nil
 }
 
 type MockAuthLib struct{}

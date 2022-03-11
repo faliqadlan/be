@@ -9,7 +9,7 @@ import (
 
 type Req struct {
 	Doctor_uid       string `json:"doctor_uid" form:"doctor_uid" validate:"required"`
-	Patient_uid      string `json:"patient_uid" form:"patient_uid" validate:"required"`
+	Patient_uid      string `json:"patient_uid" form:"patient_uid"`
 	Date             string `json:"date" form:"date" validate:"required"`
 	Status           string `json:"status" form:"status"`
 	Complaint        string `json:"complaint" form:"complaint"`
