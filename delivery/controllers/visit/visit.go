@@ -22,6 +22,7 @@ func New(r visit.Visit) *Controller {
 
 func (cont *Controller) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		var uid = middlewares.ExtractTokenUid(c)
 		var req Req
 
 		if err := c.Bind(&req); err != nil {
@@ -32,7 +33,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		if err := v.Struct(req); err != nil {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error validator for add visit "+err.(validator.ValidationErrors).Error(), nil))
 		}
-		var res, err = cont.r.CreateVal(req.Doctor_uid, req.Patient_uid, *req.ToVisit())
+		var res, err = cont.r.CreateVal(req.Doctor_uid, uid, *req.ToVisit())
 
 		if err != nil {
 			// log.Info(err)
