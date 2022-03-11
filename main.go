@@ -5,6 +5,7 @@ import (
 	"be/configs"
 	"be/delivery/controllers/auth"
 	"be/delivery/controllers/doctor"
+	"be/delivery/controllers/google"
 	"be/delivery/controllers/patient"
 	"be/delivery/controllers/visit"
 	"be/delivery/routes"
@@ -36,16 +37,13 @@ func main() {
 	var visitRepo = visitRepo.New(db)
 	var visitCont = visit.New(visitRepo)
 
+	var googleConf = api.SetupConfig(config.CLIENT_ID, config.CLIENT_SECRET)
+
+	var googleCont = google.New(googleConf)
+
 	var e = echo.New()
 
-	routes.RoutesPath(e, authCont, doctorCont, patientCont, visitCont)
-
-	res := api.CreteTokenJson(config.CLIENT_ID, config.PROJECT_ID, config.AUTH_URI, config.TOKEN_URI, config.Auth_provider_x509_cert_url, config.CLIENT_SECRET)
-
-	log.Info(res)
-
-	res1 := api.TestApi(config.CLIENT_ID, config.CLIENT_SECRET)
-	log.Info(res1)
+	routes.RoutesPath(e, authCont, doctorCont, patientCont, visitCont, googleCont)
 
 	log.Fatal(e.Start(fmt.Sprintf(":%d", config.PORT)))
 

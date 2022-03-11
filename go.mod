@@ -9,7 +9,6 @@ require (
 	github.com/labstack/gommon v0.3.1
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
-	google.golang.org/api v0.71.0
 	gorm.io/gorm v1.23.2
 )
 
@@ -49,6 +48,7 @@ require (
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
+	google.golang.org/api v0.71.0
 	gorm.io/datatypes v1.0.6
 	gorm.io/driver/mysql v1.3.2
 )
