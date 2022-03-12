@@ -58,7 +58,7 @@ func TestUpdate(t *testing.T) {
 	db.AutoMigrate(&entities.Patient{})
 
 	t.Run("success update", func(t *testing.T) {
-		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
+		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic", LeftCapacity: 5, Capacity: 15}
 
 		var res, err = r.Create(mock1)
 		if err != nil {
@@ -66,7 +66,7 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		mock1 = entities.Doctor{Name: "clinic"}
+		mock1 = entities.Doctor{Name: "clinic", Capacity: 10}
 
 		res, err = r.Update(res.Doctor_uid, mock1)
 		assert.Nil(t, err)

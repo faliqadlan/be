@@ -4,6 +4,7 @@ import (
 	"be/entities"
 	"be/utils"
 	"errors"
+	"math"
 
 	"github.com/lithammer/shortuuid"
 	"gorm.io/gorm"
@@ -57,6 +58,17 @@ func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 
 func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, error) {
 
+	tx := r.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return entities.Doctor{}, err
+	}
+
 	var resInit entities.Doctor
 
 	// check username
@@ -65,13 +77,22 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		UserName string
 	}
 
-	var checkUserName = r.db.Raw("? union all ? ", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", req.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", req.UserName)).Scan(&userNameCheck{})
+	var checkUserName = tx.Raw("? union all ? ", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", req.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", req.UserName)).Scan(&userNameCheck{})
 
 	if checkUserName.RowsAffected != 0 {
+		tx.Rollback()
 		return entities.Doctor{}, errors.New("user name already exist")
 	}
 
-	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Updates(entities.Doctor{UserName: req.UserName, Email: req.Email, Password: req.Password, Name: req.Name, Image: req.Image, Address: req.Address, Status: req.Status, OpenDay: req.OpenDay, CloseDay: req.CloseDay, Capacity: req.Capacity}); res.Error != nil || res.RowsAffected == 0 {
+	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&resInit); res.Error != nil {
+		tx.Rollback()
+		return entities.Doctor{}, res.Error
+	}
+
+	var leftCapacity = req.Capacity - int(math.Abs(float64(resInit.Capacity)-float64(resInit.LeftCapacity)))
+
+	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Updates(entities.Doctor{UserName: req.UserName, Email: req.Email, Password: req.Password, Name: req.Name, Image: req.Image, Address: req.Address, Status: req.Status, OpenDay: req.OpenDay, CloseDay: req.CloseDay, Capacity: req.Capacity, LeftCapacity: leftCapacity}); res.Error != nil || res.RowsAffected == 0 {
+		tx.Rollback()
 		return entities.Doctor{}, gorm.ErrRecordNotFound
 	}
 
@@ -79,7 +100,7 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 	// 	return entities.Doctor{}, errors.New(gorm.ErrRecordNotFound.Error())
 	// }
 
-	return resInit, nil
+	return resInit, tx.Commit().Error
 }
 
 func (r *Repo) Delete(doctor_uid string) (entities.Doctor, error) {

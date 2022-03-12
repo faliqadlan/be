@@ -122,7 +122,7 @@ func (r *Repo) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (en
 		tx.Rollback()
 		return entities.Visit{}, res.Error
 	}
-
+	log.Info(req.Status)
 	if req.Status == "pending" {
 
 		var doctorInit entities.Doctor
