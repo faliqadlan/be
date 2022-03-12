@@ -408,7 +408,7 @@ func TestGetVisitsVer1(t *testing.T) {
 		// log.Info(res3)
 		log.Info(len(res3.Visits))
 
-		res3, err3 = r.GetVisitsVer1("", "", "", "", "")
+		res3, err3 = r.GetVisitsVer1("", res.Doctor_uid, "", "", "")
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
 		// log.Info(res3)
