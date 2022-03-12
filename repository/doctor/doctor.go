@@ -98,7 +98,7 @@ func (r *Repo) GetProfile(doctor_uid string) (ProfileResp, error) {
 
 	var query = "doctor_uid as Doctor_uid, user_name as UserName, email as Email, name as Name, image as Image, address as Address, status as Status, open_day as OpenDay, close_day as CloseDay, capacity as Capacity, "
 
-	var sub = " capacity - (select count(*) from visits where visits.doctor_uid = ? and visits.status = 'pending') as LeftCapacity"
+	var sub = " capacity - (select count(*) from visits where visits.doctor_uid = ? and visits.status = 'pending' and visits.deleted_at is Null) as LeftCapacity"
 
 	query = query + sub
 	// log.Info(query)
