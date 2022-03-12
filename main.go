@@ -2,6 +2,7 @@ package main
 
 import (
 	"be/api"
+	googleApi "be/api/google"
 	"be/configs"
 	"be/delivery/controllers/auth"
 	"be/delivery/controllers/doctor"
@@ -37,9 +38,11 @@ func main() {
 	var visitRepo = visitRepo.New(db)
 	var visitCont = visit.New(visitRepo)
 
-	var googleConf = api.SetupConfig(config.DB_USERNAME, config.CLIENT_ID, config.CLIENT_SECRET)
+	var googleConf = googleApi.SetupConfig(config.DB_USERNAME, config.CLIENT_ID, config.CLIENT_SECRET)
 
 	var googleCont = google.New(googleConf, visitRepo)
+
+	api.CreteCredentialJson(config.CLIENT_ID, config.PROJECT_ID, config.AUTH_URI, config.TOKEN_URI, config.Auth_provider_x509_cert_url, config.CLIENT_SECRET)
 
 	api.Calendar()
 

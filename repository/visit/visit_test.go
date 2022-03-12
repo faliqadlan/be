@@ -319,69 +319,16 @@ func TestGetVisitsList(t *testing.T) {
 		var layDate = "02-01-2006"
 
 		var dateNow = time.Now().Local().Format(layDate)
-
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1"}); err != nil {
+		res1, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1"})
+		if err != nil {
 			log.Info(err)
 			t.Fatal()
 		}
 
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2", Status: "ready"}); err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		mock2 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient", Nik: "1", Name: "name2"}
-
-		res2, err2 = patient.New(db).Create(mock2)
-		if err2 != nil {
-			log.Info(err2)
-			t.Fatal()
-		}
-
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1", Status: "ready"}); err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2"}); err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		mock2 = entities.Patient{UserName: "patient3", Email: "patient@", Password: "patient", Nik: "3", Name: "name3"}
-
-		res2, err2 = patient.New(db).Create(mock2)
-		if err2 != nil {
-			log.Info(err2)
-			t.Fatal()
-		}
-
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1", Status: "cancelled"}); err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2"}); err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		var res3, err3 = r.GetVisitList(res2.Email, "pending")
+		var res3, err3 = r.GetVisitList(res1.Visit_uid)
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
-		log.Info(res3)
-
-		res3, err3 = r.GetVisitList(res2.Email, "ready")
-		assert.Nil(t, err3)
-		assert.NotNil(t, res3)
-		log.Info(res3)
-
-		res3, err3 = r.GetVisitList(res2.Email, "cancelled")
-		assert.Nil(t, err3)
-		assert.NotNil(t, res3)
-		log.Info(res3)
 		// log.Info(res3)
-		// log.Info(count)
 	})
 
 }

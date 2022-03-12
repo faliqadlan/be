@@ -2,33 +2,19 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"time"
 
-	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"
 )
 
-func TokenFromFile(file string) (*oauth2.Token, error) {
-	f, err := os.Open(file)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	tok := &oauth2.Token{}
-	err = json.NewDecoder(f).Decode(tok)
-	return tok, err
-}
-
 func Calendar() {
 	ctx := context.Background()
-	b, err := ioutil.ReadFile("token.json")
+	b, err := ioutil.ReadFile("credential.json")
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
@@ -37,7 +23,7 @@ func Calendar() {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 
-	tokenInit, err := TokenFromFile("tokenTestOff.json")
+	tokenInit, err := TokenFromFile("token.json")
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
