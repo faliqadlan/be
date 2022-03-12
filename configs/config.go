@@ -27,6 +27,9 @@ type AppConfig struct {
 	AUTH_URI                    string
 	TOKEN_URI                   string
 	Auth_provider_x509_cert_url string
+	Access_token                string
+	Token_type                  string
+	Refresh_token               string
 }
 
 var synchronizer = &sync.Mutex{}
@@ -69,6 +72,9 @@ func initConfig() *AppConfig {
 	exConfig.AUTH_URI = os.Getenv("AUTH_URI")
 	exConfig.TOKEN_URI = os.Getenv("TOKEN_URI")
 	exConfig.Auth_provider_x509_cert_url = os.Getenv("auth_provider_x509_cert_url")
+	exConfig.Access_token = os.Getenv("access_token")
+	exConfig.Token_type = os.Getenv("token_type")
+	exConfig.Refresh_token = os.Getenv("refresh_token")
 
 	return &exConfig
 }
@@ -113,6 +119,9 @@ func defaultConfig() *AppConfig {
 	defaultConfig.AUTH_URI = os.Getenv("AUTH_URI")
 	defaultConfig.TOKEN_URI = os.Getenv("TOKEN_URI")
 	defaultConfig.Auth_provider_x509_cert_url = os.Getenv("auth_provider_x509_cert_url")
+	defaultConfig.Access_token = os.Getenv("access_token")
+	defaultConfig.Token_type = os.Getenv("token_type")
+	defaultConfig.Refresh_token = os.Getenv("refresh_token")
 
 	return &defaultConfig
 }

@@ -1,13 +1,16 @@
-package api
+package google
 
 import (
+	"context"
+
+	"github.com/labstack/gommon/log"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	"google.golang.org/api/calendar/v3"
+	"google.golang.org/api/option"
 )
 
 func SetupConfig(db_username, clientId, clientScret string) *oauth2.Config {
-
-	// var urls = []string{"http://localhost:8080/google/callback, https://faliqadlan.cloud.okteto.net/google/callback"}
 
 	// var url = urls[0]
 	var conf = &oauth2.Config{}
@@ -38,4 +41,18 @@ func SetupConfig(db_username, clientId, clientScret string) *oauth2.Config {
 	}
 
 	return conf
+}
+
+func InitCalendar(b []byte, token *oauth2.Token) *calendar.Service {
+	config, err := google.ConfigFromJSON(b, calendar.CalendarReadonlyScope)
+	if err != nil {
+		log.Fatalf("Unable to parse client secret file to config: %v", err)
+	}
+
+	ctx := context.Background()
+	srv, err := calendar.NewService(ctx, option.WithTokenSource(config.TokenSource(ctx, token)))
+	if err != nil {
+		log.Warn(err)
+	}
+	return srv
 }

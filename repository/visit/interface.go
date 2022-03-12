@@ -7,5 +7,5 @@ type Visit interface {
 	Update(visit_uid string, req entities.Visit) (entities.Visit, error)
 	Delete(visit_uid string) (entities.Visit, error)
 	GetVisitsVer1(kind, uid, status, date, grouped string) (Visits, error)
-	GetVisitList(email, status string) (VisitCalendar, error)
+	GetVisitList(visit_uid string) (VisitCalendar, error)
 }

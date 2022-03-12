@@ -255,10 +255,10 @@ func (r *Repo) Delete(visit_uid string) (entities.Visit, error) {
 	return resInit, tx.Commit().Error
 }
 
-func (r *Repo) GetVisitList(email, status string) (VisitCalendar, error) {
+func (r *Repo) GetVisitList(visit_uid string) (VisitCalendar, error) {
 	var visits VisitCalendar
 
-	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Where("patients.email = ? and visits.status = ?", email, status).Select("doctors.address as Address, complaint as Complaint, date_format(visits.date, '%d-%m-%Y') as Date, doctors.name as DoctorName, patients.name as PatientName, doctors.email as DoctorEmail").Last(&visits); res.Error != nil || res.RowsAffected == 0 {
+	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Where("visits.visit_uid = ?", visit_uid).Select("doctors.address as Address, complaint as Complaint, date_format(visits.date, '%d-%m-%Y') as Date, doctors.name as DoctorName, patients.name as PatientName, doctors.email as DoctorEmail, patients.email as PatientEmail").Last(&visits); res.Error != nil || res.RowsAffected == 0 {
 		return VisitCalendar{}, gorm.ErrRecordNotFound
 	}
 
