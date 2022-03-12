@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/labstack/gommon/log"
 	"github.com/lithammer/shortuuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -44,11 +45,39 @@ func (r *Repo) Create(doctor_uid, patient_uid, date string, req entities.Visit) 
 	req.Doctor_uid = doctor_uid
 	req.Patient_uid = patient_uid
 
-	if res := r.db.Model(&entities.Visit{}).Create(&req); res.Error != nil {
+	tx := r.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return entities.Visit{}, err
+	}
+
+	if res := tx.Model(&entities.Visit{}).Create(&req); res.Error != nil {
+		tx.Rollback()
 		return entities.Visit{}, res.Error
 	}
 
-	return req, nil
+	if req.Status == "pending" {
+
+		var doctorInit entities.Doctor
+
+		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&doctorInit); res.Error != nil {
+			tx.Rollback()
+			return entities.Visit{}, res.Error
+		}
+
+		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Update("left_capacity", doctorInit.LeftCapacity-1); res.Error != nil || res.RowsAffected == 0 {
+			tx.Rollback()
+			return entities.Visit{}, gorm.ErrRecordNotFound
+		}
+
+	}
+
+	return req, tx.Commit().Error
 
 }
 
@@ -78,11 +107,39 @@ func (r *Repo) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (en
 	// 	req.Bmi = req.Weight / req.Height
 	// }
 
-	if res := r.db.Model(&entities.Visit{}).Create(&req); res.Error != nil {
+	tx := r.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return entities.Visit{}, err
+	}
+
+	if res := tx.Model(&entities.Visit{}).Create(&req); res.Error != nil {
+		tx.Rollback()
 		return entities.Visit{}, res.Error
 	}
 
-	return req, nil
+	if req.Status == "pending" {
+
+		var doctorInit entities.Doctor
+
+		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&doctorInit); res.Error != nil {
+			tx.Rollback()
+			return entities.Visit{}, res.Error
+		}
+
+		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Update("left_capacity", doctorInit.LeftCapacity-1); res.Error != nil || res.RowsAffected == 0 {
+			tx.Rollback()
+			return entities.Visit{}, gorm.ErrRecordNotFound
+		}
+
+	}
+
+	return req, tx.Commit().Error
 }
 
 func (r *Repo) Update(visit_uid string, req entities.Visit) (entities.Visit, error) {
@@ -137,17 +194,65 @@ func (r *Repo) Update(visit_uid string, req entities.Visit) (entities.Visit, err
 		return entities.Visit{}, res.Error
 	}
 
+	if req.Status == "ready" || req.Status == "cancelled" {
+
+		var doctorInit entities.Doctor
+
+		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", resInit.Doctor_uid).Find(&doctorInit); res.Error != nil {
+			tx.Rollback()
+			return entities.Visit{}, res.Error
+		}
+
+		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", resInit.Doctor_uid).Update("left_capacity", doctorInit.LeftCapacity+1); res.Error != nil || res.RowsAffected == 0 {
+			tx.Rollback()
+			return entities.Visit{}, gorm.ErrRecordNotFound
+		}
+
+	}
+
 	return resInit, tx.Commit().Error
 }
 
 func (r *Repo) Delete(visit_uid string) (entities.Visit, error) {
+
+	tx := r.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return entities.Visit{}, err
+	}
+
 	var resInit entities.Visit
 
-	if res := r.db.Model(&entities.Visit{}).Where("visit_uid = ?", visit_uid).Delete(&resInit); res.Error != nil || res.RowsAffected == 0 {
+	if res := tx.Model(&entities.Visit{}).Where("visit_uid = ?", visit_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {
+		tx.Rollback()
 		return entities.Visit{}, errors.New(gorm.ErrRecordNotFound.Error())
 	}
 
-	return resInit, nil
+	if res := tx.Model(&entities.Visit{}).Where("visit_uid = ?", visit_uid).Delete(&resInit); res.Error != nil || res.RowsAffected == 0 {
+		log.Info(res.RowsAffected)
+		tx.Rollback()
+		return entities.Visit{}, errors.New(gorm.ErrRecordNotFound.Error())
+	}
+
+	var doctorInit entities.Doctor
+
+	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", resInit.Doctor_uid).Find(&doctorInit); res.Error != nil {
+		tx.Rollback()
+		return entities.Visit{}, res.Error
+	}
+
+	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", resInit.Doctor_uid).Update("left_capacity", doctorInit.LeftCapacity+1); res.Error != nil || res.RowsAffected == 0 {
+		log.Info(res.RowsAffected)
+		tx.Rollback()
+		return entities.Visit{}, gorm.ErrRecordNotFound
+	}
+
+	return resInit, tx.Commit().Error
 }
 
 func (r *Repo) GetVisitList(email, status string) (VisitCalendar, error) {

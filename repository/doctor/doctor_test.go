@@ -345,8 +345,10 @@ func TestGetDashboard(t *testing.T) {
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
 		log.Info(res1)
-		// res3, err2 := r.GetProfile(res.Doctor_uid)
-		// log.Info(res3)
+		res3, err2 := r.GetAll()
+		assert.Nil(t, err2)
+		assert.NotNil(t, res3)
+		log.Info(res3)
 	})
 }
 

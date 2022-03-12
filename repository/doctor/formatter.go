@@ -37,16 +37,16 @@ type Dashboard struct {
 	TotalPatient     int `json:"totalPatient"`
 	TotalVisitDay    int `json:"totalVisitDay"`
 	TotalAppointment int `json:"totalAppointment"`
-	LeftCapacity     int `json:"leftCapacity"`
 	// Visits           []Visit `json:"visits"`
 }
 
 type AllResp struct {
-	Doctor_uid string `json:"doctor_uid"`
-	Name       string `json:"name"`
-	Image      string `json:"image"`
-	Address    string `json:"address"`
-	Status     string `json:"status"`
+	Doctor_uid   string `json:"doctor_uid"`
+	Name         string `json:"name"`
+	Image        string `json:"image"`
+	Address      string `json:"address"`
+	Status       string `json:"status"`
+	LeftCapacity int    `json:"leftCapacity"`
 }
 
 type All struct {
