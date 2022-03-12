@@ -143,39 +143,6 @@ func (r *Repo) GetProfile(doctor_uid string) (ProfileResp, error) {
 	return profileResp, nil
 }
 
-func (r *Repo) GetPatients(doctor_uid string) (PatientsResp, error) {
-	var patientsResp PatientsResp
-	// var patient PatientResp
-
-	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ?", doctor_uid).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Group("nik").Select("patients.patient_uid as Patient_uid, patients.name as Name, gender as Gender, nik as Nik, count(*) as TotalVisit").Find(&patientsResp.Patients); res.Error != nil {
-		return PatientsResp{}, res.Error
-	}
-
-	return patientsResp, nil
-}
-
-func (r *Repo) GetDashboard(doctor_uid string) (Dashboard, error) {
-	var dashResp Dashboard
-
-	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ?", doctor_uid).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Group("nik").Select("count(nik) as TotalPatient").Find(&dashResp.TotalPatient); res.Error != nil {
-		return Dashboard{}, res.Error
-	}
-
-	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ? and date(date) = date(curdate())", doctor_uid).Select("count(*) as TotalVisitDay").Find(&dashResp.TotalVisitDay); res.Error != nil {
-		return Dashboard{}, res.Error
-	}
-
-	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ? and date(date) = date(curdate()) and status = 'pending'", doctor_uid).Select("count(*) as TotalAppointment").Find(&dashResp.TotalAppointment); res.Error != nil {
-		return Dashboard{}, res.Error
-	}
-
-	// if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ?", doctor_uid).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Select("patients.patient_uid as Patient_uid, patients.name as Name, patients.gender as Gender, patients.nik as Nik, visits.status as Status ").Find(&dashResp.Visits); res.Error != nil {
-	// 	return Dashboard{}, res.Error
-	// }
-
-	return dashResp, nil
-}
-
 func (r *Repo) GetAll() (All, error) {
 	var all All
 

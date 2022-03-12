@@ -163,36 +163,6 @@ func (cont *Controller) GetProfile() echo.HandlerFunc {
 	}
 }
 
-func (cont *Controller) GetPatients() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		var uid = middlewares.ExtractTokenUid(c)
-
-		var res, err = cont.r.GetPatients(uid)
-
-		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for get all Doctor's patient "+err.Error(), nil))
-		}
-
-		return c.JSON(http.StatusOK, templates.Success(nil, "success get all doctor's patient", res))
-	}
-}
-
-func (cont *Controller) GetDashboard() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		var uid = middlewares.ExtractTokenUid(c)
-
-		var res, err = cont.r.GetDashboard(uid)
-
-		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for get all Doctor's patient "+err.Error(), nil))
-		}
-
-		return c.JSON(http.StatusOK, templates.Success(nil, "success get all doctor's patient", res))
-	}
-}
-
 func (cont *Controller) GetAll() echo.HandlerFunc {
 	return func(c echo.Context) error {
 

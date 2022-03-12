@@ -55,8 +55,6 @@ func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc
 	g.PUT("/doctor", dc.Update())
 	g.DELETE("/doctor", dc.Delete())
 	g.GET("/doctor/profile", dc.GetProfile())
-	g.GET("/doctor/patient/all", dc.GetPatients())
-	g.GET("/doctor/dashboard", dc.GetDashboard())
 	g.GET("/doctor/all", dc.GetAll())
 
 	// patient ===================================
@@ -64,9 +62,6 @@ func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc
 	g.PUT("/patient", pc.Update())
 	g.DELETE("/patient", pc.Delete())
 	g.GET("/patient/profile", pc.GetProfile())
-	g.GET("/patient/record", pc.GetRecords())
-	g.GET("/patient/history", pc.GetHistories())
-	g.GET("/patient/appointment", pc.GetAppointMent())
 
 	// visit
 
