@@ -96,12 +96,15 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 
 func (cont *Controller) GetVisits() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		var kind = c.QueryParam("kind")
+		var uid = c.QueryParam("uid")
 		var status = c.QueryParam("status")
-		var uid = middlewares.ExtractTokenUid(c)
+		var date = c.QueryParam("date")
+		var grouped = c.QueryParam("grouped")
 
 		// log.Info(uid, status)
 
-		var res, err = cont.r.GetVisits(uid, status)
+		var res, err = cont.r.GetVisitsVer1(kind, uid, status, date, grouped)
 
 		if err != nil {
 			// log.Info(err)

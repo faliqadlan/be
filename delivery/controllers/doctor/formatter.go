@@ -17,16 +17,17 @@ type Req struct {
 
 func (r *Req) ToDoctor() *entities.Doctor {
 	return &entities.Doctor{
-		UserName: r.UserName,
-		Email:    r.Email,
-		Password: r.Password,
-		Name:     r.Name,
-		Image:    r.Image,
-		Address:  r.Address,
-		Status:   r.Status,
-		OpenDay:  r.OpenDay,
-		CloseDay: r.CloseDay,
-		Capacity: r.Capacity,
+		UserName:     r.UserName,
+		Email:        r.Email,
+		Password:     r.Password,
+		Name:         r.Name,
+		Image:        r.Image,
+		Address:      r.Address,
+		Status:       r.Status,
+		OpenDay:      r.OpenDay,
+		CloseDay:     r.CloseDay,
+		Capacity:     r.Capacity,
+		LeftCapacity: r.Capacity,
 	}
 }
 

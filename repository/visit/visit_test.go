@@ -149,6 +149,34 @@ func TestUpdate(t *testing.T) {
 		// log.Info(res3)
 	})
 
+	t.Run("success handle update status", func(t *testing.T) {
+		var mock = entities.Doctor{UserName: "doctor2", Email: "doctor@", Password: "doctor"}
+		res, err := doctor.New(db).Create(mock)
+		if err != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock1 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
+		var res1, err1 = patient.New(db).Create(mock1)
+		if err1 != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock2 = entities.Visit{Complaint: "sick"}
+		res2, err2 := r.CreateVal(res.Doctor_uid, res1.Patient_uid, mock2)
+		if err2 != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var res3, err3 = r.Update(res2.Visit_uid, entities.Visit{Complaint: "very sick", Status: "cancelled"})
+		assert.Nil(t, err3)
+		assert.NotNil(t, res3)
+		// log.Info(res3)
+	})
+
 }
 
 func TestDelete(t *testing.T) {
@@ -191,7 +219,7 @@ func TestDelete(t *testing.T) {
 
 }
 
-func TestGetVisits(t *testing.T) {
+unc TestGetVisitsVer1(t *testing.T) {
 	var config = configs.GetConfig()
 	var db = utils.InitDB(config)
 	var r = New(db)
@@ -200,7 +228,7 @@ func TestGetVisits(t *testing.T) {
 	db.Migrator().DropTable(&entities.Visit{})
 	db.AutoMigrate(&entities.Visit{})
 
-	t.Run("success run update", func(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
 		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
 
 		var res, err = doctor.New(db).Create(mock1)
@@ -262,34 +290,51 @@ func TestGetVisits(t *testing.T) {
 			t.Fatal()
 		}
 
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2"}); err != nil {
+		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, time.Now().AddDate(0, 0, 1).Local().Format(layDate), entities.Visit{Complaint: "complain2"}); err != nil {
 			log.Info(err)
 			t.Fatal()
 		}
 
-		var count int
-		var res3, err3 = r.GetVisits(res.Doctor_uid, "pending")
+		var res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "pending", "", "")
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
-		count += len(res3.Visits)
 		// log.Info(res3)
+		log.Info(len(res3.Visits))
 
-		res3, err3 = r.GetVisits(res.Doctor_uid, "ready")
+		res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "ready", "", "")
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
-		count += len(res3.Visits)
 		// log.Info(res3)
+		log.Info(len(res3.Visits))
 
-		res3, err3 = r.GetVisits(res.Doctor_uid, "cancelled")
+		res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "cancelled", "", "")
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
-		count += len(res3.Visits)
-		assert.Equal(t, 6, count)
 		// log.Info(res3)
-		// log.Info(count)
+		log.Info(len(res3.Visits))
+
+		res3, err3 = r.GetVisitsVer1("", res.Doctor_uid, "", "", "")
+		assert.Nil(t, err3)
+		assert.NotNil(t, res3)
+		// log.Info(res3)
+		log.Info(len(res3.Visits))
+
+		res3, err3 = r.GetVisitsVer1("", "", "", time.Now().AddDate(0, 0, 1).Local().Format(layDate), "")
+		assert.Nil(t, err3)
+		assert.NotNil(t, res3)
+		// log.Info(res3)
+		log.Info(len(res3.Visits))
+
+		res3, err3 = r.GetVisitsVer1("", "", "", "", "patient")
+		assert.Nil(t, err3)
+		assert.NotNil(t, res3)
+		// log.Info(res3)
+		log.Info(len(res3.Visits))
 	})
+
 }
 
+       
 func TestGetVisitsList(t *testing.T) {
 	var config = configs.GetConfig()
 	var db = utils.InitDB(config)

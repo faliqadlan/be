@@ -32,6 +32,14 @@ func TestCreate(t *testing.T) {
 		// log.Info(res)
 	})
 
+	t.Run("handle below zero capacity", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic", Capacity: -10}
+
+		var _, err = r.Create(mock1)
+		assert.NotNil(t, err)
+		// log.Info(err)
+	})
+
 	t.Run("success handle username", func(t *testing.T) {
 		var mock = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
 
@@ -58,7 +66,7 @@ func TestUpdate(t *testing.T) {
 	db.AutoMigrate(&entities.Patient{})
 
 	t.Run("success update", func(t *testing.T) {
-		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
+		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic", LeftCapacity: 5, Capacity: 15}
 
 		var res, err = r.Create(mock1)
 		if err != nil {
@@ -66,11 +74,27 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		mock1 = entities.Doctor{Name: "clinic"}
+		mock1 = entities.Doctor{Name: "clinic", Capacity: 10}
 
 		res, err = r.Update(res.Doctor_uid, mock1)
 		assert.Nil(t, err)
 		assert.NotNil(t, res)
+		// log.Info(res.ClinicName)
+	})
+
+	t.Run("handle invalid input capacity", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic1n", Email: "clinic@", Password: "clinic", LeftCapacity: 5, Capacity: 15}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Doctor{Name: "clinic", Capacity: 5}
+
+		_, err = r.Update(res.Doctor_uid, mock1)
+		assert.NotNil(t, err)
 		// log.Info(res.ClinicName)
 	})
 
@@ -164,6 +188,7 @@ func TestGetProfile(t *testing.T) {
 	db.Migrator().DropTable(&entities.Visit{})
 	db.AutoMigrate(&entities.Doctor{})
 	db.AutoMigrate(&entities.Patient{})
+	db.AutoMigrate(&entities.Visit{})
 
 	t.Run("success get profile", func(t *testing.T) {
 		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
@@ -292,7 +317,7 @@ func TestGetDashboard(t *testing.T) {
 
 		var layDate = "02-01-2006"
 
-		var dateNow = time.Now().Local().Format(layDate)
+		var dateNow = time.Now()/* .AddDate(0,0,1) */.Local().Format(layDate)
 
 		if _, err := visit.New(db).Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1"}); err != nil {
 			log.Info(err)
@@ -343,7 +368,11 @@ func TestGetDashboard(t *testing.T) {
 		var res1, err1 = r.GetDashboard(res.Doctor_uid)
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
-		// log.Info(res1)
+		log.Info(res1)
+		res3, err2 := r.GetAll()
+		assert.Nil(t, err2)
+		assert.NotNil(t, res3)
+		log.Info(res3)
 	})
 }
 
