@@ -71,6 +71,41 @@ spec:
                 secretKeyRef:
                   key: CLIENT_SECRET
                   name: go-app-secret
+            - name: "PROJECT_ID"
+              valueFrom:
+                secretKeyRef:
+                  key: PROJECT_ID
+                  name: go-app-secret
+            - name: "AUTH_URI"
+              valueFrom:
+                secretKeyRef:
+                  key: AUTH_URI
+                  name: go-app-secret
+            - name: "TOKEN_URI"
+              valueFrom:
+                secretKeyRef:
+                  key: TOKEN_URI
+                  name: go-app-secret
+            - name: "auth_provider_x509_cert_url"
+              valueFrom:
+                secretKeyRef:
+                  key: auth_provider_x509_cert_url
+                  name: go-app-secret
+            - name: "access_token"
+              valueFrom:
+                secretKeyRef:
+                  key: access_token
+                  name: go-app-secret
+            - name: "token_type"
+              valueFrom:
+                secretKeyRef:
+                  key: token_type
+                  name: go-app-secret
+            - name: "refresh_token"
+              valueFrom:
+                secretKeyRef:
+                  key: refresh_token
+                  name: go-app-secret
           ports:
             - containerPort: 8000
 ---
