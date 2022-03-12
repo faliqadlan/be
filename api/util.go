@@ -32,9 +32,6 @@ func GetUserDataFromGoogle(code string, conf *oauth2.Config) ([]byte, *oauth2.To
 
 func CacheToken(token *oauth2.Token) error {
 
-	token.Expiry = token.Expiry.AddDate(1, 0,0 )
-
-
 	tokenByte, err := json.Marshal(token)
 	if err != nil {
 		return err
