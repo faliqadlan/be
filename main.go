@@ -52,7 +52,7 @@ func main() {
 
 	var googleCont = google.New(googleConf, visitRepo)
 
-	api.Calendar()
+	// api.Calendar()
 
 	var e = echo.New()
 
