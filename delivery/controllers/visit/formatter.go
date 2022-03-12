@@ -20,9 +20,9 @@ type Req struct {
 	BloodPressure    string `json:"bloodPressuse" form:"bloodPressuse"`
 	HeartRate        string `json:"heartRate" form:"heartRate"`
 	O2Saturate       string `json:"o2Saturate" form:"o2Saturate"`
-	Weight           string `json:"weight" form:"weight"`
-	Height           string `json:"height" form:"height"`
-	Bmi              string `json:"bmi" form:"bmi"`
+	Weight           int    `json:"weight" form:"weight"`
+	Height           int    `json:"height" form:"height"`
+	Bmi              int    `json:"bmi" form:"bmi"`
 }
 
 func (r *Req) ToVisit() *entities.Visit {
@@ -32,6 +32,7 @@ func (r *Req) ToVisit() *entities.Visit {
 
 	return &entities.Visit{
 		Date:             datatypes.Date(dateConv),
+		Status:           r.Status,
 		Complaint:        r.Complaint,
 		MainDiagnose:     r.MainDiagnose,
 		AdditionDiagnose: r.AdditionDiagnose,

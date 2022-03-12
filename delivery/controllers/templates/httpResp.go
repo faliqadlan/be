@@ -32,7 +32,7 @@ func InternalServerError(code interface{}, msg interface{}, data interface{}) Re
 		code = http.StatusInternalServerError
 	}
 	if msg == nil {
-		msg = "error in internal server"
+		msg = "there's some problem in server"
 	}
 	if data == nil {
 		data = nil

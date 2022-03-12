@@ -31,10 +31,11 @@ type Visits struct {
 }
 
 type VisitCalendar struct {
-	Address     string `json:"address"`
-	Complaint   string `json:"complaint"`
-	Date        string `json:"date"`
-	DoctorName  string `json:"doctorName"`
-	PatientName string `json:"patientName"`
-	DoctorEmail string `json:"doctorEmail"`
+	Address      string `json:"address"`
+	Complaint    string `json:"complaint"`
+	Date         string `json:"date"`
+	DoctorName   string `json:"doctorName"`
+	PatientName  string `json:"patientName"`
+	DoctorEmail  string `json:"doctorEmail"`
+	PatientEmail string `json:"patientEmail"`
 }

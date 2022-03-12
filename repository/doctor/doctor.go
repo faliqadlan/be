@@ -4,6 +4,7 @@ import (
 	"be/entities"
 	"be/utils"
 	"errors"
+	"math"
 
 	"github.com/lithammer/shortuuid"
 	"gorm.io/gorm"
@@ -20,6 +21,12 @@ func New(db *gorm.DB) *Repo {
 }
 
 func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
+
+	// check capacity
+
+	if req.Capacity < 0 {
+		return entities.Doctor{}, errors.New("can't assign capacity below zero")
+	}
 
 	// check username
 
@@ -57,6 +64,17 @@ func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 
 func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, error) {
 
+	tx := r.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return entities.Doctor{}, err
+	}
+
 	var resInit entities.Doctor
 
 	// check username
@@ -65,13 +83,29 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		UserName string
 	}
 
-	var checkUserName = r.db.Raw("? union all ? ", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", req.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", req.UserName)).Scan(&userNameCheck{})
+	var checkUserName = tx.Raw("? union all ? ", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", req.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", req.UserName)).Scan(&userNameCheck{})
 
 	if checkUserName.RowsAffected != 0 {
+		tx.Rollback()
 		return entities.Doctor{}, errors.New("user name already exist")
 	}
 
-	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Updates(entities.Doctor{UserName: req.UserName, Email: req.Email, Password: req.Password, Name: req.Name, Image: req.Image, Address: req.Address, Status: req.Status, OpenDay: req.OpenDay, CloseDay: req.CloseDay, Capacity: req.Capacity}); res.Error != nil || res.RowsAffected == 0 {
+	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&resInit); res.Error != nil {
+		tx.Rollback()
+		return entities.Doctor{}, res.Error
+	}
+	// log.Info(req.Capacity, req.LeftCapacity)
+	// log.Info(resInit.Capacity, resInit.LeftCapacity)
+	var leftCapacity = req.Capacity - int(math.Abs(float64(resInit.Capacity)-float64(resInit.LeftCapacity)))
+	// log.Info(leftCapacity)
+
+	if leftCapacity < 0 {
+		tx.Rollback()
+		return entities.Doctor{}, errors.New("can't update capacity below total pending patients")
+	}
+
+	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Updates(entities.Doctor{UserName: req.UserName, Email: req.Email, Password: req.Password, Name: req.Name, Image: req.Image, Address: req.Address, Status: req.Status, OpenDay: req.OpenDay, CloseDay: req.CloseDay, Capacity: req.Capacity}).Update("left_capacity", leftCapacity); res.Error != nil || res.RowsAffected == 0 {
+		tx.Rollback()
 		return entities.Doctor{}, gorm.ErrRecordNotFound
 	}
 
@@ -79,7 +113,7 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 	// 	return entities.Doctor{}, errors.New(gorm.ErrRecordNotFound.Error())
 	// }
 
-	return resInit, nil
+	return resInit, tx.Commit().Error
 }
 
 func (r *Repo) Delete(doctor_uid string) (entities.Doctor, error) {
@@ -96,13 +130,13 @@ func (r *Repo) GetProfile(doctor_uid string) (ProfileResp, error) {
 
 	var profileResp ProfileResp
 
-	var query = "doctor_uid as Doctor_uid, user_name as UserName, email as Email, name as Name, image as Image, address as Address, status as Status, open_day as OpenDay, close_day as CloseDay, capacity as Capacity, "
+	var query = "doctor_uid as Doctor_uid, user_name as UserName, email as Email, name as Name, image as Image, address as Address, status as Status, open_day as OpenDay, close_day as CloseDay, capacity as Capacity "
 
-	var sub = " capacity - (select count(*) from visits where visits.doctor_uid = ? and visits.status = 'pending') as LeftCapacity"
+	// var sub = " capacity - (select count(*) from visits where visits.doctor_uid = ? and visits.status = 'pending' and visits.deleted_at is Null) as LeftCapacity"
 
-	query = query + sub
+	// query = query + sub
 	// log.Info(query)
-	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Select(query, doctor_uid).Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
+	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Select(query /* , doctor_uid */).Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
 		return ProfileResp{}, gorm.ErrRecordNotFound
 	}
 
@@ -127,11 +161,11 @@ func (r *Repo) GetDashboard(doctor_uid string) (Dashboard, error) {
 		return Dashboard{}, res.Error
 	}
 
-	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ? and date(created_at) = date(curdate())", doctor_uid).Select("count(*) as TotalVisitDay").Find(&dashResp.TotalVisitDay); res.Error != nil {
+	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ? and date(date) = date(curdate())", doctor_uid).Select("count(*) as TotalVisitDay").Find(&dashResp.TotalVisitDay); res.Error != nil {
 		return Dashboard{}, res.Error
 	}
 
-	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ? and date(created_at) = date(curdate()) and status = 'pending'", doctor_uid).Select("count(*) as TotalAppointment").Find(&dashResp.TotalAppointment); res.Error != nil {
+	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ? and date(date) = date(curdate()) and status = 'pending'", doctor_uid).Select("count(*) as TotalAppointment").Find(&dashResp.TotalAppointment); res.Error != nil {
 		return Dashboard{}, res.Error
 	}
 
@@ -145,7 +179,7 @@ func (r *Repo) GetDashboard(doctor_uid string) (Dashboard, error) {
 func (r *Repo) GetAll() (All, error) {
 	var all All
 
-	if res := r.db.Model(&entities.Doctor{}).Select("doctor_uid as Doctor_uid, name as Name, image as Image, address as Address, status as Status").Find(&all.Doctors); res.Error != nil {
+	if res := r.db.Model(&entities.Doctor{}).Find(&all.Doctors); res.Error != nil {
 		return All{}, res.Error
 	}
 

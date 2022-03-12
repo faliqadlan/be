@@ -1,6 +1,7 @@
 package visit
 
 import (
+	"be/api/google/calendar"
 	"be/delivery/controllers/templates"
 	"be/delivery/middlewares"
 	"be/repository/visit"
@@ -8,15 +9,18 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 )
 
 type Controller struct {
-	r visit.Visit
+	r   visit.Visit
+	cal calendar.Calendar
 }
 
-func New(r visit.Visit) *Controller {
+func New(r visit.Visit, cal calendar.Calendar) *Controller {
 	return &Controller{
-		r: r,
+		r:   r,
+		cal: cal,
 	}
 }
 
@@ -33,11 +37,22 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		if err := v.Struct(req); err != nil {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error validator for add visit "+err.(validator.ValidationErrors).Error(), nil))
 		}
-		var res, err = cont.r.CreateVal(req.Doctor_uid, uid, *req.ToVisit())
+		res, err := cont.r.CreateVal(req.Doctor_uid, uid, *req.ToVisit())
 
 		if err != nil {
 			// log.Info(err)
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for add visit "+err.Error(), nil))
+		}
+
+		res1, err := cont.cal.CreateEvent(res.Visit_uid)
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, nil, nil))
+		}
+		err = cont.cal.InsertEvent(res1)
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, nil, nil))
 		}
 
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add visit", res.Complaint))
@@ -84,11 +99,12 @@ func (cont *Controller) GetVisits() echo.HandlerFunc {
 		var kind = c.QueryParam("kind")
 		var uid = c.QueryParam("uid")
 		var status = c.QueryParam("status")
-		var signStatus = c.QueryParam("signStatus")
+		var date = c.QueryParam("date")
+		var grouped = c.QueryParam("grouped")
 
 		// log.Info(uid, status)
 
-		var res, err = cont.r.GetVisitsVer1(kind, uid, status, signStatus)
+		var res, err = cont.r.GetVisitsVer1(kind, uid, status, date, grouped)
 
 		if err != nil {
 			// log.Info(err)

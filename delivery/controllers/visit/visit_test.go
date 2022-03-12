@@ -17,6 +17,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/api/calendar/v3"
 )
 
 type mockSuccess struct{}
@@ -33,11 +34,11 @@ func (m *mockSuccess) Delete(visit_uid string) (entities.Visit, error) {
 	return entities.Visit{}, nil
 }
 
-func (m *mockSuccess) GetVisitsVer1(kind, uid, status, sign_status string) (visit.Visits, error) {
+func (m *mockSuccess) GetVisitsVer1(kind, uid, status, date, grouped string) (visit.Visits, error)  {
 	return visit.Visits{}, nil
 }
 
-func (m *mockSuccess) GetVisitList(email, status string) (visit.VisitCalendar, error) {
+func (m *mockSuccess) GetVisitList(visit_uid string) (visit.VisitCalendar, error) {
 	return visit.VisitCalendar{}, nil
 }
 
@@ -55,11 +56,11 @@ func (m *mockFail) Delete(visit_uid string) (entities.Visit, error) {
 	return entities.Visit{}, errors.New("")
 }
 
-func (m *mockFail) GetVisitsVer1(kind, uid, status, sign_status string) (visit.Visits, error) {
+func (m *mockFail)GetVisitsVer1(kind, uid, status, date, grouped string) (visit.Visits, error)  {
 	return visit.Visits{}, nil
 }
 
-func (m *mockFail) GetVisitList(email, status string) (visit.VisitCalendar, error) {
+func (m *mockFail) GetVisitList(visit_uid string) (visit.VisitCalendar, error) {
 	return visit.VisitCalendar{}, nil
 }
 
@@ -70,6 +71,16 @@ func (m *MockAuthLib) Login(userName string, password string) (map[string]interf
 		"data": "abc",
 		"type": "clinic",
 	}, nil
+}
+
+type MockCal struct{}
+
+func (m *MockCal) CreateEvent(visit_uid string) (*calendar.Event, error) {
+	return &calendar.Event{}, nil
+}
+
+func (m *MockCal) InsertEvent(event *calendar.Event) error {
+	return nil
 }
 
 func TestCreate(t *testing.T) {
@@ -90,7 +101,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{})
+		var controller = New(&mockSuccess{}, &MockCal{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -115,7 +126,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{})
+		var controller = New(&mockSuccess{}, &MockCal{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -140,7 +151,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{})
+		var controller = New(&mockSuccess{}, &MockCal{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -166,7 +177,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockFail{})
+		var controller = New(&mockFail{}, &MockCal{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -200,7 +211,7 @@ func TestUpdate(t *testing.T) {
 		context.SetParamValues("visit 123")
 		// log.Info(context.ParamNames())
 
-		var controller = New(&mockSuccess{})
+		var controller = New(&mockSuccess{}, &MockCal{})
 		controller.Update()(context)
 
 		var response = ResponseFormat{}
@@ -223,7 +234,7 @@ func TestUpdate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{})
+		var controller = New(&mockSuccess{}, &MockCal{})
 		controller.Update()(context)
 
 		var response = ResponseFormat{}
@@ -246,7 +257,7 @@ func TestUpdate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockFail{})
+		var controller =New(&mockFail{}, &MockCal{})
 		controller.Update()(context)
 
 		var response = ResponseFormat{}
@@ -276,7 +287,7 @@ func TestDelete(t *testing.T) {
 		context.SetParamValues("visit 123")
 		// log.Info(context.ParamNames())
 
-		var controller = New(&mockSuccess{})
+		var controller = New(&mockSuccess{}, &MockCal{})
 		controller.Delete()(context)
 
 		var response = ResponseFormat{}
@@ -295,7 +306,7 @@ func TestDelete(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockFail{})
+		var controller =New(&mockFail{}, &MockCal{})
 		controller.Delete()(context)
 
 		var response = ResponseFormat{}
@@ -348,7 +359,7 @@ func TestGetVisits(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.QueryParams().Add("status", "pending")
 
-		var controller = New(&mockSuccess{})
+		var controller = New(&mockSuccess{}, &MockCal{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetVisits())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -371,7 +382,7 @@ func TestGetVisits(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockFail{})
+		var controller =New(&mockFail{}, &MockCal{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetVisits())(context); err != nil {
 			log.Fatal(err)
 			return
