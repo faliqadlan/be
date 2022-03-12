@@ -112,6 +112,7 @@ type Token struct {
 	Access_token  string
 	Token_type    string
 	Refresh_token string
+	Expiry        string
 }
 
 func CreateTokenJson(access_token, token_type, refresh_token string) error {
@@ -119,6 +120,7 @@ func CreateTokenJson(access_token, token_type, refresh_token string) error {
 		Access_token:  access_token,
 		Token_type:    token_type,
 		Refresh_token: refresh_token,
+		Expiry:        "2022-03-12T23:25:25.445233+07:00",
 	}
 
 	file, err := json.MarshalIndent(data, "", "")
