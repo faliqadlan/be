@@ -1,4 +1,4 @@
-package google
+package calendar
 
 import (
 	"be/repository/visit"
@@ -60,7 +60,7 @@ func (cal *CalendarConf) CreateEvent(visit_uid string) (*calendar.Event, error) 
 	return event, nil
 }
 
-func (cal *CalendarConf) InsertEven(event *calendar.Event) error {
+func (cal *CalendarConf) InsertEvent(event *calendar.Event) error {
 
 	_, err := cal.srv.Events.Insert("primary", event).Do()
 	if err != nil {
