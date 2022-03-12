@@ -96,13 +96,13 @@ func (r *Repo) GetProfile(doctor_uid string) (ProfileResp, error) {
 
 	var profileResp ProfileResp
 
-	var query = "doctor_uid as Doctor_uid, user_name as UserName, email as Email, name as Name, image as Image, address as Address, status as Status, open_day as OpenDay, close_day as CloseDay, capacity as Capacity, "
+	var query = "doctor_uid as Doctor_uid, user_name as UserName, email as Email, name as Name, image as Image, address as Address, status as Status, open_day as OpenDay, close_day as CloseDay, capacity as Capacity "
 
-	var sub = " capacity - (select count(*) from visits where visits.doctor_uid = ? and visits.status = 'pending' and visits.deleted_at is Null) as LeftCapacity"
+	// var sub = " capacity - (select count(*) from visits where visits.doctor_uid = ? and visits.status = 'pending' and visits.deleted_at is Null) as LeftCapacity"
 
-	query = query + sub
+	// query = query + sub
 	// log.Info(query)
-	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Select(query, doctor_uid).Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
+	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Select(query /* , doctor_uid */).Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
 		return ProfileResp{}, gorm.ErrRecordNotFound
 	}
 
@@ -132,6 +132,10 @@ func (r *Repo) GetDashboard(doctor_uid string) (Dashboard, error) {
 	}
 
 	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ? and date(created_at) = date(curdate()) and status = 'pending'", doctor_uid).Select("count(*) as TotalAppointment").Find(&dashResp.TotalAppointment); res.Error != nil {
+		return Dashboard{}, res.Error
+	}
+
+	if res := r.db.Model(&entities.Visit{}).Where("visits.doctor_uid = ? and visits.status = 'pending'", doctor_uid).Select("(select doctors.capacity from doctors where doctors.doctor_uid = ? and doctors.deleted_at is null) - count(*) as LeftCapacity", doctor_uid).Find(&dashResp.LeftCapacity); res.Error != nil {
 		return Dashboard{}, res.Error
 	}
 

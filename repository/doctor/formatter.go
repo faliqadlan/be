@@ -1,17 +1,16 @@
 package doctor
 
 type ProfileResp struct {
-	Doctor_uid   string `json:"doctor_uid"`
-	UserName     string `json:"userName"`
-	Email        string `json:"email"`
-	Name         string `json:"name"`
-	Image        string `json:"image"`
-	Address      string `json:"address"`
-	Status       string `json:"status"`
-	OpenDay      string `json:"openDay"`
-	CloseDay     string `json:"closeDay"`
-	Capacity     int    `json:"capacity"`
-	LeftCapacity int    `json:"leftCapacity"`
+	Doctor_uid string `json:"doctor_uid"`
+	UserName   string `json:"userName"`
+	Email      string `json:"email"`
+	Name       string `json:"name"`
+	Image      string `json:"image"`
+	Address    string `json:"address"`
+	Status     string `json:"status"`
+	OpenDay    string `json:"openDay"`
+	CloseDay   string `json:"closeDay"`
+	Capacity   int    `json:"capacity"`
 }
 
 type PatientResp struct {
@@ -38,6 +37,7 @@ type Dashboard struct {
 	TotalPatient     int `json:"totalPatient"`
 	TotalVisitDay    int `json:"totalVisitDay"`
 	TotalAppointment int `json:"totalAppointment"`
+	LeftCapacity     int `json:"leftCapacity"`
 	// Visits           []Visit `json:"visits"`
 }
 
