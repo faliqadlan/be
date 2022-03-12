@@ -219,7 +219,7 @@ func TestDelete(t *testing.T) {
 
 }
 
-unc TestGetVisitsVer1(t *testing.T) {
+func TestGetVisitsVer1(t *testing.T) {
 	var config = configs.GetConfig()
 	var db = utils.InitDB(config)
 	var r = New(db)
@@ -334,7 +334,6 @@ unc TestGetVisitsVer1(t *testing.T) {
 
 }
 
-       
 func TestGetVisitsList(t *testing.T) {
 	var config = configs.GetConfig()
 	var db = utils.InitDB(config)
