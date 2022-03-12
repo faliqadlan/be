@@ -104,12 +104,7 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		return entities.Doctor{}, errors.New("can't update capacity below total pending patients")
 	}
 
-	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Update("left_capacity", leftCapacity); res.Error != nil || res.RowsAffected == 0 {
-		tx.Rollback()
-		return entities.Doctor{}, gorm.ErrRecordNotFound
-	}
-
-	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Updates(entities.Doctor{UserName: req.UserName, Email: req.Email, Password: req.Password, Name: req.Name, Image: req.Image, Address: req.Address, Status: req.Status, OpenDay: req.OpenDay, CloseDay: req.CloseDay, Capacity: req.Capacity}); res.Error != nil || res.RowsAffected == 0 {
+	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Updates(entities.Doctor{UserName: req.UserName, Email: req.Email, Password: req.Password, Name: req.Name, Image: req.Image, Address: req.Address, Status: req.Status, OpenDay: req.OpenDay, CloseDay: req.CloseDay, Capacity: req.Capacity}).Update("left_capacity", leftCapacity); res.Error != nil || res.RowsAffected == 0 {
 		tx.Rollback()
 		return entities.Doctor{}, gorm.ErrRecordNotFound
 	}
