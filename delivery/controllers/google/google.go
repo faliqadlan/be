@@ -34,7 +34,9 @@ func (cont *Controller) GoogleLogin() echo.HandlerFunc {
 		// }
 
 		// log.Info(oauthState)
-		var url = cont.conf.AuthCodeURL("state", oauth2.AccessTypeOffline)
+		// var url = cont.conf.AuthCodeURL("state", oauth2.AccessTypeOffline)
+		var url = cont.conf.AuthCodeURL( /* oauthState */ "randomstate")
+
 		// log.Info(url)
 		res := c.Redirect(http.StatusSeeOther, url)
 		// log.Info(res)
