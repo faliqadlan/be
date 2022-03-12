@@ -22,6 +22,12 @@ func New(db *gorm.DB) *Repo {
 
 func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 
+	// check capacity
+
+	if req.Capacity < 0 {
+		return entities.Doctor{}, errors.New("can't assign capacity below zero")
+	}
+
 	// check username
 
 	type userNameCheck struct {
@@ -88,10 +94,22 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		tx.Rollback()
 		return entities.Doctor{}, res.Error
 	}
-
+	// log.Info(req.Capacity, req.LeftCapacity)
+	// log.Info(resInit.Capacity, resInit.LeftCapacity)
 	var leftCapacity = req.Capacity - int(math.Abs(float64(resInit.Capacity)-float64(resInit.LeftCapacity)))
+	// log.Info(leftCapacity)
 
-	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Updates(entities.Doctor{UserName: req.UserName, Email: req.Email, Password: req.Password, Name: req.Name, Image: req.Image, Address: req.Address, Status: req.Status, OpenDay: req.OpenDay, CloseDay: req.CloseDay, Capacity: req.Capacity, LeftCapacity: leftCapacity}); res.Error != nil || res.RowsAffected == 0 {
+	if leftCapacity < 0 {
+		tx.Rollback()
+		return entities.Doctor{}, errors.New("can't update capacity below total pending patients")
+	}
+
+	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Update("left_capacity", leftCapacity); res.Error != nil || res.RowsAffected == 0 {
+		tx.Rollback()
+		return entities.Doctor{}, gorm.ErrRecordNotFound
+	}
+
+	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Updates(entities.Doctor{UserName: req.UserName, Email: req.Email, Password: req.Password, Name: req.Name, Image: req.Image, Address: req.Address, Status: req.Status, OpenDay: req.OpenDay, CloseDay: req.CloseDay, Capacity: req.Capacity}); res.Error != nil || res.RowsAffected == 0 {
 		tx.Rollback()
 		return entities.Doctor{}, gorm.ErrRecordNotFound
 	}

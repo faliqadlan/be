@@ -32,6 +32,14 @@ func TestCreate(t *testing.T) {
 		// log.Info(res)
 	})
 
+	t.Run("handle below zero capacity", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic", Capacity: -10}
+
+		var _, err = r.Create(mock1)
+		assert.NotNil(t, err)
+		// log.Info(err)
+	})
+
 	t.Run("success handle username", func(t *testing.T) {
 		var mock = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
 
@@ -71,6 +79,22 @@ func TestUpdate(t *testing.T) {
 		res, err = r.Update(res.Doctor_uid, mock1)
 		assert.Nil(t, err)
 		assert.NotNil(t, res)
+		// log.Info(res.ClinicName)
+	})
+
+	t.Run("handle invalid input capacity", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic1n", Email: "clinic@", Password: "clinic", LeftCapacity: 5, Capacity: 15}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Doctor{Name: "clinic", Capacity: 5}
+
+		_, err = r.Update(res.Doctor_uid, mock1)
+		assert.NotNil(t, err)
 		// log.Info(res.ClinicName)
 	})
 
