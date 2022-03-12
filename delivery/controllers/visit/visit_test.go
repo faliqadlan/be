@@ -33,7 +33,7 @@ func (m *mockSuccess) Delete(visit_uid string) (entities.Visit, error) {
 	return entities.Visit{}, nil
 }
 
-func (m *mockSuccess) GetVisitsVer1(kind, uid, status, sign_status string) (visit.Visits, error) {
+func (m *mockSuccess) GetVisitsVer1(kind, uid, status, date, grouped string) (visit.Visits, error)  {
 	return visit.Visits{}, nil
 }
 
@@ -55,7 +55,7 @@ func (m *mockFail) Delete(visit_uid string) (entities.Visit, error) {
 	return entities.Visit{}, errors.New("")
 }
 
-func (m *mockFail) GetVisitsVer1(kind, uid, status, sign_status string) (visit.Visits, error) {
+func (m *mockFail)GetVisitsVer1(kind, uid, status, date, grouped string) (visit.Visits, error)  {
 	return visit.Visits{}, nil
 }
 

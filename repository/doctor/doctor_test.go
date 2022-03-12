@@ -317,7 +317,7 @@ func TestGetDashboard(t *testing.T) {
 
 		var layDate = "02-01-2006"
 
-		var dateNow = time.Now().Local().Format(layDate)
+		var dateNow = time.Now()/* .AddDate(0,0,1) */.Local().Format(layDate)
 
 		if _, err := visit.New(db).Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1"}); err != nil {
 			log.Info(err)

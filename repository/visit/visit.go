@@ -265,26 +265,51 @@ func (r *Repo) GetVisitList(email, status string) (VisitCalendar, error) {
 	return visits, nil
 }
 
-func (r *Repo) GetVisitsVer1(kind, uid, status, signStatus string) (Visits, error) {
+func (r *Repo) GetVisitsVer1(kind, uid, status, date, grouped string) (Visits, error) {
 
 	switch kind {
+	case "":
+		kind = "visits.doctor_uid != '" + "uid" + "'"
 	case "patient":
-		kind = "patients.nik"
+		kind = "patients.nik = '" + uid + "'"
 	case "doctor":
-		kind = "visits.doctor_uid"
+		kind = "visits.doctor_uid = '" + uid + "'"
+
 	}
 
-	switch signStatus {
-	case "equal":
-		signStatus = " = "
-	case "notequal":
-		signStatus = " != "
+	switch status {
+	case "":
+		status = "and visits.status != '" + "status" + "'"
+	default:
+		status = "and visits.status = '" + status + "'"
+	}
+
+	switch date {
+	case "":
+		date = "and date(visits.date) != date('1000-01-01')"
+	default:
+		var layout = "02-01-2006"
+		var dateConv, err = time.Parse(layout, date)
+		if err != nil {
+			return Visits{}, errors.New("error in time parse date")
+		}
+		date = "and date(visits.date) = date('" + dateConv.Format("2006-01-02") + "')"
+	}
+	// log.Info(date)
+	switch grouped {
+	case "":
+		grouped = "id"
+	case "patient":
+		grouped = "patients.nik"
+	case "doctor":
+		grouped = "doctors.doctor_uid"
 	}
 
 	var visits Visits
 
-	var condition = kind + " = '" + uid + "' and visits.status" + signStatus + "'" + status + "'"
-	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Where(condition).Select("visit_uid as Visit_uid,  date_format(visits.date, '%d-%m-%Y') as Date, visits.status as Status, complaint as Complaint, main_diagnose as MainDiagnose, addition_diagnose as AdditionDiagnose, action as Action, recipe as Recipe, blood_pressure as BloodPressure, heart_rate as HeartRate, o2_saturate as O2Saturate, weight as Weight, height as Height, bmi as Bmi, visits.doctor_uid as Doctor_uid, doctors.name as DoctorName, doctors.address as DoctorAddress, visits.patient_uid as Patient_uid, patients.name as PatientName, patients.gender as Gender, patients.nik as Nik").Find(&visits.Visits); res.Error != nil {
+	var condition = kind + status + date
+	if res := r.db.Model(&entities.Visit{}).Joins("inner join patients on visits.patient_uid = patients.patient_uid").Joins("inner join doctors on visits.doctor_uid = doctors.doctor_uid").Group(grouped).Where(condition).Select("visit_uid as Visit_uid,  date_format(visits.date, '%d-%m-%Y') as Date, visits.status as Status, complaint as Complaint, main_diagnose as MainDiagnose, addition_diagnose as AdditionDiagnose, action as Action, recipe as Recipe, blood_pressure as BloodPressure, heart_rate as HeartRate, o2_saturate as O2Saturate, weight as Weight, height as Height, bmi as Bmi, visits.doctor_uid as Doctor_uid, doctors.name as DoctorName, doctors.address as DoctorAddress, visits.patient_uid as Patient_uid, patients.name as PatientName, patients.gender as Gender, patients.nik as Nik").Find(&visits.Visits); res.Error != nil {
+		log.Info(condition)
 		return Visits{}, res.Error
 	}
 

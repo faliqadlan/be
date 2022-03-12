@@ -385,28 +385,46 @@ func TestGetVisitsVer1(t *testing.T) {
 			t.Fatal()
 		}
 
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2"}); err != nil {
+		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, time.Now().AddDate(0, 0, 1).Local().Format(layDate), entities.Visit{Complaint: "complain2"}); err != nil {
 			log.Info(err)
 			t.Fatal()
 		}
 
-		var res3, err3 = r.GetVisitsVer1("patient", res2.Nik, "pending", "equal")
+		var res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "pending", "", "")
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
-		// log.Info(len(res3.Visits))
 		// log.Info(res3)
+		log.Info(len(res3.Visits))
 
-		res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "ready", "equal")
+		res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "ready", "", "")
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
 		// log.Info(res3)
+		log.Info(len(res3.Visits))
 
-		res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "cancelled", "notequal")
+		res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "cancelled", "", "")
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
 		// log.Info(res3)
+		log.Info(len(res3.Visits))
+
+		res3, err3 = r.GetVisitsVer1("", "", "", "", "")
+		assert.Nil(t, err3)
+		assert.NotNil(t, res3)
 		// log.Info(res3)
-		// log.Info(count)
+		log.Info(len(res3.Visits))
+
+		res3, err3 = r.GetVisitsVer1("", "", "", time.Now().AddDate(0, 0, 1).Local().Format(layDate), "")
+		assert.Nil(t, err3)
+		assert.NotNil(t, res3)
+		// log.Info(res3)
+		log.Info(len(res3.Visits))
+
+		res3, err3 = r.GetVisitsVer1("", "", "", "", "patient")
+		assert.Nil(t, err3)
+		assert.NotNil(t, res3)
+		// log.Info(res3)
+		log.Info(len(res3.Visits))
 	})
 
 }

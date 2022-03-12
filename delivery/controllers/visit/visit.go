@@ -84,11 +84,12 @@ func (cont *Controller) GetVisits() echo.HandlerFunc {
 		var kind = c.QueryParam("kind")
 		var uid = c.QueryParam("uid")
 		var status = c.QueryParam("status")
-		var signStatus = c.QueryParam("signStatus")
+		var date = c.QueryParam("date")
+		var grouped = c.QueryParam("grouped")
 
 		// log.Info(uid, status)
 
-		var res, err = cont.r.GetVisitsVer1(kind, uid, status, signStatus)
+		var res, err = cont.r.GetVisitsVer1(kind, uid, status, date, grouped)
 
 		if err != nil {
 			// log.Info(err)

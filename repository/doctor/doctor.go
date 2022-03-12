@@ -166,11 +166,11 @@ func (r *Repo) GetDashboard(doctor_uid string) (Dashboard, error) {
 		return Dashboard{}, res.Error
 	}
 
-	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ? and date(created_at) = date(curdate())", doctor_uid).Select("count(*) as TotalVisitDay").Find(&dashResp.TotalVisitDay); res.Error != nil {
+	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ? and date(date) = date(curdate())", doctor_uid).Select("count(*) as TotalVisitDay").Find(&dashResp.TotalVisitDay); res.Error != nil {
 		return Dashboard{}, res.Error
 	}
 
-	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ? and date(created_at) = date(curdate()) and status = 'pending'", doctor_uid).Select("count(*) as TotalAppointment").Find(&dashResp.TotalAppointment); res.Error != nil {
+	if res := r.db.Model(&entities.Visit{}).Where("doctor_uid = ? and date(date) = date(curdate()) and status = 'pending'", doctor_uid).Select("count(*) as TotalAppointment").Find(&dashResp.TotalAppointment); res.Error != nil {
 		return Dashboard{}, res.Error
 	}
 
