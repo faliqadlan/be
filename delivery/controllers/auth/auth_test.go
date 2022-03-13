@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 type MockAuthLib struct{}
@@ -25,6 +26,7 @@ func (m *MockAuthLib) Login(userName string, password string) (map[string]interf
 type MockFailAuthLib struct{}
 
 func (m *MockFailAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
+
 	return map[string]interface{}{}, errors.New("")
 }
 
@@ -35,6 +37,24 @@ func (m *MockAuthLibFailToken) Login(userName string, password string) (map[stri
 		"data": "",
 		"type": "clinic",
 	}, nil
+}
+
+type MockIncorrectPassword struct{}
+
+func (m *MockIncorrectPassword) Login(userName string, password string) (map[string]interface{}, error) {
+	return map[string]interface{}{}, errors.New("incorrect password")
+}
+
+type DeletedAccount struct{}
+
+func (m *DeletedAccount) Login(userName string, password string) (map[string]interface{}, error) {
+	return map[string]interface{}{}, errors.New("account is deleted")
+}
+
+type AccountNotFound struct{}
+
+func (m *AccountNotFound) Login(userName string, password string) (map[string]interface{}, error) {
+	return map[string]interface{}{}, gorm.ErrRecordNotFound
 }
 
 func TestLogin(t *testing.T) {
@@ -61,7 +81,7 @@ func TestLogin(t *testing.T) {
 		assert.Equal(t, 400, resp.Code)
 	})
 
-	t.Run("error internal server error for login user", func(t *testing.T) {
+	t.Run("there's some problem is server", func(t *testing.T) {
 		e := echo.New()
 
 		reqBody, _ := json.Marshal(map[string]string{
@@ -77,6 +97,78 @@ func TestLogin(t *testing.T) {
 		context.SetPath("/login")
 
 		authCont := New(&MockFailAuthLib{})
+		authCont.Login()(context)
+
+		resp := LoginRespFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
+		assert.Equal(t, 500, resp.Code)
+	})
+
+	t.Run("incorrect password", func(t *testing.T) {
+		e := echo.New()
+
+		reqBody, _ := json.Marshal(map[string]string{
+			"userName": "incorrect password",
+			"password": "anonim123",
+		})
+
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		res := httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/login")
+
+		authCont := New(&MockIncorrectPassword{})
+		authCont.Login()(context)
+
+		resp := LoginRespFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
+		assert.Equal(t, 500, resp.Code)
+	})
+
+	t.Run("account is deleted", func(t *testing.T) {
+		e := echo.New()
+
+		reqBody, _ := json.Marshal(map[string]string{
+			"userName": "account is deleted",
+			"password": "anonim123",
+		})
+
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		res := httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/login")
+
+		authCont := New(&DeletedAccount{})
+		authCont.Login()(context)
+
+		resp := LoginRespFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
+		assert.Equal(t, 500, resp.Code)
+	})
+
+	t.Run(gorm.ErrRecordNotFound.Error(), func(t *testing.T) {
+		e := echo.New()
+
+		reqBody, _ := json.Marshal(map[string]string{
+			"userName": gorm.ErrRecordNotFound.Error(),
+			"password": "anonim123",
+		})
+
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		res := httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/login")
+
+		authCont := New(&AccountNotFound{})
 		authCont.Login()(context)
 
 		resp := LoginRespFormat{}

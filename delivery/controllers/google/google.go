@@ -72,7 +72,7 @@ func (cont *Controller) GoogleCalendar() echo.HandlerFunc {
 		// if err != nil {
 		// 	log.Warn(err)
 		// }
-
+		
 		token, err := api.TokenFromFile("./secret/token.json", cont.conf)
 		if err != nil {
 			log.Warn(err)
@@ -106,30 +106,3 @@ func (cont *Controller) GoogleCalendar() echo.HandlerFunc {
 		}))
 	}
 }
-
-// func (cont *Controller) GoogleCalendarEventList() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		var ctx = context.Background()
-// 		// state := c.Request().URL.Query()["state"][0]
-// 		// if state != "state" {
-// 		// 	return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error cookie "+state, nil))
-// 		// }
-
-// 		var code = c.FormValue("code")
-
-// 		_, token, err := api.GetUserDataFromGoogle(code, cont.conf)
-// 		if err != nil {
-// 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error get user profile info "+err.Error(), nil))
-// 		}
-
-// 		var client = cont.conf.Client(ctx, token)
-// 		srv, err := calendar.NewService(ctx, option.WithHTTPClient(client))
-// 		if err != nil {
-// 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error in run calendar "+err.Error(), nil))
-// 		}
-// 		t := time.Now().Format(time.RFC3339)
-// 		events, err := srv.Events.List("primary").s
-
-// 		return c.JSON(http.StatusOK, templates.Success(nil, "success run calendar", nil))
-// 	}
-// }
