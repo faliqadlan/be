@@ -5,6 +5,7 @@ import (
 	"be/delivery/middlewares"
 	"be/repository/doctor"
 	"be/utils"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -31,34 +32,43 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		var req Req
 
 		if err := c.Bind(&req); err != nil {
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error binding for add Doctor "+err.Error(), nil))
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input ", nil))
 		}
 
 		var v = validator.New()
 		if err := v.Struct(req); err != nil {
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error validator for add Doctor "+err.(validator.ValidationErrors).Error(), nil))
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input ", nil))
 		}
 
-		var file, err1 = c.FormFile("file")
-		if err1 != nil {
-			log.Info(err1)
+		res, err := cont.r.Create(*req.ToDoctor())
+
+		if err != nil {
+			log.Warn(err)
+			switch err.Error() {
+			case errors.New("can't assign capacity below zero").Error():
+				err = errors.New("can't assign capacity below zero")
+			case errors.New("user name is already exist").Error():
+				err = errors.New("user name is already exist")
+			default:
+				err = errors.New("there's some problem is server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err, nil))
 		}
-		if err1 == nil {
+
+		file, err := c.FormFile("file")
+		if err != nil {
+			log.Warn(err)
+		}
+		if err == nil {
 			var link = utils.UploadFileToS3(cont.conf, *file)
 
 			req.Image = link
 		}
 
-		var res, err = cont.r.Create(*req.ToDoctor())
-
-		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for add Doctor "+err.Error(), nil))
-		}
-
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add Doctor", map[string]interface{}{
 			"name": res.Name,
-			/* "link": res.Image, */
 		}))
 	}
 }
@@ -69,40 +79,47 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		var req Req
 
 		if err := c.Bind(&req); err != nil {
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error binding for update Doctor "+err.Error(), nil))
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
 		}
 
-		var res1, err1 = cont.r.GetProfile(uid)
-		if err1 != nil {
-			log.Error(err1)
+		res, err := cont.r.Update(uid, *req.ToDoctor())
+
+		if err != nil {
+			log.Warn(err)
+			switch err.Error() {
+			case errors.New("user name is already exist").Error():
+				err = errors.New("user name is already exist")
+			case errors.New("can't update capacity below total pending patients").Error():
+				err = errors.New("can't update capacity below total pending patients")
+			default:
+				err = errors.New("there's some problem is server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err, nil))
 		}
 
-		var file, err2 = c.FormFile("file")
-		if err2 != nil {
-			log.Info(err1)
+		res1, err := cont.r.GetProfile(uid)
+		if err != nil {
+			log.Warn(err)
 		}
-		if err2 == nil {
+
+		file, err := c.FormFile("file")
+		if err != nil {
+			log.Warn(err)
+		}
+		if err == nil {
 			if res1.Image != "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png" {
 				var nameFile = res1.Image
 
 				nameFile = strings.Replace(nameFile, "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/", "", -1)
 
 				var res = utils.UpdateFileS3(cont.conf, nameFile, *file)
-				if res != "success" {
-					return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for update Doctor "+res, nil))
-				}
+				log.Info(res)
 			} else {
 				var link = utils.UploadFileToS3(cont.conf, *file)
 
 				req.Image = link
 			}
-		}
-
-		var res, err = cont.r.Update(uid, *req.ToDoctor())
-
-		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for update Doctor "+err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update Doctor", res.Name))
@@ -113,9 +130,16 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var uid = middlewares.ExtractTokenUid(c)
 
-		var res1, err1 = cont.r.GetProfile(uid)
-		if err1 != nil {
-			log.Error(err1)
+		res, err := cont.r.Delete(uid)
+
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's problem in server", nil))
+		}
+
+		res1, err := cont.r.GetProfile(uid)
+		if err != nil {
+			log.Error(err)
 		}
 
 		if res1.Image != "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png" {
@@ -124,18 +148,8 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 
 			nameFile = strings.Replace(nameFile, "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/", "", -1)
 			log.Info(cont.conf)
-			if res := utils.DeleteFileS3(cont.conf, nameFile); res != "success" {
-				log.Info(res)
-				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for delete Doctor "+res, nil))
-			}
-
-		}
-
-		var res, err = cont.r.Delete(uid)
-
-		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for delete Doctor "+err.Error(), nil))
+			res := utils.DeleteFileS3(cont.conf, nameFile)
+			log.Info(res)
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success delete Doctor", res.DeletedAt))
@@ -149,8 +163,8 @@ func (cont *Controller) GetProfile() echo.HandlerFunc {
 		var res, err = cont.r.GetProfile(uid)
 
 		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for get ptofile Doctor "+err.Error(), nil))
+			log.Warn(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's problem in server", nil))
 		}
 
 		return c.JSON(http.StatusOK, templates.Success(nil, "success get profile Doctor", res))
@@ -163,8 +177,8 @@ func (cont *Controller) GetAll() echo.HandlerFunc {
 		var res, err = cont.r.GetAll()
 
 		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for get all Doctor's patient "+err.Error(), nil))
+			log.Warn(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's problem in server", nil))
 		}
 
 		return c.JSON(http.StatusOK, templates.Success(nil, "success get all doctor's patient", res))

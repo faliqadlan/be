@@ -5,6 +5,7 @@ import (
 	"be/utils"
 	"errors"
 
+	"github.com/labstack/gommon/log"
 	"gorm.io/gorm"
 )
 
@@ -69,6 +70,6 @@ func (ad *AuthDb) Login(userName string, password string) (map[string]interface{
 			"type": "doctor",
 		}, nil
 	}
-
+	log.Warn(res.Error)
 	return map[string]interface{}{"type": "all"}, gorm.ErrRecordNotFound
 }

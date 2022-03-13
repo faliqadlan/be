@@ -11,7 +11,7 @@ type Patient struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	Patient_uid string         `gorm:"index;type:varchar(22)"`
+	Patient_uid string         `gorm:"index;type:varchar(22);primaryKey"`
 	UserName    string         `gorm:"index;not null;type:varchar(100)"`
 	Email       string         `gorm:"index;not null;type:varchar(100)"`
 	Password    string         `gorm:"not null;type:varchar(100)"`
@@ -28,7 +28,7 @@ type Patient struct {
 	Visits      []Visit `gorm:"foreignKey:Patient_uid;references:Patient_uid"`
 }
 
-/* 
+/*
 
 pria, wanita, lainnya
 

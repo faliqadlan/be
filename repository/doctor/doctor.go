@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math"
 
+	"github.com/labstack/gommon/log"
 	"github.com/lithammer/shortuuid"
 	"gorm.io/gorm"
 )
@@ -37,7 +38,7 @@ func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 	var checkUserName = r.db.Raw("? union all ? ", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", req.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", req.UserName)).Scan(&userNameCheck{})
 
 	if checkUserName.RowsAffected != 0 {
-		return entities.Doctor{}, errors.New("user name already exist")
+		return entities.Doctor{}, errors.New("user name is already exist")
 	}
 	var uid string
 	for {
@@ -51,11 +52,13 @@ func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 	var err error
 	req.Password, err = utils.HashPassword(req.Password)
 	if err != nil {
+		log.Warn(err)
 		return entities.Doctor{}, errors.New("error in hash password")
 	}
 	req.Doctor_uid = uid
 
 	if res := r.db.Model(&entities.Doctor{}).Create(&req); res.Error != nil {
+		log.Warn(err)
 		return entities.Doctor{}, res.Error
 	}
 
@@ -86,13 +89,15 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 	var checkUserName = tx.Raw("? union all ? ", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", req.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", req.UserName)).Scan(&userNameCheck{})
 
 	if checkUserName.RowsAffected != 0 {
+		log.Warn(checkUserName.Error)
 		tx.Rollback()
-		return entities.Doctor{}, errors.New("user name already exist")
+		return entities.Doctor{}, errors.New("user name is already exist")
 	}
 
-	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&resInit); res.Error != nil {
+	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {
+		log.Warn(res.Error)
 		tx.Rollback()
-		return entities.Doctor{}, res.Error
+		return entities.Doctor{}, gorm.ErrRecordNotFound
 	}
 	// log.Info(req.Capacity, req.LeftCapacity)
 	// log.Info(resInit.Capacity, resInit.LeftCapacity)
@@ -115,13 +120,11 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		OpenDay:  req.OpenDay,
 		CloseDay: req.CloseDay,
 		Capacity: req.Capacity}).Update("left_capacity", leftCapacity); res.Error != nil || res.RowsAffected == 0 {
+		log.Warn(res.Error)
 		tx.Rollback()
+		log.Warn(res.Error)
 		return entities.Doctor{}, gorm.ErrRecordNotFound
 	}
-
-	// if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {
-	// 	return entities.Doctor{}, errors.New(gorm.ErrRecordNotFound.Error())
-	// }
 
 	return resInit, tx.Commit().Error
 }
@@ -130,6 +133,7 @@ func (r *Repo) Delete(doctor_uid string) (entities.Doctor, error) {
 	var resInit entities.Doctor
 
 	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Delete(&resInit); res.Error != nil || res.RowsAffected == 0 {
+		log.Warn(res.Error)
 		return entities.Doctor{}, errors.New(gorm.ErrRecordNotFound.Error())
 	}
 
@@ -142,11 +146,8 @@ func (r *Repo) GetProfile(doctor_uid string) (ProfileResp, error) {
 
 	var query = "doctor_uid as Doctor_uid, user_name as UserName, email as Email, name as Name, image as Image, address as Address, status as Status, open_day as OpenDay, close_day as CloseDay, capacity as Capacity "
 
-	// var sub = " capacity - (select count(*) from visits where visits.doctor_uid = ? and visits.status = 'pending' and visits.deleted_at is Null) as LeftCapacity"
-
-	// query = query + sub
-	// log.Info(query)
 	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Select(query /* , doctor_uid */).Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
+		log.Warn(res.Error)
 		return ProfileResp{}, gorm.ErrRecordNotFound
 	}
 
@@ -157,6 +158,7 @@ func (r *Repo) GetAll() (All, error) {
 	var all All
 
 	if res := r.db.Model(&entities.Doctor{}).Find(&all.Doctors); res.Error != nil {
+		log.Warn(res.Error)
 		return All{}, res.Error
 	}
 

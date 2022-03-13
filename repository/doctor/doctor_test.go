@@ -36,6 +36,7 @@ func TestCreate(t *testing.T) {
 		var _, err = r.Create(mock1)
 		assert.NotNil(t, err)
 		// log.Info(err)
+
 	})
 
 	t.Run("success handle username", func(t *testing.T) {
@@ -200,6 +201,20 @@ func TestGetProfile(t *testing.T) {
 		var res1, err1 = r.GetProfile(res.Doctor_uid)
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
+		// log.Info(res1)
+	})
+
+	t.Run("input uid", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "clinic2", Email: "clinic@", Password: "clinic"}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		var _, err1 = r.GetProfile(res.Status)
+		assert.NotNil(t, err1)
 		// log.Info(res1)
 	})
 }

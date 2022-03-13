@@ -3,77 +3,19 @@ package doctor
 import (
 	"be/configs"
 	"be/delivery/controllers/auth"
-	"be/entities"
-	"be/repository/doctor"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"log"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
 )
-
-type mockSuccess struct{}
-
-func (m *mockSuccess) Create(DoctorReq entities.Doctor) (entities.Doctor, error) {
-	return entities.Doctor{}, nil
-}
-
-func (m *mockSuccess) Update(Doctor_uid string, up entities.Doctor) (entities.Doctor, error) {
-	return entities.Doctor{}, nil
-}
-
-func (m *mockSuccess) Delete(Doctor_uid string) (entities.Doctor, error) {
-	return entities.Doctor{}, nil
-}
-
-func (m *mockSuccess) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
-	return doctor.ProfileResp{}, nil
-}
-
-func (m *mockSuccess) GetAll() (doctor.All, error) {
-	return doctor.All{}, nil
-}
-
-type mockFail struct{}
-
-func (m *mockFail) Create(DoctorReq entities.Doctor) (entities.Doctor, error) {
-	return entities.Doctor{}, errors.New("")
-}
-
-func (m *mockFail) Update(Doctor_uid string, up entities.Doctor) (entities.Doctor, error) {
-	return entities.Doctor{}, errors.New("")
-}
-
-func (m *mockFail) Delete(Doctor_uid string) (entities.Doctor, error) {
-	return entities.Doctor{}, errors.New("")
-}
-
-func (m *mockFail) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
-	return doctor.ProfileResp{}, errors.New("")
-}
-
-func (m *mockFail) GetAll() (doctor.All, error) {
-	return doctor.All{}, errors.New("")
-}
-
-type MockAuthLib struct{}
-
-func (m *MockAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
-	return map[string]interface{}{
-		"data": "abc",
-		"type": "clinic",
-	}, nil
-}
-
-var sess = session.Must(session.NewSession())
 
 func TestCreate(t *testing.T) {
 	t.Run("success Create", func(t *testing.T) {
@@ -156,6 +98,41 @@ func TestCreate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 		// log.Info(response.Message)
 	})
+	t.Run("file", func(t *testing.T) {
+
+		var reqBody = new(bytes.Buffer)
+
+		var writer = multipart.NewWriter(reqBody)
+		writer.WriteField("userName", "doctor1")
+		writer.WriteField("email", "doctor")
+		writer.WriteField("password", "doctor")
+
+		part, err := writer.CreateFormFile("file", "photo.jpg")
+		if err != nil {
+			log.Warn(err)
+		}
+		part.Write([]byte(`sample`))
+		writer.Close()
+
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", reqBody)
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, sess)
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 201, response.Code)
+		// log.Info(response.Message)
+	})
 
 	t.Run("internal server", func(t *testing.T) {
 		var e = echo.New()
@@ -174,6 +151,62 @@ func TestCreate(t *testing.T) {
 		context.SetPath("/doctor")
 
 		var controller = New(&mockFail{}, sess)
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("can't assign capacity below zero", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": "doctor",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&createCapacity{}, sess)
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("user name is already exist", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": "doctor",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&createUserName{}, sess)
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -270,6 +303,84 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
+	t.Run("file", func(t *testing.T) {
+
+		var reqBody = new(bytes.Buffer)
+
+		var writer = multipart.NewWriter(reqBody)
+		writer.WriteField("userName", "doctor1")
+		writer.WriteField("email", "doctor")
+		writer.WriteField("password", "doctor")
+
+		part, err := writer.CreateFormFile("file", "photo.jpg")
+		if err != nil {
+			log.Warn(err)
+		}
+		part.Write([]byte(`sample`))
+		writer.Close()
+
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", reqBody)
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, sess)
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 202, response.Code)
+	})
+
+	t.Run("upload file", func(t *testing.T) {
+
+		var reqBody = new(bytes.Buffer)
+
+		var writer = multipart.NewWriter(reqBody)
+		writer.WriteField("userName", "doctor1")
+		writer.WriteField("email", "doctor")
+		writer.WriteField("password", "doctor")
+
+		part, err := writer.CreateFormFile("file", "photo.jpg")
+		if err != nil {
+			log.Warn(err)
+		}
+		part.Write([]byte(`sample`))
+		writer.Close()
+
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", reqBody)
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&upload{}, sess)
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 202, response.Code)
+	})
+
 	t.Run("internal server", func(t *testing.T) {
 		var e = echo.New()
 
@@ -286,6 +397,62 @@ func TestUpdate(t *testing.T) {
 		context.SetPath("/doctor")
 
 		var controller = New(&mockFail{}, sess)
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
+	t.Run("user name is already exist", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"name": "123",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&createUserName{}, sess)
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
+	t.Run("can't update capacity below total pending patients", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"name": "123",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&createCapacity{}, sess)
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return

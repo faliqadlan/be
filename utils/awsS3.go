@@ -84,10 +84,12 @@ func DeleteFileS3(ses *session.Session, name string) string {
 			default:
 				log.Info(aerr.Error())
 			}
+			return err.Error()
 		} else {
 			// Print the error, cast err to awserr.Error to get the Code and
 			// Message from an error.
 			log.Info(err.Error())
+			return err.Error()
 		}
 	}
 
@@ -96,9 +98,10 @@ func DeleteFileS3(ses *session.Session, name string) string {
 
 func UpdateFileS3(ses *session.Session, name string, fileHeader multipart.FileHeader) string {
 
-	var src, err0 = fileHeader.Open()
-	if err0 != nil {
-		log.Info(err0)
+	src, err := fileHeader.Open()
+	if err != nil {
+		log.Info(err)
+		return err.Error()
 	}
 	defer src.Close()
 
@@ -117,7 +120,7 @@ func UpdateFileS3(ses *session.Session, name string, fileHeader multipart.FileHe
 		StorageClass: aws.String("STANDARD"),
 	}
 
-	var res, err = svc.PutObject(input)
+	res, err := svc.PutObject(input)
 
 	if err != nil {
 		log.Info(res)
@@ -126,10 +129,12 @@ func UpdateFileS3(ses *session.Session, name string, fileHeader multipart.FileHe
 			default:
 				log.Info(aerr.Error())
 			}
+			return err.Error()
 		} else {
 			// Print the error, cast err to awserr.Error to get the Code and
 			// Message from an error.
 			log.Info(err.Error())
+			return err.Error()
 		}
 	}
 

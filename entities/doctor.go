@@ -10,7 +10,7 @@ type Doctor struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
-	Doctor_uid   string         `gorm:"index;type:varchar(22)"`
+	Doctor_uid   string         `gorm:"index;type:varchar(22);primaryKey"`
 	UserName     string         `gorm:"index;not null;type:varchar(100)"`
 	Email        string         `gorm:"index;not null;type:varchar(100)"`
 	Password     string         `gorm:"not null;type:varchar(100)"`
