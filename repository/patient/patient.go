@@ -4,8 +4,10 @@ import (
 	"be/entities"
 	"be/utils"
 	"errors"
+	"time"
 
 	"github.com/lithammer/shortuuid"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -61,6 +63,15 @@ func (r *Repo) Create(req entities.Patient) (entities.Patient, error) {
 
 func (r *Repo) Update(patient_uid string, req entities.Patient) (entities.Patient, error) {
 
+	switch {
+	case req.Nik != "":
+		return entities.Patient{}, errors.New("nik can't update")
+	case req.PlaceBirth != "":
+		return entities.Patient{}, errors.New("place birth can't update")
+	case req.Dob != datatypes.Date(time.Time{}):
+		return entities.Patient{}, errors.New("date of birth can't update")
+	}
+
 	var resInit entities.Patient
 
 	// check username
@@ -75,13 +86,18 @@ func (r *Repo) Update(patient_uid string, req entities.Patient) (entities.Patien
 		return entities.Patient{}, errors.New("user name already exist")
 	}
 
-	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Updates(entities.Patient{UserName: req.UserName, Email: req.Email, Password: req.Password, Name: req.Name, Image: req.Image, Gender: req.Gender, Address: req.Address, Status: req.Status, Religion: req.Religion}); res.Error != nil || res.RowsAffected == 0 {
+	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Updates(entities.Patient{
+		UserName: req.UserName,
+		Email:    req.Email,
+		Password: req.Password,
+		Name:     req.Name,
+		Image:    req.Image,
+		Gender:   req.Gender,
+		Address:  req.Address,
+		Status:   req.Status,
+		Religion: req.Religion}); res.Error != nil || res.RowsAffected == 0 {
 		return entities.Patient{}, gorm.ErrRecordNotFound
 	}
-
-	// if res := r.db.Model(&entities.Doctor{}).Where("pa = ?", doctor_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {
-	// 	return entities.Doctor{}, errors.New(gorm.ErrRecordNotFound.Error())
-	// }
 
 	return resInit, nil
 }

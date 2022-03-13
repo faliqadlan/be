@@ -66,6 +66,8 @@ func (m *MockAuthLib) Login(userName string, password string) (map[string]interf
 	}, nil
 }
 
+var sess = session.Must(session.NewSession())
+
 func TestCreate(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
@@ -86,7 +88,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &session.Session{})
+		var controller = New(&mockSuccess{}, sess)
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -112,7 +114,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &session.Session{})
+		var controller = New(&mockSuccess{}, sess)
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -137,7 +139,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &session.Session{})
+		var controller = New(&mockSuccess{}, sess)
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -164,7 +166,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockFail{}, &session.Session{})
+		var controller = New(&mockFail{}, sess)
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -220,7 +222,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &session.Session{})
+		var controller = New(&mockSuccess{}, sess)
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -248,7 +250,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &session.Session{})
+		var controller = New(&mockSuccess{}, sess)
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -276,7 +278,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockFail{}, &session.Session{})
+		var controller = New(&mockFail{}, sess)
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -329,7 +331,7 @@ func TestDelete(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &session.Session{})
+		var controller = New(&mockSuccess{}, sess)
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Delete())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -353,7 +355,7 @@ func TestDelete(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockFail{}, &session.Session{})
+		var controller = New(&mockFail{}, sess)
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Delete())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -406,7 +408,7 @@ func TestGetProfile(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &session.Session{})
+		var controller = New(&mockSuccess{}, sess)
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetProfile())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -432,7 +434,7 @@ func TestGetProfile(t *testing.T) {
 		context.QueryParams().Add("patient_uid", "ini_query")
 		// log.Info(context.QueryString())
 
-		var controller = New(&mockSuccess{}, &session.Session{})
+		var controller = New(&mockSuccess{}, sess)
 		controller.GetProfile()(context)
 
 		var response = ResponseFormat{}
@@ -453,7 +455,7 @@ func TestGetProfile(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockFail{}, &session.Session{})
+		var controller = New(&mockFail{}, sess)
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetProfile())(context); err != nil {
 			log.Fatal(err)
 			return

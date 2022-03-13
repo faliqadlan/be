@@ -98,7 +98,12 @@ func (cont *Controller) GoogleCalendar() echo.HandlerFunc {
 		// api.CacheToken(token)
 		log.Info(user)
 
-		return c.JSON(http.StatusOK, templates.Success(nil, "success run calendar", user))
+		var res = api.Calendar(configs.TokenPath, cont.conf)
+
+		return c.JSON(http.StatusOK, templates.Success(nil, "success run calendar", map[string]interface{}{
+			"user":     user,
+			"calendar": res,
+		}))
 	}
 }
 

@@ -27,3 +27,13 @@ type Patient struct {
 	Religion    string  `gorm:"type:enum('islam', 'kristen', 'katolik', 'budha', 'hindu', 'konghuchu', 'lainnya');default:'lainnya'"`
 	Visits      []Visit `gorm:"foreignKey:Patient_uid;references:Patient_uid"`
 }
+
+/* 
+
+pria, wanita, lainnya
+
+belumKawin, kawin, ceraiHidup, ceraiMati, lainnya
+
+islam, kristen, katolik, budha, hindu, konghuchu, lainnya
+
+*/

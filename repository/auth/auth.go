@@ -24,13 +24,21 @@ func (ad *AuthDb) Login(userName string, password string) (map[string]interface{
 
 	var patient entities.Patient
 
-	var res = ad.db.Model(entities.Patient{}).Where("user_name = ?", userName).First(&patient)
+	var res = ad.db.Unscoped().Model(entities.Patient{}).Where("user_name = ?", userName).First(&patient)
 	if res.RowsAffected != 0 {
 		if match := utils.CheckPasswordHash(password, patient.Password); !match {
 			return map[string]interface{}{"type": "patient"}, errors.New("incorrect password")
 		}
 	}
+
 	if res.RowsAffected != 0 {
+
+		if patient.DeletedAt.Valid {
+			return map[string]interface{}{
+				"type": "patient",
+			}, errors.New("account is deleted")
+		}
+
 		return map[string]interface{}{
 			"data": patient.Patient_uid,
 			"type": "patient",
@@ -41,18 +49,26 @@ func (ad *AuthDb) Login(userName string, password string) (map[string]interface{
 
 	var doctor entities.Doctor
 
-	res = ad.db.Model(entities.Doctor{}).Where("user_name = ?", userName).First(&doctor)
+	res = ad.db.Unscoped().Model(entities.Doctor{}).Where("user_name = ?", userName).First(&doctor)
 	if res.RowsAffected != 0 {
 		if match := utils.CheckPasswordHash(password, doctor.Password); !match {
 			return map[string]interface{}{"type": "doctor"}, errors.New("incorrect password")
 		}
 	}
+
 	if res.RowsAffected != 0 {
+
+		if doctor.DeletedAt.Valid {
+			return map[string]interface{}{
+				"type": "doctor",
+			}, errors.New("account is deleted")
+		}
+
 		return map[string]interface{}{
 			"data": doctor.Doctor_uid,
 			"type": "doctor",
 		}, nil
 	}
 
-	return map[string]interface{}{"type": "all"}, errors.New(gorm.ErrRecordNotFound.Error())
+	return map[string]interface{}{"type": "all"}, gorm.ErrRecordNotFound
 }

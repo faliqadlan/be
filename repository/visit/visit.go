@@ -154,6 +154,11 @@ func (r *Repo) Update(visit_uid string, req entities.Visit) (entities.Visit, err
 		return entities.Visit{}, err
 	}
 
+	if req.Date != datatypes.Date(time.Time{}) {
+		tx.Rollback()
+		return entities.Visit{}, errors.New("cant't update date, must cancel the appoinment")
+	}
+
 	var resInit entities.Visit
 
 	if res := tx.Model(&entities.Visit{}).Where("visit_uid = ?", visit_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {

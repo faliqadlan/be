@@ -56,12 +56,6 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for add Doctor "+err.Error(), nil))
 		}
 
-		// token, err := middlewares.GenerateToken(res.Doctor_uid)
-
-		// if err != nil {
-		// 	return c.JSON(http.StatusNotAcceptable, templates.BadRequest(http.StatusNotAcceptable, "error in process token "+err.Error(), err))
-		// }
-
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add Doctor", map[string]interface{}{
 			"name": res.Name,
 			/* "link": res.Image, */
@@ -87,7 +81,6 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		if err2 != nil {
 			log.Info(err1)
 		}
-
 		if err2 == nil {
 			if res1.Image != "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png" {
 				var nameFile = res1.Image
@@ -130,8 +123,9 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 			var nameFile = res1.Image
 
 			nameFile = strings.Replace(nameFile, "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/", "", -1)
-
+			log.Info(cont.conf)
 			if res := utils.DeleteFileS3(cont.conf, nameFile); res != "success" {
+				log.Info(res)
 				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for delete Doctor "+res, nil))
 			}
 
