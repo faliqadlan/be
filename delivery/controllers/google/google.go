@@ -73,16 +73,18 @@ func (cont *Controller) GoogleCalendar() echo.HandlerFunc {
 		// 	log.Warn(err)
 		// }
 
-		token, err := api.TokenFromFile("./secret/token.json")
+		token, err := api.TokenFromFile("./secret/token.json", cont.conf)
 		if err != nil {
 			log.Warn(err)
 		}
+
+		// var conf = cont.conf.Client(context.Background(), tokenNew)
 
 		response, err := http.Get(configs.OauthGoogleUrlAPI + token.AccessToken)
 		if err != nil {
 			log.Warn(err)
 		}
-		defer response.Body.Close()
+		// defer response.Body.Close()
 		contents, err := ioutil.ReadAll(response.Body)
 		if err != nil {
 			log.Warn(err)

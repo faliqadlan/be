@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"be/configs"
 	"be/repository/auth"
 	"net/http"
 
@@ -35,14 +34,11 @@ func (ac *AuthController) Login() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server error for login user "+err.Error(), err))
 		}
 
-		configs.Name = "name"
-		configs.Uid = checkedUser["data"].(string)
-
 		// log.Info(checkedUser)
 		token, err := middlewares.GenerateToken(checkedUser["data"].(string))
 
 		if err != nil {
-			
+
 			return c.JSON(http.StatusNotAcceptable, templates.BadRequest(http.StatusNotAcceptable, "error in process token "+err.Error(), err))
 		}
 

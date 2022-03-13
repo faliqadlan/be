@@ -7,12 +7,13 @@ import (
 	"log"
 	"time"
 
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"
 )
 
-func Calendar() {
+func Calendar(file string, conf *oauth2.Config) {
 	ctx := context.Background()
 	b, err := ioutil.ReadFile("credential.json")
 	if err != nil {
@@ -23,7 +24,7 @@ func Calendar() {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 
-	tokenInit, err := TokenFromFile("token.json")
+	tokenInit, err := TokenFromFile(file, conf)
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}

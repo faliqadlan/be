@@ -41,7 +41,7 @@ func CacheToken(token *oauth2.Token, nameFile string) error {
 	return ioutil.WriteFile(nameFile, tokenByte, 0644)
 }
 
-func TokenFromFile(file string) (*oauth2.Token, error) {
+func TokenFromFile(file string, conf *oauth2.Config) (*oauth2.Token, error) {
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, err
@@ -49,16 +49,26 @@ func TokenFromFile(file string) (*oauth2.Token, error) {
 	defer f.Close()
 	tok := &oauth2.Token{}
 	err = json.NewDecoder(f).Decode(tok)
-	return tok, err
+	if err != nil {
+		log.Warn(err)
+	}
+
+	tokenSource := conf.TokenSource(context.Background(), tok)
+	newToken, err := tokenSource.Token()
+	if err != nil {
+		log.Warn(err)
+	}
+
+	return newToken, err
 }
 
-func TokenInit(credentialPath, tokenPath string) ([]byte, *oauth2.Token) {
+func TokenInit(credentialPath, tokenPath string, conf *oauth2.Config) ([]byte, *oauth2.Token) {
 	b, err := ioutil.ReadFile(credentialPath)
 	if err != nil {
 		log.Warn(err)
 	}
 
-	token, err := TokenFromFile(tokenPath)
+	token, err := TokenFromFile(tokenPath, conf)
 	if err != nil {
 		log.Warn(err)
 	}
@@ -134,3 +144,40 @@ func CreateTokenJson(access_token, token_type, refresh_token string) error {
 	}
 	return nil
 }
+
+// var configToken = "token"
+
+// func GetToken(name string) (*oauth2.Token, error) {
+// 	tokenString, err := fs.ConfigFile.GetValue(string(name), configToken)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	if tokenString == "" {
+// 		return nil, fmt.Errorf("Empty token found - please run rclone config again")
+// 	}
+// 	token := new(oauth2.Token)
+// 	err = json.Unmarshal([]byte(tokenString), token)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	// if has data then return it
+// 	if token.AccessToken != "" && token.RefreshToken != "" {
+// 		return token, nil
+// 	}
+// 	// otherwise try parsing as oldToken
+// 	oldtoken := new(Token)
+// 	err = json.Unmarshal([]byte(tokenString), oldtoken)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	// Fill in result into new token
+// 	token.AccessToken = oldtoken.Access_token
+// 	token.RefreshToken = oldtoken.Refresh_token
+// 	token.Expiry = oldtoken.Expiry
+// 	// Save new format in config file
+// 	err = putToken(name, token)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return token, nil
+// }
