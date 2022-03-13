@@ -14,9 +14,16 @@ spec:
       labels:
         app: go-app
     spec:
+      volumes: 
+      - name: token-test
+        configMap:
+          name: token-test
       containers:
         - image: faliqadlan/img-be:latest
           name: go-app
+          volumeMounts:
+          - name: token-test
+            mountPath: ./app/token.json
           env:
             - name: "PORT"
               value: "8000"

@@ -1,7 +1,9 @@
 local.env
 be-secret.yaml
+be-token.yaml
 token.json
 tok.json
+tok1.json
 tok2.json
 tok3.json
 tokenTest.json

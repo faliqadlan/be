@@ -29,7 +29,7 @@ func main() {
 
 	api.CreteCredentialJson(config.CLIENT_ID, config.PROJECT_ID, config.AUTH_URI, config.TOKEN_URI, config.Auth_provider_x509_cert_url, config.CLIENT_SECRET)
 
-	api.CreateTokenJson(config.Access_token, config.Token_type, config.Refresh_token)
+	// api.CreateTokenJson(config.Access_token, config.Token_type, config.Refresh_token)
 
 	var b, token = api.TokenInit("credential.json", "token.json")
 

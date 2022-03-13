@@ -52,10 +52,10 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		err = cont.cal.InsertEvent(res1)
 		if err != nil {
 			log.Warn(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, nil, nil))
+			return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit but error in added to google calendar", nil))
 		}
 
-		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add visit", res.Complaint))
+		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add visit and added to google calendar", res.Complaint))
 	}
 }
 

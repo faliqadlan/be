@@ -32,13 +32,13 @@ func GetUserDataFromGoogle(code string, conf *oauth2.Config) ([]byte, *oauth2.To
 	return contents, token, nil
 }
 
-func CacheToken(token *oauth2.Token) error {
+func CacheToken(token *oauth2.Token, nameFile string) error {
 
 	tokenByte, err := json.Marshal(token)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile("token.json", tokenByte, 0644)
+	return ioutil.WriteFile(nameFile, tokenByte, 0644)
 }
 
 func TokenFromFile(file string) (*oauth2.Token, error) {
@@ -120,7 +120,7 @@ func CreateTokenJson(access_token, token_type, refresh_token string) error {
 		Access_token:  access_token,
 		Token_type:    token_type,
 		Refresh_token: refresh_token,
-		Expiry:        "2022-03-12T23:25:25.445233+07:00",
+		Expiry:        "2022-03-13T09:08:55.6226453+07:00",
 	}
 
 	file, err := json.MarshalIndent(data, "", "")

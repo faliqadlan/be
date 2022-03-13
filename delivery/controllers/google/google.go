@@ -2,9 +2,11 @@ package google
 
 import (
 	"be/api"
+	"be/configs"
 	"be/delivery/controllers/templates"
 	"be/repository/visit"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -34,8 +36,9 @@ func (cont *Controller) GoogleLogin() echo.HandlerFunc {
 		// }
 
 		// log.Info(oauthState)
-		var url = cont.conf.AuthCodeURL("state", oauth2.AccessTypeOffline)
+		// var url = cont.conf.AuthCodeURL("randomstate", oauth2.AccessTypeOffline)
 		// var url = cont.conf.AuthCodeURL( /* oauthState */ "randomstate")
+		var url = cont.conf.AuthCodeURL("randomstate", oauth2.AccessTypeOffline)
 
 		// log.Info(url)
 		res := c.Redirect(http.StatusSeeOther, url)
@@ -56,19 +59,41 @@ func (cont *Controller) GoogleCalendar() echo.HandlerFunc {
 		// 	return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error cookie "+state, nil))
 		// }
 
-		var code = c.FormValue("code")
+		// var code = c.FormValue("code")
 
-		profile, token, err := api.GetUserDataFromGoogle(code, cont.conf)
+		// _, token, err := api.GetUserDataFromGoogle(code, cont.conf)
+		// if err != nil {
+		// 	return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error get user profile info "+err.Error(), nil))
+		// }
+
+		// api.CacheToken(token, "token.json")
+
+		// token, err = api.TokenFromFile("token.json")
+		// if err != nil {
+		// 	log.Warn(err)
+		// }
+
+		token, err := api.TokenFromFile("token.json")
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error get user profile info "+err.Error(), nil))
+			log.Warn(err)
+		}
+
+		response, err := http.Get(configs.OauthGoogleUrlAPI + token.AccessToken)
+		if err != nil {
+			log.Warn(err)
+		}
+		defer response.Body.Close()
+		contents, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			log.Warn(err)
 		}
 
 		var user UserInfo
 
-		if err := json.Unmarshal(profile, &user); err != nil {
+		if err := json.Unmarshal(contents, &user); err != nil {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error convert to struct "+err.Error(), nil))
 		}
-		api.CacheToken(token)
+		// api.CacheToken(token)
 		log.Info(user)
 
 		return c.JSON(http.StatusOK, templates.Success(nil, "success run calendar", user))
