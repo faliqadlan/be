@@ -31,7 +31,7 @@ func main() {
 
 	// api.CreateTokenJson(config.Access_token, config.Token_type, config.Refresh_token)
 
-	var b, token = api.TokenInit("credential.json", "token.json")
+	var b, token = api.TokenInit("credential.json", "./secret/token.json")
 
 	var srv = googleApi.InitCalendar(b, token)
 

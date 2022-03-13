@@ -66,14 +66,14 @@ func (cont *Controller) GoogleCalendar() echo.HandlerFunc {
 		// 	return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error get user profile info "+err.Error(), nil))
 		// }
 
-		// api.CacheToken(token, "token.json")
+		// api.CacheToken(token, "./secret/token.json")
 
-		// token, err = api.TokenFromFile("token.json")
+		// token, err = api.TokenFromFile("./secret/token.json")
 		// if err != nil {
 		// 	log.Warn(err)
 		// }
 
-		token, err := api.TokenFromFile("token.json")
+		token, err := api.TokenFromFile("./secret/token.json")
 		if err != nil {
 			log.Warn(err)
 		}
