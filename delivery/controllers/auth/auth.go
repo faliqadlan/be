@@ -43,7 +43,7 @@ func (ac *AuthController) Login() echo.HandlerFunc {
 				err = errors.New("there's some problem is server")
 			}
 
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err, nil))
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		// log.Info(checkedUser)
@@ -52,7 +52,7 @@ func (ac *AuthController) Login() echo.HandlerFunc {
 		if err != nil {
 			log.Warn(err)
 			err = errors.New("there's some problem is server")
-			return c.JSON(http.StatusNotAcceptable, templates.BadRequest(http.StatusNotAcceptable, err, nil))
+			return c.JSON(http.StatusNotAcceptable, templates.BadRequest(http.StatusNotAcceptable, err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusOK, templates.Success(nil, "success login", map[string]interface{}{

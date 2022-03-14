@@ -30,28 +30,6 @@ func (m *mockSuccess) GetAll() (doctor.All, error) {
 	return doctor.All{}, nil
 }
 
-type upload struct{}
-
-func (m *upload) Create(DoctorReq entities.Doctor) (entities.Doctor, error) {
-	return entities.Doctor{}, nil
-}
-
-func (m *upload) Update(Doctor_uid string, up entities.Doctor) (entities.Doctor, error) {
-	return entities.Doctor{}, nil
-}
-
-func (m *upload) Delete(Doctor_uid string) (entities.Doctor, error) {
-	return entities.Doctor{}, nil
-}
-
-func (m *upload) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
-	return doctor.ProfileResp{Image: "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png"}, nil
-}
-
-func (m *upload) GetAll() (doctor.All, error) {
-	return doctor.All{}, nil
-}
-
 type mockFail struct{}
 
 func (m *mockFail) Create(DoctorReq entities.Doctor) (entities.Doctor, error) {
