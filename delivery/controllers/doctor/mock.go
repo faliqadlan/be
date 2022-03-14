@@ -21,6 +21,7 @@ func (m *mockTaskS3M) DeleteFileS3(name string) string {
 	return "success"
 }
 
+
 type mockSuccess struct{}
 
 func (m *mockSuccess) Create(DoctorReq entities.Doctor) (entities.Doctor, error) {

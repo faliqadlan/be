@@ -73,7 +73,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			default:
 				err = errors.New("there's some problem is server")
 			}
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err, nil))
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add Doctor", map[string]interface{}{
@@ -142,7 +142,7 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			default:
 				err = errors.New("there's some problem is server")
 			}
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err, nil))
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update Doctor", res.Name))
