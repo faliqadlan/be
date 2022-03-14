@@ -4,9 +4,23 @@ import (
 	"be/entities"
 	"be/repository/doctor"
 	"errors"
-
-	"github.com/aws/aws-sdk-go/aws/session"
+	"mime/multipart"
 )
+
+type mockTaskS3M struct{}
+
+func (m *mockTaskS3M) UploadFileToS3(fileHeader multipart.FileHeader) (string, error) {
+	return "", nil
+}
+
+func (m *mockTaskS3M) UpdateFileS3(name string, fileHeader multipart.FileHeader) string {
+	return "success"
+}
+
+func (m *mockTaskS3M) DeleteFileS3(name string) string {
+	return "success"
+}
+
 
 type mockSuccess struct{}
 
@@ -104,5 +118,3 @@ func (m *MockAuthLib) Login(userName string, password string) (map[string]interf
 		"type": "clinic",
 	}, nil
 }
-
-var sess = session.Must(session.NewSession())

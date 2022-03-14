@@ -1,4 +1,4 @@
-package aws
+package s3
 
 import (
 	"bytes"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -15,28 +14,21 @@ import (
 	"github.com/lithammer/shortuuid"
 )
 
-func InitS3(region, id, secret string) *session.Session {
-	var ses, err = session.NewSession(
-		&aws.Config{
-			Region: aws.String(region),
-			Credentials: credentials.NewStaticCredentials(
-				id, secret, "",
-			),
-		},
-	)
-
-	if err != nil {
-		log.Warn(err)
-		panic(err)
-	}
-	return ses
+type TaskS3 struct {
+	ses *session.Session
 }
 
-func UploadFileToS3(ses *session.Session, fileHeader multipart.FileHeader) (string, error) {
+func New(ses *session.Session) *TaskS3 {
+	return &TaskS3{
+		ses: ses,
+	}
+}
+
+func (t *TaskS3) UploadFileToS3(fileHeader multipart.FileHeader) (string, error) {
 
 	var uid = shortuuid.New()
 
-	var manager = s3manager.NewUploader(ses)
+	var manager = s3manager.NewUploader(t.ses)
 	var src, err = fileHeader.Open()
 	if err != nil {
 		log.Warn(err)
@@ -71,15 +63,31 @@ func UploadFileToS3(ses *session.Session, fileHeader multipart.FileHeader) (stri
 	return url, nil
 }
 
-func DeleteFileS3(ses *session.Session, name string) string {
-	var svc = s3.New(ses)
-	// log.Info(name)
-	var input = &s3.DeleteObjectInput{
-		Bucket: aws.String("karen-givi-bucket"),
-		Key:    aws.String(name),
+func (t *TaskS3) UpdateFileS3(name string, fileHeader multipart.FileHeader) string {
+
+	src, err := fileHeader.Open()
+	if err != nil {
+		log.Info(err)
+		return err.Error()
+	}
+	defer src.Close()
+
+	size := fileHeader.Size
+	buffer := make([]byte, size)
+	src.Read(buffer)
+
+	var svc = s3.New(t.ses)
+
+	var input = &s3.PutObjectInput{
+		Body:         bytes.NewReader(buffer),
+		Bucket:       aws.String("karen-givi-bucket"),
+		Key:          aws.String(name),
+		ACL:          aws.String("public-read-write"),
+		ContentType:  aws.String(http.DetectContentType(buffer)),
+		StorageClass: aws.String("STANDARD"),
 	}
 
-	var res, err = svc.DeleteObject(input)
+	res, err := svc.PutObject(input)
 
 	if err != nil {
 		log.Info(res)
@@ -101,31 +109,15 @@ func DeleteFileS3(ses *session.Session, name string) string {
 	return "success"
 }
 
-func UpdateFileS3(ses *session.Session, name string, fileHeader multipart.FileHeader) string {
-
-	src, err := fileHeader.Open()
-	if err != nil {
-		log.Info(err)
-		return err.Error()
-	}
-	defer src.Close()
-
-	size := fileHeader.Size
-	buffer := make([]byte, size)
-	src.Read(buffer)
-
-	var svc = s3.New(ses)
-
-	var input = &s3.PutObjectInput{
-		Body:         bytes.NewReader(buffer),
-		Bucket:       aws.String("karen-givi-bucket"),
-		Key:          aws.String(name),
-		ACL:          aws.String("public-read-write"),
-		ContentType:  aws.String(http.DetectContentType(buffer)),
-		StorageClass: aws.String("STANDARD"),
+func (t *TaskS3) DeleteFileS3(name string) string {
+	var svc = s3.New(t.ses)
+	// log.Info(name)
+	var input = &s3.DeleteObjectInput{
+		Bucket: aws.String("karen-givi-bucket"),
+		Key:    aws.String(name),
 	}
 
-	res, err := svc.PutObject(input)
+	var res, err = svc.DeleteObject(input)
 
 	if err != nil {
 		log.Info(res)

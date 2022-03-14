@@ -9,16 +9,30 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
 )
+
+type mockTaskS3M struct{}
+
+func (m *mockTaskS3M) UploadFileToS3(fileHeader multipart.FileHeader) (string, error) {
+	return "", nil
+}
+
+func (m *mockTaskS3M) UpdateFileS3(name string, fileHeader multipart.FileHeader) string {
+	return "success"
+}
+
+func (m *mockTaskS3M) DeleteFileS3(name string) string {
+	return "success"
+}
 
 type mockSuccess struct{}
 
@@ -37,7 +51,6 @@ func (m *mockSuccess) Delete(patient_uid string) (entities.Patient, error) {
 func (m *mockSuccess) GetProfile(patient_uid string) (patient.Profile, error) {
 	return patient.Profile{}, nil
 }
-
 
 type mockFail struct{}
 
@@ -66,8 +79,6 @@ func (m *MockAuthLib) Login(userName string, password string) (map[string]interf
 	}, nil
 }
 
-var sess = session.Must(session.NewSession())
-
 func TestCreate(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
@@ -88,7 +99,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, sess)
+		var controller = New(&mockSuccess{},  &mockTaskS3M{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -114,7 +125,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, sess)
+		var controller = New(&mockSuccess{},  &mockTaskS3M{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -139,7 +150,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, sess)
+		var controller = New(&mockSuccess{},  &mockTaskS3M{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -166,7 +177,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockFail{}, sess)
+		var controller = New(&mockFail{},  &mockTaskS3M{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -222,7 +233,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, sess)
+		var controller = New(&mockSuccess{},  &mockTaskS3M{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -250,7 +261,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, sess)
+		var controller = New(&mockSuccess{},  &mockTaskS3M{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -278,7 +289,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockFail{}, sess)
+		var controller = New(&mockFail{},  &mockTaskS3M{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -331,7 +342,7 @@ func TestDelete(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, sess)
+		var controller = New(&mockSuccess{},  &mockTaskS3M{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Delete())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -355,7 +366,7 @@ func TestDelete(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockFail{}, sess)
+		var controller = New(&mockFail{},  &mockTaskS3M{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Delete())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -408,7 +419,7 @@ func TestGetProfile(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, sess)
+		var controller = New(&mockSuccess{},  &mockTaskS3M{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetProfile())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -434,7 +445,7 @@ func TestGetProfile(t *testing.T) {
 		context.QueryParams().Add("patient_uid", "ini_query")
 		// log.Info(context.QueryString())
 
-		var controller = New(&mockSuccess{}, sess)
+		var controller = New(&mockSuccess{},  &mockTaskS3M{})
 		controller.GetProfile()(context)
 
 		var response = ResponseFormat{}
@@ -455,7 +466,7 @@ func TestGetProfile(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockFail{}, sess)
+		var controller = New(&mockFail{},  &mockTaskS3M{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetProfile())(context); err != nil {
 			log.Fatal(err)
 			return

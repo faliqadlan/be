@@ -3,6 +3,7 @@ package main
 import (
 	"be/api"
 	"be/api/aws"
+	"be/api/aws/s3"
 	googleApi "be/api/google"
 	"be/api/google/calendar"
 	"be/configs"
@@ -32,7 +33,7 @@ func main() {
 
 	var googleConf = googleApi.SetupConfig(config.DB_USERNAME, config.CLIENT_ID, config.CLIENT_SECRET)
 
-	// api.CreateTokenJson(config.Access_token, config.Token_type, config.Refresh_token)
+	var awsS3 = s3.New(awsS3Conf)
 
 	var b, token = api.TokenInit(configs.CredentialPath, configs.TokenPath, googleConf)
 
@@ -42,10 +43,10 @@ func main() {
 	var authCont = auth.New(authRepo)
 
 	var doctorRepo = doctorRepo.New(db)
-	var doctorCont = doctor.New(doctorRepo, awsS3Conf)
+	var doctorCont = doctor.New(doctorRepo, awsS3)
 
 	var patientRepo = patientRepo.New(db)
-	var patientCont = patient.New(patientRepo, awsS3Conf)
+	var patientCont = patient.New(patientRepo, awsS3)
 
 	var visitRepo = visitRepo.New(db)
 	var calendar = calendar.New(visitRepo, srv)
