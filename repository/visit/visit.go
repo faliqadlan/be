@@ -143,6 +143,7 @@ func (r *Repo) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (en
 }
 
 func (r *Repo) Update(visit_uid string, req entities.Visit) (entities.Visit, error) {
+	log.Info(req)
 	tx := r.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {

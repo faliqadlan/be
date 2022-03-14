@@ -143,35 +143,7 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		var res3, err3 = r.Update(res2.Visit_uid, entities.Visit{Complaint: "very sick"})
-		assert.Nil(t, err3)
-		assert.NotNil(t, res3)
-		// log.Info(res3)
-	})
-
-	t.Run("success handle update status", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: "doctor2", Email: "doctor@", Password: "doctor"}
-		res, err := doctor.New(db).Create(mock)
-		if err != nil {
-			t.Log()
-			t.Fatal()
-		}
-
-		var mock1 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
-		var res1, err1 = patient.New(db).Create(mock1)
-		if err1 != nil {
-			t.Log()
-			t.Fatal()
-		}
-
-		var mock2 = entities.Visit{Complaint: "sick"}
-		res2, err2 := r.CreateVal(res.Doctor_uid, res1.Patient_uid, mock2)
-		if err2 != nil {
-			t.Log()
-			t.Fatal()
-		}
-
-		var res3, err3 = r.Update(res2.Visit_uid, entities.Visit{Complaint: "very sick", Status: "cancelled"})
+		var res3, err3 = r.Update(res2.Visit_uid, entities.Visit{Status: "cancelled", Complaint: "update complaint", MainDiagnose: "update main diagnose", AdditionDiagnose: "update addition_diagnose", Action: "update action", Recipe: "update recipe", BloodPressure: "update blood_pressure", HeartRate: "update heart_rate", O2Saturate: "update o2_saturate", Weight: 100, Height: 100, Bmi: 100})
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
 		// log.Info(res3)

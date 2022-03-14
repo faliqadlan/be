@@ -65,8 +65,14 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		var req Req
 
 		if err := c.Bind(&req); err != nil {
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error binding for update visit "+err.Error(), nil))
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
 		}
+
+		switch {
+		case req.Date != "":
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "date can't updated, must cancel the appoinment", nil))
+		}
+		log.Info(req)
 		// log.Info(uid)
 		var res, err = cont.r.Update(uid, *req.ToVisit())
 
