@@ -34,8 +34,6 @@ func InitS3(region, id, secret string) *session.Session {
 
 func UploadFileToS3(ses *session.Session, fileHeader multipart.FileHeader) (string, error) {
 
-	
-
 	var uid = shortuuid.New()
 
 	var manager = s3manager.NewUploader(ses)
@@ -75,7 +73,7 @@ func UploadFileToS3(ses *session.Session, fileHeader multipart.FileHeader) (stri
 
 func DeleteFileS3(ses *session.Session, name string) string {
 	var svc = s3.New(ses)
-
+	// log.Info(name)
 	var input = &s3.DeleteObjectInput{
 		Bucket: aws.String("karen-givi-bucket"),
 		Key:    aws.String(name),

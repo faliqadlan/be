@@ -154,15 +154,6 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var uid = middlewares.ExtractTokenUid(c)
 
-		// database
-
-		res, err := cont.r.Delete(uid)
-
-		if err != nil {
-			log.Warn(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's problem in server", nil))
-		}
-
 		// aws s3
 
 		res1, err := cont.r.GetProfile(uid)
@@ -181,6 +172,15 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 			if res != "success" {
 				log.Warn(res)
 			}
+		}
+
+		// database
+
+		res, err := cont.r.Delete(uid)
+
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's problem in server", nil))
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success delete Doctor", res.DeletedAt))
