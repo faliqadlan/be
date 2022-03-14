@@ -18,6 +18,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 type mockTaskS3M struct{}
@@ -66,6 +67,24 @@ func (m *mockSuccess) GetProfile(patient_uid string) (patient.Profile, error) {
 	return patient.Profile{Image: "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/testing"}, nil
 }
 
+type defaultImage struct{}
+
+func (m *defaultImage) Create(patientReq entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, nil
+}
+
+func (m *defaultImage) Update(patient_uid string, req entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, nil
+}
+
+func (m *defaultImage) Delete(patient_uid string) (entities.Patient, error) {
+	return entities.Patient{}, nil
+}
+
+func (m *defaultImage) GetProfile(patient_uid string) (patient.Profile, error) {
+	return patient.Profile{Image: "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png"}, nil
+}
+
 type mockFail struct{}
 
 func (m *mockFail) Create(patientReq entities.Patient) (entities.Patient, error) {
@@ -82,6 +101,42 @@ func (m *mockFail) Delete(patient_uid string) (entities.Patient, error) {
 
 func (m *mockFail) GetProfile(patient_uid string) (patient.Profile, error) {
 	return patient.Profile{}, errors.New("")
+}
+
+type recordNotFound struct{}
+
+func (m *recordNotFound) Create(patientReq entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, gorm.ErrRecordNotFound
+}
+
+func (m *recordNotFound) Update(patient_uid string, req entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, gorm.ErrRecordNotFound
+}
+
+func (m *recordNotFound) Delete(patient_uid string) (entities.Patient, error) {
+	return entities.Patient{}, gorm.ErrRecordNotFound
+}
+
+func (m *recordNotFound) GetProfile(patient_uid string) (patient.Profile, error) {
+	return patient.Profile{}, gorm.ErrRecordNotFound
+}
+
+type userNameCheck struct{}
+
+func (m *userNameCheck) Create(patientReq entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("user name is already exist")
+}
+
+func (m *userNameCheck) Update(patient_uid string, req entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("user name is already exist")
+}
+
+func (m *userNameCheck) Delete(patient_uid string) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("user name is already exist")
+}
+
+func (m *userNameCheck) GetProfile(patient_uid string) (patient.Profile, error) {
+	return patient.Profile{}, errors.New("user name is already exist")
 }
 
 type MockAuthLib struct{}
@@ -331,6 +386,34 @@ func TestCreate(t *testing.T) {
 		// log.Info(response.Message)
 	})
 
+	t.Run("userNameCheck", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": "doctor",
+			"nik":      "123",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&userNameCheck{}, &mockTaskS3M{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
+	})
+
 	t.Run("internal server", func(t *testing.T) {
 		var e = echo.New()
 
@@ -444,13 +527,12 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("succeess upload", func(t *testing.T) {
-
-
-
-
-
+	t.Run("nik", func(t *testing.T) {
 		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"nik": "123",
+		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
 		var res = httptest.NewRecorder()
@@ -471,6 +553,298 @@ func TestUpdate(t *testing.T) {
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
 
 		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("PlaceBirth", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"placeBirth": "malang",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("dob", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"dob": "05-05-2002",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("succeess update file", func(t *testing.T) {
+
+		var reqBody = new(bytes.Buffer)
+
+		var writer = multipart.NewWriter(reqBody)
+
+		part, err := writer.CreateFormFile("file", "photo.jpg")
+		if err != nil {
+			log.Warn(err)
+		}
+		part.Write([]byte(`sample`))
+		writer.Close()
+
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", reqBody)
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 202, response.Code)
+	})
+
+	t.Run("error get link file", func(t *testing.T) {
+
+		var reqBody = new(bytes.Buffer)
+
+		var writer = multipart.NewWriter(reqBody)
+
+		part, err := writer.CreateFormFile("file", "photo.jpg")
+		if err != nil {
+			log.Warn(err)
+		}
+		part.Write([]byte(`sample`))
+		writer.Close()
+
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", reqBody)
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockFail{}, &failTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
+	t.Run("error update file", func(t *testing.T) {
+
+		var reqBody = new(bytes.Buffer)
+
+		var writer = multipart.NewWriter(reqBody)
+
+		part, err := writer.CreateFormFile("file", "photo.jpg")
+		if err != nil {
+			log.Warn(err)
+		}
+		part.Write([]byte(`sample`))
+		writer.Close()
+
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", reqBody)
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &failTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
+	t.Run("succeess upload file", func(t *testing.T) {
+
+		var reqBody = new(bytes.Buffer)
+
+		var writer = multipart.NewWriter(reqBody)
+
+		part, err := writer.CreateFormFile("file", "photo.jpg")
+		if err != nil {
+			log.Warn(err)
+		}
+		part.Write([]byte(`sample`))
+		writer.Close()
+
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", reqBody)
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&defaultImage{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 202, response.Code)
+	})
+
+	t.Run("fail upload file", func(t *testing.T) {
+
+		var reqBody = new(bytes.Buffer)
+
+		var writer = multipart.NewWriter(reqBody)
+
+		part, err := writer.CreateFormFile("file", "photo.jpg")
+		if err != nil {
+			log.Warn(err)
+		}
+		part.Write([]byte(`sample`))
+		writer.Close()
+
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", reqBody)
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&defaultImage{}, &failTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
+	t.Run("recordNotFound", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"name": "123",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&recordNotFound{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
+	t.Run("userNameCheck", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"name": "123",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&userNameCheck{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
 	})
 
 	t.Run("internal server", func(t *testing.T) {
@@ -552,6 +926,55 @@ func TestDelete(t *testing.T) {
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
 
 		assert.Equal(t, 202, response.Code)
+	})
+
+	t.Run("error delete file", func(t *testing.T) {
+
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &failTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Delete())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 202, response.Code)
+	})
+
+	t.Run("recordNotFound", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&recordNotFound{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Delete())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
 	})
 
 	t.Run("internal server", func(t *testing.T) {
@@ -652,6 +1075,30 @@ func TestGetProfile(t *testing.T) {
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
 
 		assert.Equal(t, 200, response.Code)
+	})
+
+	t.Run("recordNotFound", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&recordNotFound{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetProfile())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
 	})
 
 	t.Run("internal server", func(t *testing.T) {

@@ -4,10 +4,8 @@ import (
 	"be/entities"
 	"be/utils"
 	"errors"
-	"time"
 
 	"github.com/lithammer/shortuuid"
-	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -32,7 +30,7 @@ func (r *Repo) Create(req entities.Patient) (entities.Patient, error) {
 	var checkUserName = r.db.Raw("? union all ? ", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", req.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", req.UserName)).Scan(&userNameCheck{})
 
 	if checkUserName.RowsAffected != 0 {
-		return entities.Patient{}, errors.New("user name already exist")
+		return entities.Patient{}, errors.New("user name is already exist")
 	}
 	var uid string
 	for {
@@ -59,15 +57,6 @@ func (r *Repo) Create(req entities.Patient) (entities.Patient, error) {
 
 func (r *Repo) Update(patient_uid string, req entities.Patient) (entities.Patient, error) {
 
-	switch {
-	case req.Nik != "":
-		return entities.Patient{}, errors.New("nik can't update")
-	case req.PlaceBirth != "":
-		return entities.Patient{}, errors.New("place birth can't update")
-	case req.Dob != datatypes.Date(time.Time{}):
-		return entities.Patient{}, errors.New("date of birth can't update")
-	}
-
 	var resInit entities.Patient
 
 	// check username
@@ -79,7 +68,7 @@ func (r *Repo) Update(patient_uid string, req entities.Patient) (entities.Patien
 	var checkUserName = r.db.Raw("? union all ? ", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", req.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", req.UserName)).Scan(&userNameCheck{})
 
 	if checkUserName.RowsAffected != 0 {
-		return entities.Patient{}, errors.New("user name already exist")
+		return entities.Patient{}, errors.New("user name is already exist")
 	}
 
 	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Updates(entities.Patient{
@@ -102,7 +91,7 @@ func (r *Repo) Delete(patient_uid string) (entities.Patient, error) {
 	var resInit entities.Patient
 
 	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Delete(&resInit); res.Error != nil || res.RowsAffected == 0 {
-		return entities.Patient{}, errors.New(gorm.ErrRecordNotFound.Error())
+		return entities.Patient{}, gorm.ErrRecordNotFound
 	}
 
 	return resInit, nil

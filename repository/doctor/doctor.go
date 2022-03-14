@@ -134,7 +134,7 @@ func (r *Repo) Delete(doctor_uid string) (entities.Doctor, error) {
 
 	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Delete(&resInit); res.Error != nil || res.RowsAffected == 0 {
 		log.Warn(res.Error)
-		return entities.Doctor{}, errors.New(gorm.ErrRecordNotFound.Error())
+		return entities.Doctor{}, gorm.ErrRecordNotFound
 	}
 
 	return resInit, nil

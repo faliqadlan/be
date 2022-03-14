@@ -108,16 +108,16 @@ func (cont *Controller) Update() echo.HandlerFunc {
 
 		// aws s3
 
-		res1, err := cont.r.GetProfile(uid)
-		if err != nil {
-			log.Warn(err)
-		}
-
 		file, err := c.FormFile("file")
 		if err != nil {
 			log.Warn(err)
 		}
 		if err == nil {
+			res1, err := cont.r.GetProfile(uid)
+			if err != nil {
+				log.Warn(err)
+				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
+			}
 			if res1.Image != "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png" {
 				var nameFile = res1.Image
 
@@ -151,6 +151,8 @@ func (cont *Controller) Update() echo.HandlerFunc {
 				err = errors.New("user name is already exist")
 			case errors.New("can't update capacity below total pending patients").Error():
 				err = errors.New("can't update capacity below total pending patients")
+			case "record not found":
+				err = errors.New("account is not found")
 			default:
 				err = errors.New("there's some problem is server")
 			}
@@ -190,7 +192,13 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 
 		if err != nil {
 			log.Warn(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's problem in server", nil))
+			switch err.Error() {
+			case "record not found":
+				err = errors.New("account is not found")
+			default:
+				err = errors.New("there's some problem is server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success delete Doctor", res.DeletedAt))
@@ -207,7 +215,13 @@ func (cont *Controller) GetProfile() echo.HandlerFunc {
 
 		if err != nil {
 			log.Warn(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's problem in server", nil))
+			switch err.Error() {
+			case "record not found":
+				err = errors.New("account is not found")
+			default:
+				err = errors.New("there's some problem is server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusOK, templates.Success(nil, "success get profile Doctor", res))

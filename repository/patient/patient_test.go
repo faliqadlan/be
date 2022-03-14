@@ -6,11 +6,9 @@ import (
 	"be/repository/doctor"
 	"be/utils"
 	"testing"
-	"time"
 
 	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/datatypes"
 )
 
 func TestCreate(t *testing.T) {
@@ -71,54 +69,6 @@ func TestUpdate(t *testing.T) {
 		res, err = r.Update(res.Patient_uid, mock1)
 		assert.Nil(t, err)
 		assert.NotNil(t, res)
-		// log.Info(res.ClinicName)
-	})
-
-	t.Run("handle nik", func(t *testing.T) {
-		var mock1 = entities.Patient{UserName: "clinic2", Email: "clinic@", Password: "clinic", Nik: "1"}
-
-		var res, err = r.Create(mock1)
-		if err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		mock1 = entities.Patient{Name: "clinic", Nik: "123"}
-
-		_, err = r.Update(res.Patient_uid, mock1)
-		assert.NotNil(t, err)
-		// log.Info(res.ClinicName)
-	})
-
-	t.Run("handle PlaceBirth", func(t *testing.T) {
-		var mock1 = entities.Patient{UserName: "clinic3", Email: "clinic@", Password: "clinic", Nik: "1"}
-
-		var res, err = r.Create(mock1)
-		if err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		mock1 = entities.Patient{Name: "clinic", PlaceBirth: "234"}
-
-		_, err = r.Update(res.Patient_uid, mock1)
-		assert.NotNil(t, err)
-		// log.Info(res.ClinicName)
-	})
-
-	t.Run("handle date of birth", func(t *testing.T) {
-		var mock1 = entities.Patient{UserName: "clinic4", Email: "clinic@", Password: "clinic", Nik: "1"}
-
-		var res, err = r.Create(mock1)
-		if err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
-
-		mock1 = entities.Patient{Name: "clinic", Dob: datatypes.Date(time.Now())}
-
-		_, err = r.Update(res.Patient_uid, mock1)
-		assert.NotNil(t, err)
 		// log.Info(res.ClinicName)
 	})
 

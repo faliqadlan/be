@@ -18,6 +18,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 type mockTaskS3M struct{}
@@ -134,6 +135,28 @@ func (m *createUserName) GetProfile(doctor_uid string) (doctor.ProfileResp, erro
 
 func (m *createUserName) GetAll() (doctor.All, error) {
 	return doctor.All{}, errors.New("")
+}
+
+type recordNotFound struct{}
+
+func (m *recordNotFound) Create(DoctorReq entities.Doctor) (entities.Doctor, error) {
+	return entities.Doctor{}, gorm.ErrRecordNotFound
+}
+
+func (m *recordNotFound) Update(Doctor_uid string, up entities.Doctor) (entities.Doctor, error) {
+	return entities.Doctor{}, gorm.ErrRecordNotFound
+}
+
+func (m *recordNotFound) Delete(Doctor_uid string) (entities.Doctor, error) {
+	return entities.Doctor{}, gorm.ErrRecordNotFound
+}
+
+func (m *recordNotFound) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
+	return doctor.ProfileResp{}, gorm.ErrRecordNotFound
+}
+
+func (m *recordNotFound) GetAll() (doctor.All, error) {
+	return doctor.All{}, gorm.ErrRecordNotFound
 }
 
 type updateFile struct{}
@@ -544,7 +567,7 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("file", func(t *testing.T) {
+	t.Run("succeess upload", func(t *testing.T) {
 
 		var reqBody = new(bytes.Buffer)
 
@@ -581,6 +604,45 @@ func TestUpdate(t *testing.T) {
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
 
 		assert.Equal(t, 202, response.Code)
+	})
+
+	t.Run("error get image link", func(t *testing.T) {
+
+		var reqBody = new(bytes.Buffer)
+
+		var writer = multipart.NewWriter(reqBody)
+		writer.WriteField("userName", "doctor1")
+		writer.WriteField("email", "doctor")
+		writer.WriteField("password", "doctor")
+
+		part, err := writer.CreateFormFile("file", "photo.jpg")
+		if err != nil {
+			log.Warn(err)
+		}
+		part.Write([]byte(`sample`))
+		writer.Close()
+
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", reqBody)
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockFail{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
 	})
 
 	t.Run("error upload file", func(t *testing.T) {
@@ -784,6 +846,34 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 500, response.Code)
 	})
 
+	t.Run("record not found", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"name": "123",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&recordNotFound{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
 }
 
 func TestDelete(t *testing.T) {
@@ -901,6 +991,30 @@ func TestDelete(t *testing.T) {
 		assert.Equal(t, 500, response.Code)
 	})
 
+	t.Run("record not found", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&recordNotFound{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Delete())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
 }
 
 func TestGetProfile(t *testing.T) {
@@ -966,6 +1080,30 @@ func TestGetProfile(t *testing.T) {
 		context.SetPath("/doctor/profile")
 
 		var controller = New(&mockFail{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetProfile())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
+	t.Run("recordNotFound", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor/profile")
+
+		var controller = New(&recordNotFound{}, &mockTaskS3M{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetProfile())(context); err != nil {
 			log.Fatal(err)
 			return

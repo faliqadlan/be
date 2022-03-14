@@ -76,8 +76,15 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		res, err := cont.r.Create(*req.ToPatient())
 
 		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's some problem is server", nil))
+			log.Warn(err)
+			switch err.Error() {
+			case errors.New("user name is already exist").Error():
+				err = errors.New("user name is already exist")
+			default:
+				err = errors.New("there's some problem is server")
+			}
+
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add patient", res.Name))
@@ -92,21 +99,31 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		// request
 
 		if err := c.Bind(&req); err != nil {
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error binding for update patient "+err.Error(), nil))
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
+		switch {
+		case req.Nik != "":
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, errors.New("nik can't update").Error(), nil))
+		case req.PlaceBirth != "":
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, errors.New("place birth can't update").Error(), nil))
+		case req.Dob != "":
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, errors.New("date of birth can't update").Error(), nil))
 		}
 
 		// aws s3
-
-		res1, err := cont.r.GetProfile(uid)
-		if err != nil {
-			log.Warn(err)
-		}
 
 		file, err := c.FormFile("file")
 		if err != nil {
 			log.Warn(err)
 		}
 		if err == nil {
+			res1, err := cont.r.GetProfile(uid)
+			if err != nil {
+				log.Warn(err)
+				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
+
+			}
 			if res1.Image != "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png" {
 				var nameFile = res1.Image
 
@@ -134,8 +151,16 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		res, err := cont.r.Update(uid, *req.ToPatient())
 
 		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for update patient "+err.Error(), nil))
+			log.Warn(err)
+			switch err.Error() {
+			case errors.New("user name is already exist").Error():
+				err = errors.New("user name is already exist")
+			case "record not found":
+				err = errors.New("account is not found")
+			default:
+				err = errors.New("there's some problem is server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update patient", res.Name))
@@ -170,8 +195,14 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 		res, err := cont.r.Delete(uid)
 
 		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for delete patient "+err.Error(), nil))
+			log.Warn(err)
+			switch err.Error() {
+			case "record not found":
+				err = errors.New("account is not found")
+			default:
+				err = errors.New("there's some problem is server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success delete patient", res.DeletedAt))
@@ -191,8 +222,14 @@ func (cont *Controller) GetProfile() echo.HandlerFunc {
 		var res, err = cont.r.GetProfile(uid)
 
 		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for get profile patient "+err.Error(), nil))
+			log.Warn(err)
+			switch err.Error() {
+			case "record not found":
+				err = errors.New("account is not found")
+			default:
+				err = errors.New("there's some problem is server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusOK, templates.Success(http.StatusOK, "success get profile patient", res))
