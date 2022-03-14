@@ -409,7 +409,7 @@ func TestGetVisitsVer1(t *testing.T) {
 	db.Migrator().DropTable(&entities.Visit{})
 	db.AutoMigrate(&entities.Visit{})
 
-	t.Run("success", func(t *testing.T) {
+	t.Run("case", func(t *testing.T) {
 		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic"}
 
 		var res, err = doctor.New(db).Create(mock1)
@@ -476,47 +476,26 @@ func TestGetVisitsVer1(t *testing.T) {
 			t.Fatal()
 		}
 
-		var res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "pending", "", "")
+		var res3, err3 = r.GetVisitsVer1("", "", "", "", "")
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
 		// log.Info(res3)
 		log.Info(len(res3.Visits))
 
-		res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "ready", "", "")
+		res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "pending", "", "patient")
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
 		// log.Info(res3)
 		log.Info(len(res3.Visits))
 
-		res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "cancelled", "", "")
+		res3, err3 = r.GetVisitsVer1("patient", res2.Patient_uid, "", time.Now().Format(layDate), "doctor")
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
 		// log.Info(res3)
 		log.Info(len(res3.Visits))
 
-		res3, err3 = r.GetVisitsVer1("", res.Doctor_uid, "", "", "")
-		assert.Nil(t, err3)
-		assert.NotNil(t, res3)
-		// log.Info(res3)
-		log.Info(len(res3.Visits))
-
-		res3, err3 = r.GetVisitsVer1("", "", "", time.Now().AddDate(0, 0, 1).Local().Format(layDate), "")
-		assert.Nil(t, err3)
-		assert.NotNil(t, res3)
-		// log.Info(res3)
-		log.Info(len(res3.Visits))
-
-		res3, err3 = r.GetVisitsVer1("", "", "", "", "patient")
-		assert.Nil(t, err3)
-		assert.NotNil(t, res3)
-		// log.Info(res3)
-		log.Info(len(res3.Visits))
-
-		res3, err3 = r.GetVisitsVer1("", "", "", "", "")
-		assert.Nil(t, err3)
-		assert.NotNil(t, res3)
-		// log.Info(res3)
-		log.Info(len(res3.Visits))
+		_, err3 = r.GetVisitsVer1("patient", res2.Patient_uid, "", "date error", "")
+		assert.NotNil(t, err3)
 	})
 
 }
