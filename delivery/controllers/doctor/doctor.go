@@ -40,7 +40,17 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		var v = validator.New()
 		if err := v.Struct(req); err != nil {
 			log.Warn(err)
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input ", nil))
+			switch {
+			case strings.Contains(err.Error(), "UserName"):
+				err = errors.New("invalid userName")
+			case strings.Contains(err.Error(), "Email"):
+				err = errors.New("invalid email")
+			case strings.Contains(err.Error(), "Password"):
+				err = errors.New("invalid password")
+			default:
+				err = errors.New("invalid input")
+			}
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
 		// aws s3
@@ -65,8 +75,10 @@ func (cont *Controller) Create() echo.HandlerFunc {
 
 		if err != nil {
 			log.Warn(err)
+			// log.Info(err.Error() == errors.New("can't assign capacity below zero").Error())
 			switch err.Error() {
 			case errors.New("can't assign capacity below zero").Error():
+
 				err = errors.New("can't assign capacity below zero")
 			case errors.New("user name is already exist").Error():
 				err = errors.New("user name is already exist")

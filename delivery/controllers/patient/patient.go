@@ -33,12 +33,26 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		// request
 
 		if err := c.Bind(&req); err != nil {
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error binding for add patient "+err.Error(), nil))
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
 		}
 
 		var v = validator.New()
 		if err := v.Struct(req); err != nil {
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error validator for add patient "+err.(validator.ValidationErrors).Error(), nil))
+			log.Warn(err)
+			switch {
+			case strings.Contains(err.Error(), "UserName"):
+				err = errors.New("invalid userName")
+			case strings.Contains(err.Error(), "Email"):
+				err = errors.New("invalid email")
+			case strings.Contains(err.Error(), "Password"):
+				err = errors.New("invalid password")
+			case strings.Contains(err.Error(), "Nik"):
+				err = errors.New("invalid nik")
+			default:
+				err = errors.New("invalid input")
+			}
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
 		// aws s3
@@ -51,7 +65,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			link, err := cont.taskS3.UploadFileToS3(*file)
 			if err != nil {
 				log.Warn(err)
-				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
+				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's some problem is server", nil))
 			}
 
 			req.Image = link
@@ -63,7 +77,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 
 		if err != nil {
 			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for add patient "+err.Error(), nil))
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's some problem is server", nil))
 		}
 
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add patient", res.Name))

@@ -6,9 +6,11 @@ import (
 	"be/repository/doctor"
 	"be/utils"
 	"testing"
+	"time"
 
 	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/datatypes"
 )
 
 func TestCreate(t *testing.T) {
@@ -72,6 +74,54 @@ func TestUpdate(t *testing.T) {
 		// log.Info(res.ClinicName)
 	})
 
+	t.Run("handle nik", func(t *testing.T) {
+		var mock1 = entities.Patient{UserName: "clinic2", Email: "clinic@", Password: "clinic", Nik: "1"}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Patient{Name: "clinic", Nik: "123"}
+
+		_, err = r.Update(res.Patient_uid, mock1)
+		assert.NotNil(t, err)
+		// log.Info(res.ClinicName)
+	})
+
+	t.Run("handle PlaceBirth", func(t *testing.T) {
+		var mock1 = entities.Patient{UserName: "clinic3", Email: "clinic@", Password: "clinic", Nik: "1"}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Patient{Name: "clinic", PlaceBirth: "234"}
+
+		_, err = r.Update(res.Patient_uid, mock1)
+		assert.NotNil(t, err)
+		// log.Info(res.ClinicName)
+	})
+
+	t.Run("handle date of birth", func(t *testing.T) {
+		var mock1 = entities.Patient{UserName: "clinic4", Email: "clinic@", Password: "clinic", Nik: "1"}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Patient{Name: "clinic", Dob: datatypes.Date(time.Now())}
+
+		_, err = r.Update(res.Patient_uid, mock1)
+		assert.NotNil(t, err)
+		// log.Info(res.ClinicName)
+	})
+
 	t.Run("success handle username", func(t *testing.T) {
 		var mock = entities.Doctor{UserName: "patient2", Email: "patient@", Password: "patient"}
 
@@ -80,7 +130,7 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		var mock1 = entities.Patient{UserName: "clinic2", Email: "clinic@", Password: "clinic", Nik: "1"}
+		var mock1 = entities.Patient{UserName: "clinic5", Email: "clinic@", Password: "clinic", Nik: "1"}
 
 		var res, err = r.Create(mock1)
 		if err != nil {
@@ -96,7 +146,7 @@ func TestUpdate(t *testing.T) {
 	})
 
 	t.Run("error input uid", func(t *testing.T) {
-		var mock1 = entities.Patient{UserName: "clinic3", Email: "clinic@", Password: "clinic", Nik: "1"}
+		var mock1 = entities.Patient{UserName: "clinic7", Email: "clinic@", Password: "clinic", Nik: "1"}
 
 		var _, err = r.Create(mock1)
 		if err != nil {
@@ -175,6 +225,20 @@ func TestGetProfile(t *testing.T) {
 		var res1, err1 = r.GetProfile(res.Patient_uid)
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
+		// log.Info(res1)
+	})
+
+	t.Run("error input uit", func(t *testing.T) {
+		var mock1 = entities.Patient{UserName: "clinic2", Email: "clinic@", Password: "clinic", Nik: "1"}
+
+		var _, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		var _, err1 = r.GetProfile("")
+		assert.NotNil(t, err1)
 		// log.Info(res1)
 	})
 }
