@@ -12,7 +12,6 @@ be/delivery/controllers/auth/auth.go:38.30,39.43 1 1
 be/delivery/controllers/auth/auth.go:40.28,41.45 1 1
 be/delivery/controllers/auth/auth.go:42.12,43.55 1 1
 be/delivery/controllers/auth/auth.go:52.17,56.4 3 1
-be/delivery/controllers/doctor/formatter.go:18.43,32.2 1 1
 be/delivery/controllers/doctor/doctor.go:22.58,27.2 1 1
 be/delivery/controllers/doctor/doctor.go:29.51,30.36 1 1
 be/delivery/controllers/doctor/doctor.go:30.36,35.38 2 1
@@ -82,6 +81,7 @@ be/delivery/controllers/doctor/doctor.go:231.51,232.36 1 1
 be/delivery/controllers/doctor/doctor.go:232.36,238.17 2 1
 be/delivery/controllers/doctor/doctor.go:243.3,243.96 1 1
 be/delivery/controllers/doctor/doctor.go:238.17,241.4 2 1
+be/delivery/controllers/doctor/formatter.go:18.43,32.2 1 1
 be/delivery/controllers/patient/formatter.go:26.45,47.2 3 1
 be/delivery/controllers/patient/patient.go:22.60,27.2 1 1
 be/delivery/controllers/patient/patient.go:29.51,30.36 1 1
@@ -349,15 +349,15 @@ be/repository/visit/visit.go:297.2,297.17 1 1
 be/repository/visit/visit.go:306.2,309.833 3 1
 be/repository/visit/visit.go:315.2,315.20 1 1
 be/repository/visit/visit.go:269.10,270.48 1 1
-be/repository/visit/visit.go:271.17,272.40 1 0
+be/repository/visit/visit.go:271.17,272.40 1 1
 be/repository/visit/visit.go:273.16,274.45 1 1
 be/repository/visit/visit.go:279.10,280.53 1 1
 be/repository/visit/visit.go:281.10,282.50 1 1
 be/repository/visit/visit.go:286.10,287.55 1 1
 be/repository/visit/visit.go:288.10,291.17 3 1
 be/repository/visit/visit.go:294.3,294.81 1 1
-be/repository/visit/visit.go:291.17,293.4 1 0
+be/repository/visit/visit.go:291.17,293.4 1 1
 be/repository/visit/visit.go:298.10,299.17 1 1
 be/repository/visit/visit.go:300.17,301.27 1 1
-be/repository/visit/visit.go:302.16,303.33 1 0
+be/repository/visit/visit.go:302.16,303.33 1 1
 be/repository/visit/visit.go:309.833,313.3 3 0

@@ -100,7 +100,7 @@ func (r *Repo) Delete(patient_uid string) (entities.Patient, error) {
 func (r *Repo) GetProfile(patient_uid string) (Profile, error) {
 	var profileResp Profile
 
-	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
+	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Select("patient_uid as Patient_uid, nik as Nik, name as Name, image as Image, gender as Gender, address as Address, place_birth as PlaceBirth, date_format(dob, '%d-%m-%Y') as Dob, religion as Religion, status as Status, job as Job").Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
 		return Profile{}, gorm.ErrRecordNotFound
 	}
 
