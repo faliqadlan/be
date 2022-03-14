@@ -37,8 +37,6 @@ func (ac *AuthController) Login() echo.HandlerFunc {
 			switch err.Error() {
 			case "incorrect password":
 				err = errors.New("incorrect password")
-			case "account is deleted":
-				err = errors.New("account is deleted")
 			case "record not found":
 				err = errors.New("account is not found")
 			default:
