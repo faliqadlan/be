@@ -1,10 +1,10 @@
 package doctor
 
 import (
+	utils "be/api/aws"
 	"be/delivery/controllers/templates"
 	"be/delivery/middlewares"
 	"be/repository/doctor"
-	"be/utils"
 	"errors"
 	"net/http"
 	"strings"
@@ -51,7 +51,11 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			log.Warn(err)
 		}
 		if err == nil {
-			var link = utils.UploadFileToS3(cont.conf, *file)
+			link, err := utils.UploadFileToS3(cont.conf, *file)
+			if err != nil {
+				log.Warn(err)
+				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
+			}
 
 			req.Image = link
 		}
@@ -110,8 +114,16 @@ func (cont *Controller) Update() echo.HandlerFunc {
 
 				var res = utils.UpdateFileS3(cont.conf, nameFile, *file)
 				log.Info(res)
+				if res != "success" {
+					log.Warn(res)
+					return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
+				}
 			} else {
-				var link = utils.UploadFileToS3(cont.conf, *file)
+				var link, err = utils.UploadFileToS3(cont.conf, *file)
+				if err != nil {
+					log.Warn(err)
+					return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
+				}
 
 				req.Image = link
 			}
@@ -142,6 +154,15 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var uid = middlewares.ExtractTokenUid(c)
 
+		// database
+
+		res, err := cont.r.Delete(uid)
+
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's problem in server", nil))
+		}
+
 		// aws s3
 
 		res1, err := cont.r.GetProfile(uid)
@@ -157,15 +178,9 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 			log.Info(cont.conf)
 			res := utils.DeleteFileS3(cont.conf, nameFile)
 			log.Info(res)
-		}
-
-		// database
-
-		res, err := cont.r.Delete(uid)
-
-		if err != nil {
-			log.Warn(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's problem in server", nil))
+			if res != "success" {
+				log.Warn(res)
+			}
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success delete Doctor", res.DeletedAt))

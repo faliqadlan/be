@@ -2,6 +2,7 @@ package main
 
 import (
 	"be/api"
+	"be/api/aws"
 	googleApi "be/api/google"
 	"be/api/google/calendar"
 	"be/configs"
@@ -25,7 +26,7 @@ import (
 func main() {
 	var config = configs.GetConfig()
 	var db = utils.InitDB(config)
-	var awsS3Conf = utils.InitS3(config.S3_REGION, config.S3_ID, config.S3_SECRET)
+	var awsS3Conf = aws.InitS3(config.S3_REGION, config.S3_ID, config.S3_SECRET)
 
 	api.CreteCredentialJson(config.CLIENT_ID, config.PROJECT_ID, config.AUTH_URI, config.TOKEN_URI, config.Auth_provider_x509_cert_url, config.CLIENT_SECRET)
 

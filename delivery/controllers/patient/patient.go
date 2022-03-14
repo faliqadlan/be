@@ -1,10 +1,11 @@
 package patient
 
 import (
+	utils "be/api/aws"
 	"be/delivery/controllers/templates"
 	"be/delivery/middlewares"
 	"be/repository/patient"
-	"be/utils"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -43,19 +44,23 @@ func (cont *Controller) Create() echo.HandlerFunc {
 
 		// aws s3
 
-		var file, err1 = c.FormFile("file")
-		if err1 != nil {
-			log.Info(err1)
+		file, err := c.FormFile("file")
+		if err != nil {
+			log.Warn(err)
 		}
-		if err1 == nil {
-			var link = utils.UploadFileToS3(cont.conf, *file)
+		if err == nil {
+			link, err := utils.UploadFileToS3(cont.conf, *file)
+			if err != nil {
+				log.Warn(err)
+				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
+			}
 
 			req.Image = link
 		}
 
 		// database
 
-		var res, err = cont.r.Create(*req.ToPatient())
+		res, err := cont.r.Create(*req.ToPatient())
 
 		if err != nil {
 			// log.Info(err)
@@ -79,28 +84,33 @@ func (cont *Controller) Update() echo.HandlerFunc {
 
 		// aws s3
 
-		var res1, err1 = cont.r.GetProfile(uid)
-		if err1 != nil {
-			log.Error(err1)
+		res1, err := cont.r.GetProfile(uid)
+		if err != nil {
+			log.Warn(err)
 		}
 
-		var file, err2 = c.FormFile("file")
-		if err2 != nil {
-			log.Info(err1)
+		file, err := c.FormFile("file")
+		if err != nil {
+			log.Warn(err)
 		}
-
-		if err2 == nil {
+		if err == nil {
 			if res1.Image != "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png" {
 				var nameFile = res1.Image
 
 				nameFile = strings.Replace(nameFile, "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/", "", -1)
 
 				var res = utils.UpdateFileS3(cont.conf, nameFile, *file)
+				log.Info(res)
 				if res != "success" {
-					return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for update Doctor "+res, nil))
+					log.Warn(res)
+					return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
 				}
 			} else {
-				var link = utils.UploadFileToS3(cont.conf, *file)
+				var link, err = utils.UploadFileToS3(cont.conf, *file)
+				if err != nil {
+					log.Warn(err)
+					return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
+				}
 
 				req.Image = link
 			}
@@ -108,7 +118,7 @@ func (cont *Controller) Update() echo.HandlerFunc {
 
 		// database
 
-		var res, err = cont.r.Update(uid, *req.ToPatient())
+		res, err := cont.r.Update(uid, *req.ToPatient())
 
 		if err != nil {
 			// log.Info(err)
@@ -123,25 +133,6 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var uid = middlewares.ExtractTokenUid(c)
 
-		// aws s3
-
-		var res1, err1 = cont.r.GetProfile(uid)
-		if err1 != nil {
-			log.Error(err1)
-		}
-
-		if res1.Image != "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png" {
-
-			var nameFile = res1.Image
-
-			nameFile = strings.Replace(nameFile, "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/", "", -1)
-
-			res := utils.DeleteFileS3(cont.conf, nameFile)
-
-			log.Info(res)
-
-		}
-
 		// database
 
 		var res, err = cont.r.Delete(uid)
@@ -149,6 +140,26 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 		if err != nil {
 			// log.Info(err)
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for delete patient "+err.Error(), nil))
+		}
+
+		// aws s3
+
+		res1, err := cont.r.GetProfile(uid)
+		if err != nil {
+			log.Error(err)
+		}
+
+		if res1.Image != "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png" {
+
+			var nameFile = res1.Image
+
+			nameFile = strings.Replace(nameFile, "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/", "", -1)
+			log.Info(cont.conf)
+			res := utils.DeleteFileS3(cont.conf, nameFile)
+			log.Info(res)
+			if res != "success" {
+				log.Warn(res)
+			}
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success delete patient", res.DeletedAt))

@@ -1,4 +1,4 @@
-package utils
+package aws
 
 import (
 	"bytes"
@@ -26,19 +26,23 @@ func InitS3(region, id, secret string) *session.Session {
 	)
 
 	if err != nil {
-		log.Error(err)
+		log.Warn(err)
+		panic(err)
 	}
 	return ses
 }
 
-func UploadFileToS3(ses *session.Session, fileHeader multipart.FileHeader) string {
+func UploadFileToS3(ses *session.Session, fileHeader multipart.FileHeader) (string, error) {
+
+	
 
 	var uid = shortuuid.New()
 
 	var manager = s3manager.NewUploader(ses)
 	var src, err = fileHeader.Open()
 	if err != nil {
-		log.Info(err)
+		log.Warn(err)
+		return src.Close().Error(), err
 	}
 	defer src.Close()
 
@@ -46,25 +50,27 @@ func UploadFileToS3(ses *session.Session, fileHeader multipart.FileHeader) strin
 	buffer := make([]byte, size)
 	src.Read(buffer)
 
-	var res, err1 = manager.Upload(
-		&s3manager.UploadInput{
-			Bucket:       aws.String("karen-givi-bucket"),
-			Key:          aws.String(uid),
-			ACL:          aws.String("public-read-write"),
-			Body:         bytes.NewReader(buffer),
-			ContentType:  aws.String(http.DetectContentType(buffer)),
-			StorageClass: aws.String("STANDARD"),
-		},
-	)
+	var input = &s3manager.UploadInput{
+		Bucket:       aws.String("karen-givi-bucket"),
+		Key:          aws.String(uid),
+		ACL:          aws.String("public-read-write"),
+		Body:         bytes.NewReader(buffer),
+		ContentType:  aws.String(http.DetectContentType(buffer)),
+		StorageClass: aws.String("STANDARD"),
+	}
 
-	if err1 != nil {
+	res, err := manager.Upload(input)
+
+	if err != nil {
 		log.Info(res)
-		log.Error(err1)
+		log.Error(err)
+		return "there's some error", err
+
 	}
 
 	var url = "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/" + uid
 
-	return url
+	return url, nil
 }
 
 func DeleteFileS3(ses *session.Session, name string) string {
@@ -79,6 +85,7 @@ func DeleteFileS3(ses *session.Session, name string) string {
 
 	if err != nil {
 		log.Info(res)
+		log.Warn(err)
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			default:
@@ -124,6 +131,7 @@ func UpdateFileS3(ses *session.Session, name string, fileHeader multipart.FileHe
 
 	if err != nil {
 		log.Info(res)
+		log.Warn(err)
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			default:
