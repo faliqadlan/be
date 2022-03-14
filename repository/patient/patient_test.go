@@ -175,7 +175,7 @@ func TestGetProfile(t *testing.T) {
 		var res1, err1 = r.GetProfile(res.Patient_uid)
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
-		log.Info(res1.Dob)
+		// log.Info(res1.Dob)
 	})
 
 	t.Run("error input uit", func(t *testing.T) {

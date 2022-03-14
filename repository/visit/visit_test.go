@@ -479,6 +479,7 @@ func TestGetVisitsVer1(t *testing.T) {
 		var res3, err3 = r.GetVisitsVer1("", "", "", "", "")
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
+		// log.Info(res3.Visits[0].RespiratoryRate)
 		// log.Info(res3)
 		log.Info(len(res3.Visits))
 
@@ -491,7 +492,7 @@ func TestGetVisitsVer1(t *testing.T) {
 		res3, err3 = r.GetVisitsVer1("patient", res2.Patient_uid, "", time.Now().Format(layDate), "doctor")
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
-		// log.Info(res3)
+
 		log.Info(len(res3.Visits))
 
 		_, err3 = r.GetVisitsVer1("patient", res2.Patient_uid, "", "date error", "")

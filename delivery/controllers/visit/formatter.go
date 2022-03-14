@@ -19,6 +19,7 @@ type Req struct {
 	Recipe           string `json:"recipe" form:"recipe"`
 	BloodPressure    string `json:"bloodPressuse" form:"bloodPressuse"`
 	HeartRate        string `json:"heartRate" form:"heartRate"`
+	RespiratoryRate  string `json:"respiratoryRate" form:"respiratoryRate"`
 	O2Saturate       string `json:"o2Saturate" form:"o2Saturate"`
 	Weight           int    `json:"weight" form:"weight"`
 	Height           int    `json:"height" form:"height"`
@@ -40,6 +41,7 @@ func (r *Req) ToVisit() *entities.Visit {
 		Recipe:           r.Recipe,
 		BloodPressure:    r.BloodPressure,
 		HeartRate:        r.HeartRate,
+		RespiratoryRate:  r.RespiratoryRate,
 		O2Saturate:       r.O2Saturate,
 		Weight:           r.Weight,
 		Height:           r.Height,

@@ -11,6 +11,7 @@ type VisitResp struct {
 	Recipe           string `json:"recipe" form:"recipe"`
 	BloodPressure    string `json:"bloodPressuse" form:"bloodPressuse"`
 	HeartRate        string `json:"heartRate" form:"heartRate"`
+	RespiratoryRate  string `json:"respiratoryRate" form:"respiratoryRate"`
 	O2Saturate       string `json:"o2Saturate" form:"o2Saturate"`
 	Weight           string `json:"weight" form:"weight"`
 	Height           string `json:"height" form:"height"`

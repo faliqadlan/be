@@ -24,6 +24,7 @@ type Visit struct {
 	Recipe           string
 	BloodPressure    string
 	HeartRate        string
+	RespiratoryRate  string
 	O2Saturate       string
 	Weight           int
 	Height           int
