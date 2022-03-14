@@ -4,9 +4,22 @@ import (
 	"be/entities"
 	"be/repository/doctor"
 	"errors"
-
-	"github.com/aws/aws-sdk-go/aws/session"
+	"mime/multipart"
 )
+
+type mockTaskS3M struct{}
+
+func (m *mockTaskS3M) UploadFileToS3(fileHeader multipart.FileHeader) (string, error) {
+	return "", nil
+}
+
+func (m *mockTaskS3M) UpdateFileS3(name string, fileHeader multipart.FileHeader) string {
+	return "success"
+}
+
+func (m *mockTaskS3M) DeleteFileS3(name string) string {
+	return "success"
+}
 
 type mockSuccess struct{}
 
@@ -27,28 +40,6 @@ func (m *mockSuccess) GetProfile(doctor_uid string) (doctor.ProfileResp, error) 
 }
 
 func (m *mockSuccess) GetAll() (doctor.All, error) {
-	return doctor.All{}, nil
-}
-
-type upload struct{}
-
-func (m *upload) Create(DoctorReq entities.Doctor) (entities.Doctor, error) {
-	return entities.Doctor{}, nil
-}
-
-func (m *upload) Update(Doctor_uid string, up entities.Doctor) (entities.Doctor, error) {
-	return entities.Doctor{}, nil
-}
-
-func (m *upload) Delete(Doctor_uid string) (entities.Doctor, error) {
-	return entities.Doctor{}, nil
-}
-
-func (m *upload) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
-	return doctor.ProfileResp{Image: "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png"}, nil
-}
-
-func (m *upload) GetAll() (doctor.All, error) {
 	return doctor.All{}, nil
 }
 
@@ -126,5 +117,3 @@ func (m *MockAuthLib) Login(userName string, password string) (map[string]interf
 		"type": "clinic",
 	}, nil
 }
-
-var sess = session.Must(session.NewSession())

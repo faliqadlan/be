@@ -1,7 +1,7 @@
 package patient
 
 import (
-	utils "be/api/aws"
+	"be/api/aws/s3"
 	"be/delivery/controllers/templates"
 	"be/delivery/middlewares"
 	"be/repository/patient"
@@ -9,21 +9,20 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
 
 type Controller struct {
-	r    patient.Patient
-	conf *session.Session
+	r      patient.Patient
+	taskS3 s3.TaskS3M
 }
 
-func New(r patient.Patient, awsS3 *session.Session) *Controller {
+func New(r patient.Patient, taskS3 s3.TaskS3M) *Controller {
 	return &Controller{
-		r:    r,
-		conf: awsS3,
+		r:      r,
+		taskS3: taskS3,
 	}
 }
 
@@ -49,7 +48,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			log.Warn(err)
 		}
 		if err == nil {
-			link, err := utils.UploadFileToS3(cont.conf, *file)
+			link, err := cont.taskS3.UploadFileToS3(*file)
 			if err != nil {
 				log.Warn(err)
 				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
@@ -99,14 +98,14 @@ func (cont *Controller) Update() echo.HandlerFunc {
 
 				nameFile = strings.Replace(nameFile, "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/", "", -1)
 
-				var res = utils.UpdateFileS3(cont.conf, nameFile, *file)
+				var res = cont.taskS3.UpdateFileS3(nameFile, *file)
 				log.Info(res)
 				if res != "success" {
 					log.Warn(res)
 					return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
 				}
 			} else {
-				var link, err = utils.UploadFileToS3(cont.conf, *file)
+				var link, err = cont.taskS3.UploadFileToS3(*file)
 				if err != nil {
 					log.Warn(err)
 					return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
@@ -145,8 +144,7 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 			var nameFile = res1.Image
 
 			nameFile = strings.Replace(nameFile, "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/", "", -1)
-			log.Info(cont.conf)
-			res := utils.DeleteFileS3(cont.conf, nameFile)
+			res := cont.taskS3.DeleteFileS3(nameFile)
 			log.Info(res)
 			if res != "success" {
 				log.Warn(res)
