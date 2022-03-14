@@ -12,7 +12,7 @@ type Req struct {
 	Patient_uid      string `json:"patient_uid" form:"patient_uid"`
 	Date             string `json:"date" form:"date" validate:"required"`
 	Status           string `json:"status" form:"status"`
-	Complaint        string `json:"complaint" form:"complaint"`
+	Complaint        string `json:"complaint" form:"complaint"  validate:"required"`
 	MainDiagnose     string `json:"mainDiagnose" form:"mainDiagnose"`
 	AdditionDiagnose string `json:"additionDiagnose" form:"additionDiagnose"`
 	Action           string `json:"action" form:"action"`

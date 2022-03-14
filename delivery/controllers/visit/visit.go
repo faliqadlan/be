@@ -5,7 +5,9 @@ import (
 	"be/delivery/controllers/templates"
 	"be/delivery/middlewares"
 	"be/repository/visit"
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -30,32 +32,50 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		var req Req
 
 		if err := c.Bind(&req); err != nil {
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error binding for add visit "+err.Error(), nil))
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
 		}
 
 		var v = validator.New()
 		if err := v.Struct(req); err != nil {
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error validator for add visit "+err.(validator.ValidationErrors).Error(), nil))
+			log.Warn(err)
+			switch {
+			case strings.Contains(err.Error(), "Date"):
+				err = errors.New("invalid date")
+			case strings.Contains(err.Error(), "Doctor_uid"):
+				err = errors.New("invalid doctor_uid")
+			case strings.Contains(err.Error(), "Complaint"):
+				err = errors.New("invalid complaint")
+			default:
+				err = errors.New("invalid input")
+			}
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 		res, err := cont.r.CreateVal(req.Doctor_uid, uid, *req.ToVisit())
 
 		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for add visit "+err.Error(), nil))
+			log.Warn(err)
+			switch err.Error() {
+			case errors.New("there's another appoinment in pending").Error():
+				err = errors.New("there's another appoinment in pending")
+			default:
+				err = errors.New("there's problem in server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		res1, err := cont.cal.CreateEvent(res.Visit_uid)
 		if err != nil {
 			log.Warn(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, nil, nil))
+			return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
 		}
 		err = cont.cal.InsertEvent(res1)
 		if err != nil {
 			log.Warn(err)
-			return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit but error in added to google calendar", nil))
+			return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
 		}
 
-		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add visit and added to google calendar", res.Complaint))
+		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add visit and attach to google calendar", res1.HtmlLink))
 	}
 }
 
@@ -72,13 +92,18 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		case req.Date != "":
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "date can't updated, must cancel the appoinment", nil))
 		}
-		log.Info(req)
 		// log.Info(uid)
 		var res, err = cont.r.Update(uid, *req.ToVisit())
 
 		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for update visit "+err.Error(), nil))
+			log.Warn(err)
+			switch err.Error() {
+			case errors.New("record not found").Error():
+				err = errors.New("account is not found")
+			default:
+				err = errors.New("there's problem in server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update visit", res.Complaint))
@@ -92,8 +117,14 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 		var res, err = cont.r.Delete(uid)
 
 		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for delete visit "+err.Error(), nil))
+			log.Warn(err)
+			switch err.Error() {
+			case errors.New("record not found").Error():
+				err = errors.New("account is not found")
+			default:
+				err = errors.New("there's problem in server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success delete visit", res.DeletedAt))
@@ -113,8 +144,12 @@ func (cont *Controller) GetVisits() echo.HandlerFunc {
 		var res, err = cont.r.GetVisitsVer1(kind, uid, status, date, grouped)
 
 		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for get list visit "+err.Error(), nil))
+			log.Warn(err)
+			switch err.Error() {
+			default:
+				err = errors.New("there's problem in server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusOK, templates.Success(http.StatusOK, "success get list visit", res))

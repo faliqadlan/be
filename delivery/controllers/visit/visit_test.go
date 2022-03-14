@@ -18,6 +18,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/calendar/v3"
+	"gorm.io/gorm"
 )
 
 type mockSuccess struct{}
@@ -64,6 +65,28 @@ func (m *mockFail) GetVisitList(visit_uid string) (visit.VisitCalendar, error) {
 	return visit.VisitCalendar{}, errors.New("")
 }
 
+type spesificError struct{}
+
+func (m *spesificError) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (entities.Visit, error) {
+	return entities.Visit{}, errors.New("there's another appoinment in pending")
+}
+
+func (m *spesificError) Update(visit_uid string, req entities.Visit) (entities.Visit, error) {
+	return entities.Visit{}, gorm.ErrRecordNotFound
+}
+
+func (m *spesificError) Delete(visit_uid string) (entities.Visit, error) {
+	return entities.Visit{}, gorm.ErrRecordNotFound
+}
+
+func (m *spesificError) GetVisitsVer1(kind, uid, status, date, grouped string) (visit.Visits, error) {
+	return visit.Visits{}, gorm.ErrRecordNotFound
+}
+
+func (m *spesificError) GetVisitList(visit_uid string) (visit.VisitCalendar, error) {
+	return visit.VisitCalendar{}, gorm.ErrRecordNotFound
+}
+
 type MockAuthLib struct{}
 
 func (m *MockAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
@@ -81,6 +104,26 @@ func (m *MockCal) CreateEvent(visit_uid string) (*calendar.Event, error) {
 
 func (m *MockCal) InsertEvent(event *calendar.Event) error {
 	return nil
+}
+
+type errorCreateEvent struct{}
+
+func (m *errorCreateEvent) CreateEvent(visit_uid string) (*calendar.Event, error) {
+	return &calendar.Event{}, errors.New("")
+}
+
+func (m *errorCreateEvent) InsertEvent(event *calendar.Event) error {
+	return errors.New("")
+}
+
+type errorInsertEvent struct{}
+
+func (m *errorInsertEvent) CreateEvent(visit_uid string) (*calendar.Event, error) {
+	return &calendar.Event{}, nil
+}
+
+func (m *errorInsertEvent) InsertEvent(event *calendar.Event) error {
+	return errors.New("")
 }
 
 func TestCreate(t *testing.T) {
@@ -115,9 +158,9 @@ func TestCreate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"doctor_uid":  "doctor",
-			"patient_uid": "patient",
-			"date":        "05-05-2022",
+			"doctor_uid": "doctor",
+			"date":       "05-05-2022",
+			"complaint":  "sick",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -170,13 +213,13 @@ func TestCreate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("validator", func(t *testing.T) {
+	t.Run("validator doctor_uid", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"doctor_uid":  "",
-			"patient_uid": "patient",
-			"date":        "05-05-2022",
+			"doctor_uid": "",
+			"date":       "05-05-2022",
+			"complaint":  "complaint",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -200,6 +243,98 @@ func TestCreate(t *testing.T) {
 		// log.Info(response.Message)
 	})
 
+	t.Run("validator date", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"doctor_uid": "doctor_uid",
+			"date":       "",
+			"complaint":  "complaint",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &MockCal{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("validator complaint", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"doctor_uid": "doctor_uid",
+			"date":       "05-05-2000",
+			"complaint":  "",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &MockCal{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("there's another appoinment", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"doctor_uid":  "doctor",
+			"patient_uid": "patient",
+			"date":        "05-05-2022",
+			"complaint":   "sick",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&spesificError{}, &MockCal{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
+	})
+
 	t.Run("internal server", func(t *testing.T) {
 		var e = echo.New()
 
@@ -207,6 +342,7 @@ func TestCreate(t *testing.T) {
 			"doctor_uid":  "doctor",
 			"patient_uid": "patient",
 			"date":        "05-05-2022",
+			"complaint":   "sick",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -228,6 +364,70 @@ func TestCreate(t *testing.T) {
 
 		// log.Info(response)
 		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("error create event", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"doctor_uid":  "doctor",
+			"patient_uid": "patient",
+			"date":        "05-05-2022",
+			"complaint":   "sick",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &errorCreateEvent{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 200, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("error Insert event", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"doctor_uid":  "doctor",
+			"patient_uid": "patient",
+			"date":        "05-05-2022",
+			"complaint":   "sick",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &errorInsertEvent{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 200, response.Code)
 		// log.Info(response.Message)
 	})
 
@@ -286,6 +486,54 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
+	t.Run("binding", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"date": "05-05-2002",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &MockCal{})
+		controller.Update()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("recordNotFound", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"complaint": "sick",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&spesificError{}, &MockCal{})
+		controller.Update()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
+	})
+
 	t.Run("internal server", func(t *testing.T) {
 		var e = echo.New()
 
@@ -337,6 +585,27 @@ func TestDelete(t *testing.T) {
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
 		// log.Info(response)
 		assert.Equal(t, 202, response.Code)
+	})
+
+	t.Run("recordNotFound", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&spesificError{}, &MockCal{})
+		controller.Delete()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
 	})
 
 	t.Run("internal server", func(t *testing.T) {
