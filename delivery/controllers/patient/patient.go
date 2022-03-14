@@ -30,6 +30,8 @@ func (cont *Controller) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var req Req
 
+		// request
+
 		if err := c.Bind(&req); err != nil {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error binding for add patient "+err.Error(), nil))
 		}
@@ -39,12 +41,8 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error validator for add patient "+err.(validator.ValidationErrors).Error(), nil))
 		}
 
-		var res, err = cont.r.Create(*req.ToPatient())
+		// aws s3
 
-		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for add patient "+err.Error(), nil))
-		}
 		var file, err1 = c.FormFile("file")
 		if err1 != nil {
 			log.Info(err1)
@@ -53,6 +51,15 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			var link = utils.UploadFileToS3(cont.conf, *file)
 
 			req.Image = link
+		}
+
+		// database
+
+		var res, err = cont.r.Create(*req.ToPatient())
+
+		if err != nil {
+			// log.Info(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for add patient "+err.Error(), nil))
 		}
 
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add patient", res.Name))
@@ -64,16 +71,13 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		var uid = middlewares.ExtractTokenUid(c)
 		var req Req
 
+		// request
+
 		if err := c.Bind(&req); err != nil {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "error binding for update patient "+err.Error(), nil))
 		}
 
-		var res, err = cont.r.Update(uid, *req.ToPatient())
-
-		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for update patient "+err.Error(), nil))
-		}
+		// aws s3
 
 		var res1, err1 = cont.r.GetProfile(uid)
 		if err1 != nil {
@@ -102,6 +106,15 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			}
 		}
 
+		// database
+
+		var res, err = cont.r.Update(uid, *req.ToPatient())
+
+		if err != nil {
+			// log.Info(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for update patient "+err.Error(), nil))
+		}
+
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update patient", res.Name))
 	}
 }
@@ -110,12 +123,7 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var uid = middlewares.ExtractTokenUid(c)
 
-		var res, err = cont.r.Delete(uid)
-
-		if err != nil {
-			// log.Info(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for delete patient "+err.Error(), nil))
-		}
+		// aws s3
 
 		var res1, err1 = cont.r.GetProfile(uid)
 		if err1 != nil {
@@ -134,6 +142,15 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 
 		}
 
+		// database
+
+		var res, err = cont.r.Delete(uid)
+
+		if err != nil {
+			// log.Info(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "error internal server for delete patient "+err.Error(), nil))
+		}
+
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success delete patient", res.DeletedAt))
 	}
 }
@@ -145,6 +162,8 @@ func (cont *Controller) GetProfile() echo.HandlerFunc {
 		if uid = c.QueryParam("patient_uid"); uid == "" {
 			uid = middlewares.ExtractTokenUid(c)
 		}
+
+		// database
 		// log.Info(uid)
 		var res, err = cont.r.GetProfile(uid)
 

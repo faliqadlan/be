@@ -31,6 +31,8 @@ func (cont *Controller) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var req Req
 
+		// request
+
 		if err := c.Bind(&req); err != nil {
 			log.Warn(err)
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input ", nil))
@@ -41,6 +43,20 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			log.Warn(err)
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input ", nil))
 		}
+
+		// aws s3
+
+		file, err := c.FormFile("file")
+		if err != nil {
+			log.Warn(err)
+		}
+		if err == nil {
+			var link = utils.UploadFileToS3(cont.conf, *file)
+
+			req.Image = link
+		}
+
+		// database
 
 		res, err := cont.r.Create(*req.ToDoctor())
 
@@ -57,16 +73,6 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err, nil))
 		}
 
-		file, err := c.FormFile("file")
-		if err != nil {
-			log.Warn(err)
-		}
-		if err == nil {
-			var link = utils.UploadFileToS3(cont.conf, *file)
-
-			req.Image = link
-		}
-
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add Doctor", map[string]interface{}{
 			"name": res.Name,
 		}))
@@ -78,25 +84,14 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		var uid = middlewares.ExtractTokenUid(c)
 		var req Req
 
+		// request
+
 		if err := c.Bind(&req); err != nil {
 			log.Warn(err)
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
 		}
 
-		res, err := cont.r.Update(uid, *req.ToDoctor())
-
-		if err != nil {
-			log.Warn(err)
-			switch err.Error() {
-			case errors.New("user name is already exist").Error():
-				err = errors.New("user name is already exist")
-			case errors.New("can't update capacity below total pending patients").Error():
-				err = errors.New("can't update capacity below total pending patients")
-			default:
-				err = errors.New("there's some problem is server")
-			}
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err, nil))
-		}
+		// aws s3
 
 		res1, err := cont.r.GetProfile(uid)
 		if err != nil {
@@ -122,6 +117,23 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			}
 		}
 
+		// database
+
+		res, err := cont.r.Update(uid, *req.ToDoctor())
+
+		if err != nil {
+			log.Warn(err)
+			switch err.Error() {
+			case errors.New("user name is already exist").Error():
+				err = errors.New("user name is already exist")
+			case errors.New("can't update capacity below total pending patients").Error():
+				err = errors.New("can't update capacity below total pending patients")
+			default:
+				err = errors.New("there's some problem is server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err, nil))
+		}
+
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update Doctor", res.Name))
 	}
 }
@@ -130,12 +142,7 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var uid = middlewares.ExtractTokenUid(c)
 
-		res, err := cont.r.Delete(uid)
-
-		if err != nil {
-			log.Warn(err)
-			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's problem in server", nil))
-		}
+		// aws s3
 
 		res1, err := cont.r.GetProfile(uid)
 		if err != nil {
@@ -152,6 +159,15 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 			log.Info(res)
 		}
 
+		// database
+
+		res, err := cont.r.Delete(uid)
+
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's problem in server", nil))
+		}
+
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success delete Doctor", res.DeletedAt))
 	}
 }
@@ -159,6 +175,8 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 func (cont *Controller) GetProfile() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var uid = middlewares.ExtractTokenUid(c)
+
+		// database
 
 		var res, err = cont.r.GetProfile(uid)
 
@@ -173,6 +191,8 @@ func (cont *Controller) GetProfile() echo.HandlerFunc {
 
 func (cont *Controller) GetAll() echo.HandlerFunc {
 	return func(c echo.Context) error {
+
+		// database
 
 		var res, err = cont.r.GetAll()
 
