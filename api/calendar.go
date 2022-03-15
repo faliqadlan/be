@@ -5,11 +5,8 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"strconv"
-	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/labstack/gommon/log"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -45,29 +42,28 @@ func Calendar(file string, conf *oauth2.Config) string {
 	var event *calendar.Event
 	// for {
 
-		var uid = uuid.New().ClockSequence()
-		var uidS = strconv.Itoa(uid)
-		log.Info(uidS)
-		log.Info(len(uidS))
-		event = &calendar.Event{
-			Id:          uidS,
-			Summary:     "golang test",
-			Location:    "golang3",
-			Description: "test golang",
-			Start: &calendar.EventDateTime{
-				DateTime: time.Now().Format(time.RFC3339),
-			},
-			End: &calendar.EventDateTime{
-				DateTime: time.Now().Add(time.Hour).Format(time.RFC3339),
-			},
-		}
-		calendarId := "primary"
-		event, err = srv.Events.Insert(calendarId, event).Do()
-		if err != nil {
-			log.Warn("Unable to create event. %v\n", err)
-			return err.Error()
-		}
-		log.Info(strings.Contains(err.Error(), "id"))
+	// var uid = uuid.New().ClockSequence()
+	// var uidS = strconv.Itoa(uid)
+	// log.Info(uidS)
+	// log.Info(len(uidS))
+	event = &calendar.Event{
+		Summary:     "golang test",
+		Location:    "golang3",
+		Description: "test golang",
+		Start: &calendar.EventDateTime{
+			DateTime: time.Now().Format(time.RFC3339),
+		},
+		End: &calendar.EventDateTime{
+			DateTime: time.Now().Add(time.Hour).Format(time.RFC3339),
+		},
+	}
+	calendarId := "primary"
+	event, err = srv.Events.Insert(calendarId, event).Do()
+	if err != nil {
+		log.Warn("Unable to create event. %v\n", err)
+		return err.Error()
+	}
+	// log.Info(strings.Contains(err.Error(), "id"))
 	// 	if !strings.Contains(err.Error(), "id") {
 	// 		break
 	// 	}
@@ -77,7 +73,7 @@ func Calendar(file string, conf *oauth2.Config) string {
 	fmt.Printf("Event created: %s\n", event.HtmlLink)
 	log.Info(event.Id)
 	log.Info(event.ICalUID)
-	log.Info(event.Id)
+	log.Info(len(event.Id))
 
 	// findEvent, err := srv.Events.Get(calendarId, uid).Do()
 	// if err != nil {
