@@ -2,7 +2,6 @@ package calendar
 
 import (
 	"be/repository/visit"
-	"strconv"
 	"time"
 
 	"google.golang.org/api/calendar/v3"
@@ -20,7 +19,7 @@ func New(r visit.Visit, srv *calendar.Service) *CalendarConf {
 	}
 }
 
-func (cal *CalendarConf) CreateEvent(res visit.VisitCalendar, event_id int) (*calendar.Event, error) {
+func (cal *CalendarConf) CreateEvent(res visit.VisitCalendar) (*calendar.Event, error) {
 	// res, err := cal.r.GetVisitList(visit_uid)
 	// if err != nil {
 	// 	return &calendar.Event{}, err
@@ -33,7 +32,6 @@ func (cal *CalendarConf) CreateEvent(res visit.VisitCalendar, event_id int) (*ca
 	}
 
 	var event = &calendar.Event{
-		Id: strconv.Itoa(event_id),
 		Summary:     "Apppoinment with " + res.DoctorName,
 		Location:    res.Address,
 		Description: res.Complaint,

@@ -43,13 +43,13 @@ func Calendar(file string, conf *oauth2.Config) string {
 	}
 
 	var event *calendar.Event
-	for {
+	// for {
 
 		var uid = uuid.New().ClockSequence()
 		var uidS = strconv.Itoa(uid)
 		log.Info(uidS)
 		log.Info(len(uidS))
-		event := &calendar.Event{
+		event = &calendar.Event{
 			Id:          uidS,
 			Summary:     "golang test",
 			Location:    "golang3",
@@ -67,11 +67,12 @@ func Calendar(file string, conf *oauth2.Config) string {
 			log.Warn("Unable to create event. %v\n", err)
 			return err.Error()
 		}
-		if !strings.Contains(err.Error(), "id") {
-			break
-		}
-		log.Info(event.Id)
-	}
+		log.Info(strings.Contains(err.Error(), "id"))
+	// 	if !strings.Contains(err.Error(), "id") {
+	// 		break
+	// 	}
+	// 	log.Info(event.Id)
+	// }
 
 	fmt.Printf("Event created: %s\n", event.HtmlLink)
 	log.Info(event.Id)

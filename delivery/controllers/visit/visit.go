@@ -4,16 +4,16 @@ import (
 	"be/api/google/calendar"
 	"be/delivery/controllers/templates"
 	"be/delivery/middlewares"
+	"be/entities"
 	"be/repository/visit"
 	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
-	calGoogle "google.golang.org/api/calendar/v3"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
+	calGoogle "google.golang.org/api/calendar/v3"
 )
 
 type Controller struct {
@@ -74,21 +74,26 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		}
 
 		var res1 *calGoogle.Event
-		for {
-			res1, err = cont.cal.CreateEvent(resCal, uuid.New().ClockSequence())
-			if err != nil {
-				log.Warn(err)
-				return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
-			}
-			err = cont.cal.InsertEvent(res1)
-			if err != nil {
-				log.Warn(err)
-				return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
-			}
+		// for {
+		res1, err = cont.cal.CreateEvent(resCal)
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
+		}
+		err = cont.cal.InsertEvent(res1)
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
+		}
 
-			if !strings.Contains(err.Error(), "id") {
-				break
-			}
+		// 	if !strings.Contains(err.Error(), "id") {
+		// 		break
+		// 	}
+		// }
+
+		_, err = cont.r.Update(res.Visit_uid, entities.Visit{Event_uid: res1.Id})
+		if err != nil {
+			log.Warn(err)
 		}
 
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add visit and attach to google calendar", res1.HtmlLink))

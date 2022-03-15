@@ -7,6 +7,6 @@ import (
 )
 
 type Calendar interface {
-	CreateEvent(res visit.VisitCalendar, event_id int) (*calendar.Event, error)
+	CreateEvent(res visit.VisitCalendar) (*calendar.Event, error)
 	InsertEvent(event *calendar.Event) error
 }

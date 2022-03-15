@@ -120,7 +120,7 @@ func (m *MockAuthLib) Login(userName string, password string) (map[string]interf
 
 type MockCal struct{}
 
-func (m *MockCal) CreateEvent(res visit.VisitCalendar, event_id int) (*calendar.Event, error) {
+func (m *MockCal) CreateEvent(res visit.VisitCalendar) (*calendar.Event, error) {
 	return &calendar.Event{}, nil
 }
 
@@ -130,7 +130,7 @@ func (m *MockCal) InsertEvent(event *calendar.Event) error {
 
 type errorCreateEvent struct{}
 
-func (m *errorCreateEvent) CreateEvent(res visit.VisitCalendar, event_id int) (*calendar.Event, error) {
+func (m *errorCreateEvent) CreateEvent(res visit.VisitCalendar) (*calendar.Event, error) {
 	return &calendar.Event{}, errors.New("")
 }
 
@@ -140,7 +140,7 @@ func (m *errorCreateEvent) InsertEvent(event *calendar.Event) error {
 
 type errorInsertEvent struct{}
 
-func (m *errorInsertEvent) CreateEvent(res visit.VisitCalendar, event_id int) (*calendar.Event, error) {
+func (m *errorInsertEvent) CreateEvent(res visit.VisitCalendar) (*calendar.Event, error) {
 	return &calendar.Event{}, nil
 }
 

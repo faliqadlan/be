@@ -73,7 +73,7 @@ func (cont *Controller) GoogleCalendar() echo.HandlerFunc {
 		// 	log.Warn(err)
 		// }
 		
-		token, err := api.TokenFromFile("./secret/token.json", cont.conf)
+		token, err := api.TokenFromFile(configs.TokenPath, cont.conf)
 		if err != nil {
 			log.Warn(err)
 		}
