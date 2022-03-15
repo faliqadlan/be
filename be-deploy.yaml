@@ -26,9 +26,9 @@ spec:
           name: go-app
           volumeMounts:
           - name: token-test
-            mountPath: ./app/secret
+            mountPath: ./app/token
           - name: credential-test
-            mountPath: ./app/secret
+            mountPath: ./app/credential
           env:
             - name: "PORT"
               value: "8000"
