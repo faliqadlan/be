@@ -124,7 +124,15 @@ func (m *MockCal) CreateEvent(res visit.VisitCalendar) (*calendar.Event, error) 
 	return &calendar.Event{}, nil
 }
 
-func (m *MockCal) InsertEvent(event *calendar.Event) error {
+func (m *MockCal) InsertEvent(event *calendar.Event) (*calendar.Event, error) {
+	return &calendar.Event{}, nil
+}
+
+func (m *MockCal) UpdateEvent(event *calendar.Event, event_uid string) (*calendar.Event, error) {
+	return &calendar.Event{}, nil
+}
+
+func (m *MockCal) DeleteEvent(event_uid string) error {
 	return nil
 }
 
@@ -134,7 +142,15 @@ func (m *errorCreateEvent) CreateEvent(res visit.VisitCalendar) (*calendar.Event
 	return &calendar.Event{}, errors.New("")
 }
 
-func (m *errorCreateEvent) InsertEvent(event *calendar.Event) error {
+func (m *errorCreateEvent) InsertEvent(event *calendar.Event) (*calendar.Event, error) {
+	return &calendar.Event{}, errors.New("")
+}
+
+func (m *errorCreateEvent) UpdateEvent(event *calendar.Event, event_uid string) (*calendar.Event, error) {
+	return &calendar.Event{}, errors.New("")
+}
+
+func (m *errorCreateEvent) DeleteEvent(event_uid string) error {
 	return errors.New("")
 }
 
@@ -144,7 +160,15 @@ func (m *errorInsertEvent) CreateEvent(res visit.VisitCalendar) (*calendar.Event
 	return &calendar.Event{}, nil
 }
 
-func (m *errorInsertEvent) InsertEvent(event *calendar.Event) error {
+func (m *errorInsertEvent) InsertEvent(event *calendar.Event) (*calendar.Event, error) {
+	return &calendar.Event{}, errors.New("")
+}
+
+func (m *errorInsertEvent) UpdateEvent(event *calendar.Event, event_uid string) (*calendar.Event, error) {
+	return &calendar.Event{}, errors.New("")
+}
+
+func (m *errorInsertEvent) DeleteEvent(event_uid string) error {
 	return errors.New("")
 }
 

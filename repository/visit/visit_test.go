@@ -377,7 +377,7 @@ func TestGetVisitsList(t *testing.T) {
 		var layDate = "02-01-2006"
 
 		var dateNow = time.Now().Local().Format(layDate)
-		res1, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1"})
+		res1, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1", Event_uid: "test"})
 		if err != nil {
 			log.Info(err)
 			t.Fatal()
@@ -386,7 +386,7 @@ func TestGetVisitsList(t *testing.T) {
 		var res3, err3 = r.GetVisitList(res1.Visit_uid)
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
-		// log.Info(res3)
+		// log.Info(res3.Event_uid)
 	})
 
 	t.Run("invalid uid", func(t *testing.T) {

@@ -13,7 +13,7 @@ type Visit struct {
 	UpdatedAt        time.Time
 	DeletedAt        gorm.DeletedAt `gorm:"index"`
 	Visit_uid        string         `gorm:"index;type:varchar(22)"` 
-	Event_uid        string
+	Event_uid        string  `gorm:"index;type:varchar(26)"` 
 	Doctor_uid       string `gorm:"index;type:varchar(22)"`
 	Patient_uid      string `gorm:"index;type:varchar(22)"`
 	Date             datatypes.Date

@@ -80,7 +80,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			log.Warn(err)
 			return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
 		}
-		err = cont.cal.InsertEvent(res1)
+		res1, err = cont.cal.InsertEvent(res1)
 		if err != nil {
 			log.Warn(err)
 			return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
@@ -90,7 +90,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		// 		break
 		// 	}
 		// }
-
+		// log.Info(res1.Id)
 		_, err = cont.r.Update(res.Visit_uid, entities.Visit{Event_uid: res1.Id})
 		if err != nil {
 			log.Warn(err)
@@ -127,7 +127,26 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
-		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update visit", res.Complaint))
+		// google calendar
+		resCal, err := cont.r.GetVisitList(uid)
+		if err != nil {
+			log.Warn(err)
+		}
+
+		var res1 *calGoogle.Event
+		// for {
+		res1, err = cont.cal.CreateEvent(resCal)
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusCreated, templates.Success(nil, "success update visit", res.Complaint))
+		}
+		res1, err = cont.cal.UpdateEvent(res1, resCal.Event_uid)
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusCreated, templates.Success(nil, "success update visit", res.Complaint))
+		}
+
+		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update visit", res1.HtmlLink))
 	}
 }
 
@@ -135,7 +154,12 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var uid = c.Param("visit_uid")
 
-		var res, err = cont.r.Delete(uid)
+		resCal, err := cont.r.GetVisitList(uid)
+		if err != nil {
+			log.Warn(err)
+		}
+
+		res, err := cont.r.Delete(uid)
 
 		if err != nil {
 			log.Warn(err)
@@ -146,6 +170,13 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 				err = errors.New("there's problem in server")
 			}
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
+		}
+		// google calendar
+
+		err = cont.cal.DeleteEvent(resCal.Event_uid)
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusCreated, templates.Success(nil, "success delete visit", res.Complaint))
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success delete visit", res.DeletedAt))

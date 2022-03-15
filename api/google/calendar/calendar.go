@@ -61,11 +61,28 @@ func (cal *CalendarConf) CreateEvent(res visit.VisitCalendar) (*calendar.Event, 
 	return event, nil
 }
 
-func (cal *CalendarConf) InsertEvent(event *calendar.Event) error {
+func (cal *CalendarConf) InsertEvent(event *calendar.Event) (*calendar.Event, error) {
 
-	_, err := cal.srv.Events.Insert("primary", event).Do()
+	res, err := cal.srv.Events.Insert("primary", event).Do()
+	if err != nil {
+		return res, err
+	}
+	return res, nil
+}
+
+func (cal *CalendarConf) UpdateEvent(event *calendar.Event, event_uid string) (*calendar.Event, error) {
+	res, err := cal.srv.Events.Update("primary", event_uid, event).SendUpdates("all").SendNotifications(true).Do()
+	if err != nil {
+		return res, err
+	}
+	return res, nil
+}
+
+func (cal *CalendarConf) DeleteEvent(event_uid string) error {
+	err := cal.srv.Events.Delete("primary", event_uid).SendUpdates("all").SendNotifications(true).Do()
 	if err != nil {
 		return err
 	}
 	return nil
+
 }

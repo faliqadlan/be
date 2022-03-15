@@ -39,4 +39,5 @@ type VisitCalendar struct {
 	PatientName  string `json:"patientName"`
 	DoctorEmail  string `json:"doctorEmail"`
 	PatientEmail string `json:"patientEmail"`
+	Event_uid    string `json:"event_uid"`
 }
