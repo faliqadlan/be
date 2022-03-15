@@ -12,15 +12,15 @@ type Req struct {
 	Email      string `json:"email" form:"email" validate:"required"`
 	Password   string `json:"password" form:"password" validate:"required"`
 	Nik        string `json:"nik" form:"nik" validate:"required"`
-	Name       string `json:"name" form:"name"`
+	Name       string `json:"name" form:"name"  validate:"required"`
 	Image      string `json:"image" form:"image"`
-	Gender     string `json:"gender" form:"gender"`
-	Address    string `json:"address" form:"address"`
-	PlaceBirth string `json:"placeBirth" form:"placeBirth"`
-	Dob        string `json:"dob" form:"dob"`
-	Job        string `json:"job" form:"job"`
-	Status     string `json:"status" form:"status"`
-	Religion   string `json:"religion" form:"religion"`
+	Gender     string `json:"gender" form:"gender"  validate:"required"`
+	Address    string `json:"address" form:"address"  validate:"required"`
+	PlaceBirth string `json:"placeBirth" form:"placeBirth"  validate:"required"`
+	Dob        string `json:"dob" form:"dob"  validate:"required"`
+	Job        string `json:"job" form:"job"  validate:"required"`
+	Status     string `json:"status" form:"status"  validate:"required"`
+	Religion   string `json:"religion" form:"religion"  validate:"required"`
 }
 
 func (r *Req) ToPatient() *entities.Patient {

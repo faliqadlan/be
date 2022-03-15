@@ -138,12 +138,19 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		res1, err = cont.cal.CreateEvent(resCal)
 		if err != nil {
 			log.Warn(err)
-			return c.JSON(http.StatusCreated, templates.Success(nil, "success update visit", res.Complaint))
+			return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update visit", res.Complaint))
 		}
 		res1, err = cont.cal.UpdateEvent(res1, resCal.Event_uid)
 		if err != nil {
 			log.Warn(err)
-			return c.JSON(http.StatusCreated, templates.Success(nil, "success update visit", res.Complaint))
+			return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update visit", res.Complaint))
+		}
+
+		if req.Status == "cancelled" {
+			err = cont.cal.DeleteEvent(resCal.Event_uid)
+			if err != nil {
+				log.Warn(err)
+			}
 		}
 
 		return c.JSON(http.StatusAccepted, templates.Success(http.StatusAccepted, "success update visit", res1.HtmlLink))

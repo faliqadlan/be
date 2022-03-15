@@ -43,6 +43,50 @@ func (m *mockSuccess) GetVisitList(visit_uid string) (visit.VisitCalendar, error
 	return visit.VisitCalendar{}, nil
 }
 
+type errorVisitList struct{}
+
+func (m *errorVisitList) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (entities.Visit, error) {
+	return entities.Visit{}, nil
+}
+
+func (m *errorVisitList) Update(visit_uid string, req entities.Visit) (entities.Visit, error) {
+	return entities.Visit{}, nil
+}
+
+func (m *errorVisitList) Delete(visit_uid string) (entities.Visit, error) {
+	return entities.Visit{}, nil
+}
+
+func (m *errorVisitList) GetVisitsVer1(kind, uid, status, date, grouped string) (visit.Visits, error) {
+	return visit.Visits{}, nil
+}
+
+func (m *errorVisitList) GetVisitList(visit_uid string) (visit.VisitCalendar, error) {
+	return visit.VisitCalendar{}, errors.New("")
+}
+
+type errorUpdateEventId struct{}
+
+func (m *errorUpdateEventId) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (entities.Visit, error) {
+	return entities.Visit{}, nil
+}
+
+func (m *errorUpdateEventId) Update(visit_uid string, req entities.Visit) (entities.Visit, error) {
+	return entities.Visit{},  errors.New("")
+}
+
+func (m *errorUpdateEventId) Delete(visit_uid string) (entities.Visit, error) {
+	return entities.Visit{}, nil
+}
+
+func (m *errorUpdateEventId) GetVisitsVer1(kind, uid, status, date, grouped string) (visit.Visits, error) {
+	return visit.Visits{}, nil
+}
+
+func (m *errorUpdateEventId) GetVisitList(visit_uid string) (visit.VisitCalendar, error) {
+	return visit.VisitCalendar{}, nil
+}
+
 type mockFail struct{}
 
 func (m *mockFail) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (entities.Visit, error) {
@@ -169,6 +213,24 @@ func (m *errorInsertEvent) UpdateEvent(event *calendar.Event, event_uid string) 
 }
 
 func (m *errorInsertEvent) DeleteEvent(event_uid string) error {
+	return errors.New("")
+}
+
+type errorCancelEvent struct{}
+
+func (m *errorCancelEvent) CreateEvent(res visit.VisitCalendar) (*calendar.Event, error) {
+	return &calendar.Event{}, nil
+}
+
+func (m *errorCancelEvent) InsertEvent(event *calendar.Event) (*calendar.Event, error) {
+	return &calendar.Event{}, nil
+}
+
+func (m *errorCancelEvent) UpdateEvent(event *calendar.Event, event_uid string) (*calendar.Event, error) {
+	return &calendar.Event{}, nil
+}
+
+func (m *errorCancelEvent) DeleteEvent(event_uid string) error {
 	return errors.New("")
 }
 
@@ -445,6 +507,38 @@ func TestCreate(t *testing.T) {
 		// log.Info(response.Message)
 	})
 
+	t.Run("error visit list", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"doctor_uid":  "doctor",
+			"patient_uid": "patient",
+			"date":        "05-05-2022",
+			"complaint":   "sick",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&errorVisitList{}, &errorCreateEvent{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 200, response.Code)
+		// log.Info(response.Message)
+	})
+
 	t.Run("error create event", func(t *testing.T) {
 		var e = echo.New()
 
@@ -506,6 +600,38 @@ func TestCreate(t *testing.T) {
 
 		// log.Info(response)
 		assert.Equal(t, 200, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("error update event id", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"doctor_uid":  "doctor",
+			"patient_uid": "patient",
+			"date":        "05-05-2022",
+			"complaint":   "sick",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&errorUpdateEventId{}, &MockCal{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 201, response.Code)
 		// log.Info(response.Message)
 	})
 
@@ -637,6 +763,107 @@ func TestUpdate(t *testing.T) {
 		// log.Info(response.Message)
 	})
 
+	t.Run("error visit list", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"complaint": "sick",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&errorVisitList{}, &MockCal{})
+		controller.Update()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 202, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("error create event", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"complaint": "sick",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &errorCreateEvent{})
+		controller.Update()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 202, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("error update event", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"complaint": "sick",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &errorInsertEvent{})
+		controller.Update()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 202, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("error delete cancel event event", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"complaint": "sick",
+			"status":"cancelled",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &errorCancelEvent{})
+		controller.Update()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 202, response.Code)
+		// log.Info(response.Message)
+	})
+
 }
 
 func TestDelete(t *testing.T) {
@@ -704,6 +931,27 @@ func TestDelete(t *testing.T) {
 
 		// log.Info(response)
 		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("delete event", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &errorInsertEvent{})
+		controller.Delete()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 200, response.Code)
 		// log.Info(response.Message)
 	})
 
