@@ -69,7 +69,7 @@ func UserNameValid(s string) error {
 			if err != nil {
 				return err
 			}
-			return errors.New("invalid address format")
+			return errors.New("invalid user name format")
 		}
 	}
 	return nil

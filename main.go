@@ -52,15 +52,6 @@ func main() {
 
 	var googleCont = google.New(googleConf, visitRepo)
 
-	// var number = "1234567891234567abcd"
-	// res, err := strconv.Atoi(number)
-	// if err != nil {
-	// 	log.Info(res)
-	// 	log.Info(err)
-	// }
-	// log.Info(res)
-	// log.Info(err)
-
 	var e = echo.New()
 
 	routes.RoutesPath(e, authCont, doctorCont, patientCont, visitCont, googleCont)
