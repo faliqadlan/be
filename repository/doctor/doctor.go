@@ -40,6 +40,15 @@ func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 	if checkUserName.RowsAffected != 0 {
 		return entities.Doctor{}, errors.New("user name is already exist")
 	}
+
+	// check email
+
+	var checkEmail = r.db.Model(&entities.Doctor{}).Where("email = ?", req.Email).Select("user_name as UserName").Scan(&userNameCheck{})
+
+	if checkEmail.RowsAffected != 0 {
+		return entities.Doctor{}, errors.New("email is already exist")
+	}
+
 	var uid string
 	for {
 		uid = shortuuid.New()
@@ -49,14 +58,29 @@ func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 			break
 		}
 	}
+	req.Doctor_uid = uid
 	var err error
 	req.Password, err = utils.HashPassword(req.Password)
 	if err != nil {
 		log.Warn(err)
 		return entities.Doctor{}, errors.New("error in hash password")
 	}
-	req.Doctor_uid = uid
 
+	if res := r.db.Model(&entities.Doctor{}).Create(&req); res.Error != nil {
+		log.Warn(err)
+		return entities.Doctor{}, res.Error
+	}
+
+	req.UserName = "admin" + req.UserName
+	for {
+		uid = shortuuid.New()
+		var find = entities.Doctor{}
+		var res = r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", uid).Find(&find)
+		if res.RowsAffected == 0 {
+			break
+		}
+	}
+	req.Doctor_uid = uid
 	if res := r.db.Model(&entities.Doctor{}).Create(&req); res.Error != nil {
 		log.Warn(err)
 		return entities.Doctor{}, res.Error

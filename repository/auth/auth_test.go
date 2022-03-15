@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/labstack/gommon/log"
+	"github.com/lithammer/shortuuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,7 +39,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("incorrect password patient", func(t *testing.T) {
 
-		var mock1 = entities.Patient{UserName: "patient3", Email: "clinic@", Password: "clinic"}
+		var mock1 = entities.Patient{UserName: "patient3", Email: shortuuid.New(), Password: "clinic"}
 
 		_, err := patient.New(db).Create(mock1)
 		if err != nil {
@@ -52,7 +53,7 @@ func TestLogin(t *testing.T) {
 		log.Info(res1["type"])
 	})
 
-	t.Run("success run login doctor", func(t *testing.T) {
+	t.Run("success run login doctor and admin", func(t *testing.T) {
 
 		var mock2 = entities.Doctor{UserName: "doctor1", Email: "doctor@", Password: "doctor"}
 
@@ -65,11 +66,16 @@ func TestLogin(t *testing.T) {
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
 		log.Info(res1["type"])
+
+		res1, err1 = r.Login("admin"+mock2.UserName, mock2.Password)
+		assert.Nil(t, err1)
+		assert.NotNil(t, res1)
+		log.Info(res1["type"])
 	})
 
 	t.Run("incorrect password doctor", func(t *testing.T) {
 
-		var mock2 = entities.Doctor{UserName: "doctor3", Email: "doctor@", Password: "doctor"}
+		var mock2 = entities.Doctor{UserName: "doctor3", Email: shortuuid.New(), Password: "doctor"}
 
 		if _, err := doctor.New(db).Create(mock2); err != nil {
 			log.Info(err)

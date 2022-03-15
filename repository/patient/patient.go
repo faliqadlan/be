@@ -32,6 +32,15 @@ func (r *Repo) Create(req entities.Patient) (entities.Patient, error) {
 	if checkUserName.RowsAffected != 0 {
 		return entities.Patient{}, errors.New("user name is already exist")
 	}
+
+	// check email
+
+	var checkEmail = r.db.Model(&entities.Patient{}).Where("email = ?", req.Email).Select("user_name as UserName").Scan(&userNameCheck{})
+
+	if checkEmail.RowsAffected != 0 {
+		return entities.Patient{}, errors.New("email is already exist")
+	}
+
 	var uid string
 	for {
 		uid = shortuuid.New()

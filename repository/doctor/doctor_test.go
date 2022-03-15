@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/labstack/gommon/log"
+	"github.com/lithammer/shortuuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -52,6 +53,21 @@ func TestCreate(t *testing.T) {
 		var _, err = r.Create(mock1)
 		assert.NotNil(t, err)
 	})
+
+	t.Run("success handle email", func(t *testing.T) {
+		var mock = entities.Doctor{UserName: "patient5", Email: "patient@", Password: "patient"}
+
+		if _, err := r.Create(mock); err != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock1 = entities.Doctor{UserName: "patient1", Email: "patient@", Password: "clinic"}
+
+		var _, err = r.Create(mock1)
+		assert.NotNil(t, err)
+		// log.Info(err)
+	})
 }
 
 func TestUpdate(t *testing.T) {
@@ -82,7 +98,7 @@ func TestUpdate(t *testing.T) {
 	})
 
 	t.Run("handle invalid input capacity", func(t *testing.T) {
-		var mock1 = entities.Doctor{UserName: "clinic1n", Email: "clinic@", Password: "clinic", LeftCapacity: 5, Capacity: 15}
+		var mock1 = entities.Doctor{UserName: "clinic1n", Email: shortuuid.New(), Password: "clinic", LeftCapacity: 5, Capacity: 15}
 
 		var res, err = r.Create(mock1)
 		if err != nil {
@@ -105,7 +121,7 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		var mock1 = entities.Doctor{UserName: "clinic2", Email: "clinic@", Password: "clinic"}
+		var mock1 = entities.Doctor{UserName: "clinic2", Email: shortuuid.New(), Password: "clinic"}
 
 		var res, err = r.Create(mock1)
 		if err != nil {
@@ -121,7 +137,7 @@ func TestUpdate(t *testing.T) {
 	})
 
 	t.Run("error input uid", func(t *testing.T) {
-		var mock1 = entities.Doctor{UserName: "clinic3", Email: "clinic@", Password: "clinic"}
+		var mock1 = entities.Doctor{UserName: "clinic3", Email: shortuuid.New(), Password: "clinic"}
 
 		var _, err = r.Create(mock1)
 		if err != nil {
@@ -164,7 +180,7 @@ func TestDelete(t *testing.T) {
 	})
 
 	t.Run("error input uid", func(t *testing.T) {
-		var mock1 = entities.Doctor{UserName: "clinic3", Email: "clinic@", Password: "clinic"}
+		var mock1 = entities.Doctor{UserName: "clinic3", Email: shortuuid.New(), Password: "clinic"}
 
 		var _, err = r.Create(mock1)
 		if err != nil {
@@ -205,7 +221,7 @@ func TestGetProfile(t *testing.T) {
 	})
 
 	t.Run("input uid", func(t *testing.T) {
-		var mock1 = entities.Doctor{UserName: "clinic2", Email: "clinic@", Password: "clinic"}
+		var mock1 = entities.Doctor{UserName: "clinic2", Email: shortuuid.New(), Password: "clinic"}
 
 		var res, err = r.Create(mock1)
 		if err != nil {
@@ -237,13 +253,13 @@ func TestGetAll(t *testing.T) {
 			t.Fatal()
 		}
 
-		mock1 = entities.Doctor{UserName: "doctor1", Email: "clinic@", Password: "clinic"}
+		mock1 = entities.Doctor{UserName: "doctor1", Email: shortuuid.New(), Password: "clinic"}
 		if _, err := r.Create(mock1); err != nil {
 			log.Info(err)
 			t.Fatal()
 		}
 
-		mock1 = entities.Doctor{UserName: "doctor2", Email: "clinic@", Password: "clinic"}
+		mock1 = entities.Doctor{UserName: "doctor2", Email: shortuuid.New(), Password: "clinic"}
 		if _, err := r.Create(mock1); err != nil {
 			log.Info(err)
 			t.Fatal()

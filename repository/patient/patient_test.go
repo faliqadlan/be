@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/labstack/gommon/log"
+	"github.com/lithammer/shortuuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,6 +43,21 @@ func TestCreate(t *testing.T) {
 
 		var _, err = r.Create(mock1)
 		assert.NotNil(t, err)
+	})
+
+	t.Run("success handle email", func(t *testing.T) {
+		var mock = entities.Patient{UserName: "patient20", Email: "patient@", Password: "patient"}
+
+		if _, err := r.Create(mock); err != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock1 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "clinic", Nik: "1"}
+
+		var _, err = r.Create(mock1)
+		assert.NotNil(t, err)
+		log.Info(err)
 	})
 }
 
@@ -80,7 +96,7 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		var mock1 = entities.Patient{UserName: "clinic5", Email: "clinic@", Password: "clinic", Nik: "1"}
+		var mock1 = entities.Patient{UserName: "clinic5", Email: shortuuid.New(), Password: "clinic", Nik: "1"}
 
 		var res, err = r.Create(mock1)
 		if err != nil {
@@ -96,7 +112,7 @@ func TestUpdate(t *testing.T) {
 	})
 
 	t.Run("error input uid", func(t *testing.T) {
-		var mock1 = entities.Patient{UserName: "clinic7", Email: "clinic@", Password: "clinic", Nik: "1"}
+		var mock1 = entities.Patient{UserName: "clinic7", Email: shortuuid.New(), Password: "clinic", Nik: "1"}
 
 		var _, err = r.Create(mock1)
 		if err != nil {
@@ -124,7 +140,7 @@ func TestDelete(t *testing.T) {
 	db.AutoMigrate(&entities.Patient{})
 
 	t.Run("success delete", func(t *testing.T) {
-		var mock1 = entities.Patient{UserName: "clinic1", Email: "clinic@", Password: "clinic", Nik: "1"}
+		var mock1 = entities.Patient{UserName: "clinic1", Email: shortuuid.New(), Password: "clinic", Nik: "1"}
 
 		var res, err = r.Create(mock1)
 		if err != nil {
@@ -139,7 +155,7 @@ func TestDelete(t *testing.T) {
 	})
 
 	t.Run("error input uid", func(t *testing.T) {
-		var mock1 = entities.Patient{UserName: "clinic3", Email: "clinic@", Password: "clinic", Nik: "1"}
+		var mock1 = entities.Patient{UserName: "clinic3", Email: shortuuid.New(), Password: "clinic", Nik: "1"}
 
 		var _, err = r.Create(mock1)
 		if err != nil {
@@ -164,7 +180,7 @@ func TestGetProfile(t *testing.T) {
 	db.AutoMigrate(&entities.Patient{})
 
 	t.Run("success get profile", func(t *testing.T) {
-		var mock1 = entities.Patient{UserName: "clinic1", Email: "clinic@", Password: "clinic", Nik: "1"}
+		var mock1 = entities.Patient{UserName: "clinic1", Email: shortuuid.New(), Password: "clinic", Nik: "1"}
 
 		var res, err = r.Create(mock1)
 		if err != nil {
@@ -179,7 +195,7 @@ func TestGetProfile(t *testing.T) {
 	})
 
 	t.Run("error input uit", func(t *testing.T) {
-		var mock1 = entities.Patient{UserName: "clinic2", Email: "clinic@", Password: "clinic", Nik: "1"}
+		var mock1 = entities.Patient{UserName: "clinic2", Email: shortuuid.New(), Password: "clinic", Nik: "1"}
 
 		var _, err = r.Create(mock1)
 		if err != nil {
