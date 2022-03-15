@@ -1,4 +1,6 @@
 secret
+credential
+token
 local.env
 be-secret.yaml
 be-token.yaml

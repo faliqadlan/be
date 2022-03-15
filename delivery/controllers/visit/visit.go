@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	calGoogle "google.golang.org/api/calendar/v3"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
@@ -66,15 +68,27 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
-		res1, err := cont.cal.CreateEvent(res.Visit_uid)
+		resCal, err := cont.r.GetVisitList(res.Visit_uid)
 		if err != nil {
 			log.Warn(err)
-			return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
 		}
-		err = cont.cal.InsertEvent(res1)
-		if err != nil {
-			log.Warn(err)
-			return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
+
+		var res1 *calGoogle.Event
+		for {
+			res1, err = cont.cal.CreateEvent(resCal, uuid.New().ClockSequence())
+			if err != nil {
+				log.Warn(err)
+				return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
+			}
+			err = cont.cal.InsertEvent(res1)
+			if err != nil {
+				log.Warn(err)
+				return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
+			}
+
+			if !strings.Contains(err.Error(), "id") {
+				break
+			}
 		}
 
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add visit and attach to google calendar", res1.HtmlLink))

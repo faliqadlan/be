@@ -1,8 +1,12 @@
 package calendar
 
-import "google.golang.org/api/calendar/v3"
+import (
+	"be/repository/visit"
+
+	"google.golang.org/api/calendar/v3"
+)
 
 type Calendar interface {
-	CreateEvent(visit_uid string) (*calendar.Event, error)
+	CreateEvent(res visit.VisitCalendar, event_id int) (*calendar.Event, error)
 	InsertEvent(event *calendar.Event) error
 }

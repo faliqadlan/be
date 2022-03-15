@@ -29,6 +29,8 @@ func main() {
 	var db = utils.InitDB(config)
 	var awsS3Conf = aws.InitS3(config.S3_REGION, config.S3_ID, config.S3_SECRET)
 
+	// api.CreteCredentialJson(config.CLIENT_ID, config.PROJECT_ID, config.AUTH_URI, config.TOKEN_URI, config.Auth_provider_x509_cert_url, config.CLIENT_SECRET)
+
 	var googleConf = googleApi.SetupConfig(config.DB_USERNAME, config.CLIENT_ID, config.CLIENT_SECRET)
 
 	var awsS3 = s3.New(awsS3Conf)
