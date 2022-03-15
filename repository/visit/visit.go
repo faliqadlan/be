@@ -132,6 +132,11 @@ func (r *Repo) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (en
 			return entities.Visit{}, gorm.ErrRecordNotFound
 		}
 
+		if doctorInit.LeftCapacity == 0 {
+			tx.Rollback()
+			return entities.Visit{}, errors.New("left capacity can't below zero")
+		}
+
 		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Update("left_capacity", doctorInit.LeftCapacity-1); res.Error != nil || res.RowsAffected == 0 {
 			tx.Rollback()
 			return entities.Visit{}, gorm.ErrRecordNotFound
