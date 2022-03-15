@@ -214,7 +214,7 @@ func TestCreateVal(t *testing.T) {
 
 	t.Run("invalid parent", func(t *testing.T) {
 		var mock = entities.Doctor{UserName: shortuuid.New(), Email: "doctor@", Password: "doctor", LeftCapacity: 10}
-		_, err := doctor.New(db).Create(mock)
+		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
 			t.Fatal()
@@ -229,7 +229,7 @@ func TestCreateVal(t *testing.T) {
 
 		var mock2 = entities.Visit{Complaint: "sick"}
 
-		var _, err3 = r.CreateVal(shortuuid.New(), shortuuid.New(), mock2)
+		var _, err3 = r.CreateVal(res.Doctor_uid, shortuuid.New(), mock2)
 		assert.NotNil(t, err3)
 		log.Info(err3)
 	})

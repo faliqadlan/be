@@ -72,7 +72,7 @@ func (m *errorUpdateEventId) CreateVal(doctor_uid, patient_uid string, req entit
 }
 
 func (m *errorUpdateEventId) Update(visit_uid string, req entities.Visit) (entities.Visit, error) {
-	return entities.Visit{},  errors.New("")
+	return entities.Visit{}, errors.New("")
 }
 
 func (m *errorUpdateEventId) Delete(visit_uid string) (entities.Visit, error) {
@@ -150,6 +150,50 @@ func (m *leftCapacity) GetVisitsVer1(kind, uid, status, date, grouped string) (v
 }
 
 func (m *leftCapacity) GetVisitList(visit_uid string) (visit.VisitCalendar, error) {
+	return visit.VisitCalendar{}, gorm.ErrRecordNotFound
+}
+
+type invalidDoctorUid struct{}
+
+func (m *invalidDoctorUid) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (entities.Visit, error) {
+	return entities.Visit{}, errors.New("Cannot add or update a child row: a foreign key constraint fails (`crud_api_test`.`visits`, CONSTRAINT `fk_doctors_visits` FOREIGN KEY (`doctor_uid`) REFERENCES `doctors` (`doctor_uid`))")
+}
+
+func (m *invalidDoctorUid) Update(visit_uid string, req entities.Visit) (entities.Visit, error) {
+	return entities.Visit{}, gorm.ErrRecordNotFound
+}
+
+func (m *invalidDoctorUid) Delete(visit_uid string) (entities.Visit, error) {
+	return entities.Visit{}, gorm.ErrRecordNotFound
+}
+
+func (m *invalidDoctorUid) GetVisitsVer1(kind, uid, status, date, grouped string) (visit.Visits, error) {
+	return visit.Visits{}, gorm.ErrRecordNotFound
+}
+
+func (m *invalidDoctorUid) GetVisitList(visit_uid string) (visit.VisitCalendar, error) {
+	return visit.VisitCalendar{}, gorm.ErrRecordNotFound
+}
+
+type invalidPatientUid struct{}
+
+func (m *invalidPatientUid) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (entities.Visit, error) {
+	return entities.Visit{}, errors.New("Cannot add or update a child row: a foreign key constraint fails (`crud_api_test`.`visits`, CONSTRAINT `fk_patients_visits` FOREIGN KEY (`patient_uid`) REFERENCES `patients` (`patient_uid`))")
+}
+
+func (m *invalidPatientUid) Update(visit_uid string, req entities.Visit) (entities.Visit, error) {
+	return entities.Visit{}, gorm.ErrRecordNotFound
+}
+
+func (m *invalidPatientUid) Delete(visit_uid string) (entities.Visit, error) {
+	return entities.Visit{}, gorm.ErrRecordNotFound
+}
+
+func (m *invalidPatientUid) GetVisitsVer1(kind, uid, status, date, grouped string) (visit.Visits, error) {
+	return visit.Visits{}, gorm.ErrRecordNotFound
+}
+
+func (m *invalidPatientUid) GetVisitList(visit_uid string) (visit.VisitCalendar, error) {
 	return visit.VisitCalendar{}, gorm.ErrRecordNotFound
 }
 
@@ -411,6 +455,36 @@ func TestCreate(t *testing.T) {
 		// log.Info(response.Message)
 	})
 
+	t.Run("invalid date format", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"doctor_uid": "doctor_uid",
+			"date":       "05-05-00",
+			"complaint":  "comlaint",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &MockCal{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
 	t.Run("there's another appoinment", func(t *testing.T) {
 		var e = echo.New()
 
@@ -461,6 +535,70 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 
 		var controller = New(&leftCapacity{}, &MockCal{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("doctor_uid", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"doctor_uid":  "doctor",
+			"patient_uid": "patient",
+			"date":        "05-05-2022",
+			"complaint":   "sick",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&invalidDoctorUid{}, &MockCal{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("patient_uid", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"doctor_uid":  "doctor",
+			"patient_uid": "patient",
+			"date":        "05-05-2022",
+			"complaint":   "sick",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&invalidPatientUid{}, &MockCal{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -690,7 +828,7 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("binding", func(t *testing.T) {
+	t.Run("date", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
@@ -843,7 +981,7 @@ func TestUpdate(t *testing.T) {
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
 			"complaint": "sick",
-			"status":"cancelled",
+			"status":    "cancelled",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))

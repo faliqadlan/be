@@ -121,12 +121,8 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "date can't updated, must cancel the appoinment", nil))
 		}
 		// log.Info(uid)
-		entity, err := req.ToVisit()
-		if req.Date != "" {
-			if err != nil {
-				return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
-			}
-		}
+		entity, _ := req.ToVisit()
+
 		res, err := cont.r.Update(uid, *entity)
 
 		if err != nil {
