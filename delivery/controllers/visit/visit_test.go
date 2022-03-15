@@ -87,6 +87,28 @@ func (m *spesificError) GetVisitList(visit_uid string) (visit.VisitCalendar, err
 	return visit.VisitCalendar{}, gorm.ErrRecordNotFound
 }
 
+type leftCapacity struct{}
+
+func (m *leftCapacity) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (entities.Visit, error) {
+	return entities.Visit{}, errors.New("left capacity can't below zero")
+}
+
+func (m *leftCapacity) Update(visit_uid string, req entities.Visit) (entities.Visit, error) {
+	return entities.Visit{}, gorm.ErrRecordNotFound
+}
+
+func (m *leftCapacity) Delete(visit_uid string) (entities.Visit, error) {
+	return entities.Visit{}, gorm.ErrRecordNotFound
+}
+
+func (m *leftCapacity) GetVisitsVer1(kind, uid, status, date, grouped string) (visit.Visits, error) {
+	return visit.Visits{}, gorm.ErrRecordNotFound
+}
+
+func (m *leftCapacity) GetVisitList(visit_uid string) (visit.VisitCalendar, error) {
+	return visit.VisitCalendar{}, gorm.ErrRecordNotFound
+}
+
 type MockAuthLib struct{}
 
 func (m *MockAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
@@ -321,6 +343,38 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 
 		var controller = New(&spesificError{}, &MockCal{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("leftCapacity", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"doctor_uid":  "doctor",
+			"patient_uid": "patient",
+			"date":        "05-05-2022",
+			"complaint":   "sick",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&leftCapacity{}, &MockCal{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return

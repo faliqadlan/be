@@ -18,11 +18,16 @@ spec:
       - name: token-test
         configMap:
           name: token-test
+      - name: credential-test
+        configMap:
+          name: credential-test
       containers:
         - image: faliqadlan/img-be:latest
           name: go-app
           volumeMounts:
           - name: token-test
+            mountPath: ./app/secret
+          - name: credential-test
             mountPath: ./app/secret
           env:
             - name: "PORT"

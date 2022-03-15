@@ -1,6 +1,7 @@
 package api
 
 import (
+	"be/configs"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -17,7 +18,7 @@ import (
 
 func Calendar(file string, conf *oauth2.Config) string {
 	ctx := context.Background()
-	b, err := ioutil.ReadFile("credential.json")
+	b, err := ioutil.ReadFile(configs.CredentialPath)
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 		return err.Error()
@@ -42,6 +43,7 @@ func Calendar(file string, conf *oauth2.Config) string {
 	var uid = uuid.New().ClockSequence()
 	var uidS = strconv.Itoa(uid)
 	log.Info(uidS)
+	log.Info(len(uidS))
 	event := &calendar.Event{
 		Id:          uidS,
 		Summary:     "golang test",

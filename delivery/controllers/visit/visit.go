@@ -58,6 +58,8 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			switch err.Error() {
 			case errors.New("there's another appoinment in pending").Error():
 				err = errors.New("there's another appoinment in pending")
+			case errors.New("left capacity can't below zero").Error():
+				err = errors.New("left capacity can't below zero")
 			default:
 				err = errors.New("there's problem in server")
 			}

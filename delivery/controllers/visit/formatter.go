@@ -8,6 +8,7 @@ import (
 )
 
 type Req struct {
+	Event_uid        string
 	Doctor_uid       string `json:"doctor_uid" form:"doctor_uid" validate:"required"`
 	Patient_uid      string `json:"patient_uid" form:"patient_uid"`
 	Date             string `json:"date" form:"date" validate:"required"`
@@ -32,6 +33,7 @@ func (r *Req) ToVisit() *entities.Visit {
 	var dateConv, _ = time.Parse(layout, r.Date)
 
 	return &entities.Visit{
+		Event_uid:        r.Event_uid,
 		Date:             datatypes.Date(dateConv),
 		Status:           r.Status,
 		Complaint:        r.Complaint,
