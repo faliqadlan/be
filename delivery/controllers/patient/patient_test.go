@@ -157,10 +157,10 @@ func TestCreate(t *testing.T) {
 			"userName":   "doctor1",
 			"email":      "doctor@",
 			"password":   "a",
-			"nik":        "123",
+			"nik":        "1234567891234567",
 			"name":       "subejo",
 			"gender":     "pria",
-			"address":    "address",
+			"address":    "123456789123456",
 			"placeBirth": "malang",
 			"dob":        "05-05-2000",
 			"job":        "lainnya",
@@ -576,7 +576,7 @@ func TestCreate(t *testing.T) {
 			"userName":   "doctor1",
 			"email":      "doctor@",
 			"password":   "a",
-			"nik":        "123",
+			"nik":        "123456789123456",
 			"name":       "name",
 			"gender":     "pria",
 			"address":    "address",
@@ -611,7 +611,7 @@ func TestCreate(t *testing.T) {
 			"userName":   "doctor1",
 			"email":      "doctor@",
 			"password":   "a",
-			"nik":        "123",
+			"nik":        "123456789123456",
 			"name":       "name",
 			"gender":     "pria",
 			"address":    "address",
@@ -646,7 +646,7 @@ func TestCreate(t *testing.T) {
 			"userName":   "doctor1",
 			"email":      "doctor@",
 			"password":   "a",
-			"nik":        "123",
+			"nik":        "123456789123456",
 			"name":       "name",
 			"gender":     "pria",
 			"address":    "address",
@@ -682,10 +682,10 @@ func TestCreate(t *testing.T) {
 		writer.WriteField("userName", "doctor1")
 		writer.WriteField("email", "doctor")
 		writer.WriteField("password", "doctor")
-		writer.WriteField("nik", "nik")
+		writer.WriteField("nik", "1234567891234567")
 		writer.WriteField("name", "name")
 		writer.WriteField("gender", "pria")
-		writer.WriteField("address", "address")
+		writer.WriteField("address", "123456789123456")
 		writer.WriteField("placeBirth", "placeBirth")
 		writer.WriteField("dob", "05-05-2002")
 		writer.WriteField("job", "lainnya")
@@ -727,10 +727,10 @@ func TestCreate(t *testing.T) {
 		writer.WriteField("userName", "doctor1")
 		writer.WriteField("email", "doctor")
 		writer.WriteField("password", "doctor")
-		writer.WriteField("nik", "nik")
+		writer.WriteField("nik", "1234567891234567")
 		writer.WriteField("name", "name")
 		writer.WriteField("gender", "pria")
-		writer.WriteField("address", "address")
+		writer.WriteField("address", "123456789123456")
 		writer.WriteField("placeBirth", "placeBirth")
 		writer.WriteField("dob", "05-05-2002")
 		writer.WriteField("job", "lainnya")
@@ -771,10 +771,10 @@ func TestCreate(t *testing.T) {
 			"userName":   "doctor1",
 			"email":      "doctor@",
 			"password":   "a",
-			"nik":        "123",
+			"nik":        "1234567891234567",
 			"name":       "subejo",
 			"gender":     "pria",
-			"address":    "address",
+			"address":    "123456789123456",
 			"placeBirth": "malang",
 			"dob":        "05-05-2000",
 			"job":        "lainnya",
@@ -807,10 +807,10 @@ func TestCreate(t *testing.T) {
 			"userName":   "doctor1",
 			"email":      "doctor@",
 			"password":   "a",
-			"nik":        "123",
+			"nik":        "1234567891234567",
 			"name":       "subejo",
 			"gender":     "pria",
-			"address":    "address",
+			"address":    "123456789123456",
 			"placeBirth": "malang",
 			"dob":        "05-05-2000",
 			"job":        "lainnya",

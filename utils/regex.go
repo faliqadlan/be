@@ -40,7 +40,7 @@ func DigitRegex(s string) bool {
 }
 
 func NameValid(s string) error {
-	if len(s) <=4 && len(s) > 255 {
+	if len(s) < 4 || len(s) > 255 {
 		return errors.New("invalid length name")
 	} else {
 		if !NameRegex(s) {
@@ -51,7 +51,7 @@ func NameValid(s string) error {
 }
 
 func AddressValid(s string) error {
-	if len(s) <= 15 && len(s) > 255 {
+	if len(s) < 15 || len(s) > 255 {
 		return errors.New("invalid length address")
 	} else {
 		if !AddressRegex(s) {
@@ -62,7 +62,7 @@ func AddressValid(s string) error {
 }
 
 func UserNameValid(s string) error {
-	if len(s) <= 5 && len(s) > 255 {
+	if len(s) < 5 || len(s) > 255 {
 		return errors.New("invalid length user name")
 	} else {
 		if s, err := UserNameRegex(s); s != "success" {
@@ -85,4 +85,3 @@ func NikValid(s string) error {
 	}
 	return nil
 }
-

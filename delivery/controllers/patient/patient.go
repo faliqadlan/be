@@ -5,6 +5,7 @@ import (
 	"be/delivery/controllers/templates"
 	"be/delivery/middlewares"
 	"be/repository/patient"
+	"be/utils"
 	"errors"
 	"net/http"
 	"strings"
@@ -68,6 +69,34 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			default:
 				err = errors.New("invalid input")
 			}
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
+		// check format name
+
+		if err := utils.NameValid(req.Name); err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
+		// check format address
+
+		if err := utils.AddressValid(req.Address); err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
+		// check format user name
+
+		if err := utils.UserNameValid(req.UserName); err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
+		// check nik
+
+		if err := utils.NikValid(req.Nik); err != nil {
+			log.Warn(err)
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
