@@ -154,11 +154,18 @@ func TestCreate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "a",
-			"nik":      "123",
-			"dob":      "05-05-2000",
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -182,10 +189,18 @@ func TestCreate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": 123,
-			"nik":      "123",
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   123,
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -208,10 +223,18 @@ func TestCreate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "",
-			"email":    "doctor@",
-			"password": "password",
-			"nik":      "nik",
+			"userName":   "",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -235,10 +258,18 @@ func TestCreate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "userName",
-			"email":    "",
-			"password": "password",
-			"nik":      "nik",
+			"userName":   "doctor1",
+			"email":      "",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -262,10 +293,18 @@ func TestCreate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "userName",
-			"email":    "user",
-			"password": "",
-			"nik":      "nik",
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -289,10 +328,333 @@ func TestCreate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "userName",
-			"email":    "user",
-			"password": "password",
-			"nik":      "",
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("validator name ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("validator gender ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "name",
+			"gender":     "",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("validator address", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "name",
+			"gender":     "gender",
+			"address":    "",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("validator place birth ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "name",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("validator date of birth ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "name",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("validator job ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "name",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2001",
+			"job":        "",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("validator status ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "name",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2001",
+			"job":        "job",
+			"status":     "",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("validator religion ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "name",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2001",
+			"job":        "job",
+			"status":     "lainnya",
+			"religion":   "",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("invalid dob format ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "name",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-99",
+			"job":        "job",
+			"status":     "lainnya",
+			"religion":   "lainnya",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -321,6 +683,14 @@ func TestCreate(t *testing.T) {
 		writer.WriteField("email", "doctor")
 		writer.WriteField("password", "doctor")
 		writer.WriteField("nik", "nik")
+		writer.WriteField("name", "name")
+		writer.WriteField("gender", "pria")
+		writer.WriteField("address", "address")
+		writer.WriteField("placeBirth", "placeBirth")
+		writer.WriteField("dob", "05-05-2002")
+		writer.WriteField("job", "lainnya")
+		writer.WriteField("status", "lainnya")
+		writer.WriteField("religion", "religion")
 
 		part, err := writer.CreateFormFile("file", "photo.jpg")
 		if err != nil {
@@ -358,6 +728,14 @@ func TestCreate(t *testing.T) {
 		writer.WriteField("email", "doctor")
 		writer.WriteField("password", "doctor")
 		writer.WriteField("nik", "nik")
+		writer.WriteField("name", "name")
+		writer.WriteField("gender", "pria")
+		writer.WriteField("address", "address")
+		writer.WriteField("placeBirth", "placeBirth")
+		writer.WriteField("dob", "05-05-2002")
+		writer.WriteField("job", "lainnya")
+		writer.WriteField("status", "lainnya")
+		writer.WriteField("religion", "religion")
 
 		part, err := writer.CreateFormFile("file", "photo.jpg")
 		if err != nil {
@@ -390,10 +768,18 @@ func TestCreate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "doctor",
-			"nik":      "123",
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -418,10 +804,18 @@ func TestCreate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "doctor",
-			"nik":      "123",
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -495,7 +889,6 @@ func TestUpdate(t *testing.T) {
 		var response = ResponseFormat{}
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
 		assert.Equal(t, 202, response.Code)
 	})
 

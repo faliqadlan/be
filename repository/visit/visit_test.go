@@ -212,6 +212,28 @@ func TestCreateVal(t *testing.T) {
 		// log.Info(err3)
 	})
 
+	t.Run("invalid parent", func(t *testing.T) {
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: "doctor@", Password: "doctor", LeftCapacity: 10}
+		_, err := doctor.New(db).Create(mock)
+		if err != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: "patient@", Password: "patient"}
+		var _, err1 = patient.New(db).Create(mock1)
+		if err1 != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock2 = entities.Visit{Complaint: "sick"}
+
+		var _, err3 = r.CreateVal(shortuuid.New(), shortuuid.New(), mock2)
+		assert.NotNil(t, err3)
+		log.Info(err3)
+	})
+
 }
 
 func TestUpdate(t *testing.T) {

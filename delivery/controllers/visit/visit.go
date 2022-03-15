@@ -53,14 +53,26 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			}
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
-		res, err := cont.r.CreateVal(req.Doctor_uid, uid, *req.ToVisit())
+
+		entity, err := req.ToVisit()
+		if req.Date != "" {
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+			}
+		}
+
+		res, err := cont.r.CreateVal(req.Doctor_uid, uid, *entity)
 
 		if err != nil {
 			log.Warn(err)
-			switch err.Error() {
-			case errors.New("there's another appoinment in pending").Error():
+			switch {
+			case strings.Contains(err.Error(), "doctor_uid"):
+				err = errors.New("invalid doctor_uid")
+			case strings.Contains(err.Error(), "patient_uid"):
+				err = errors.New("invalid patient_uid")
+			case err.Error() == errors.New("there's another appoinment in pending").Error():
 				err = errors.New("there's another appoinment in pending")
-			case errors.New("left capacity can't below zero").Error():
+			case err.Error() == errors.New("left capacity can't below zero").Error():
 				err = errors.New("left capacity can't below zero")
 			default:
 				err = errors.New("there's problem in server")
@@ -86,11 +98,6 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusCreated, templates.Success(nil, "success add visit", res.Complaint))
 		}
 
-		// 	if !strings.Contains(err.Error(), "id") {
-		// 		break
-		// 	}
-		// }
-		// log.Info(res1.Id)
 		_, err = cont.r.Update(res.Visit_uid, entities.Visit{Event_uid: res1.Id})
 		if err != nil {
 			log.Warn(err)
@@ -114,7 +121,13 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "date can't updated, must cancel the appoinment", nil))
 		}
 		// log.Info(uid)
-		var res, err = cont.r.Update(uid, *req.ToVisit())
+		entity, err := req.ToVisit()
+		if req.Date != "" {
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+			}
+		}
+		res, err := cont.r.Update(uid, *entity)
 
 		if err != nil {
 			log.Warn(err)

@@ -2,6 +2,7 @@ package visit
 
 import (
 	"be/entities"
+	"errors"
 	"time"
 
 	"gorm.io/datatypes"
@@ -27,10 +28,13 @@ type Req struct {
 	Bmi              int    `json:"bmi" form:"bmi"`
 }
 
-func (r *Req) ToVisit() *entities.Visit {
+func (r *Req) ToVisit() (*entities.Visit, error) {
 	var layout = "02-01-2006"
 
-	var dateConv, _ = time.Parse(layout, r.Date)
+	var dateConv, err = time.Parse(layout, r.Date)
+	if err != nil {
+		return &entities.Visit{}, errors.New("invalid date format")
+	}
 
 	return &entities.Visit{
 		Event_uid:        r.Event_uid,
@@ -48,7 +52,7 @@ func (r *Req) ToVisit() *entities.Visit {
 		Weight:           r.Weight,
 		Height:           r.Height,
 		Bmi:              r.Bmi,
-	}
+	}, nil
 }
 
 type ResponseFormat struct {

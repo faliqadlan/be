@@ -49,6 +49,22 @@ func (cont *Controller) Create() echo.HandlerFunc {
 				err = errors.New("invalid password")
 			case strings.Contains(err.Error(), "Nik"):
 				err = errors.New("invalid nik")
+			case strings.Contains(err.Error(), "Name"):
+				err = errors.New("invalid name")
+			case strings.Contains(err.Error(), "Gender"):
+				err = errors.New("invalid gender")
+			case strings.Contains(err.Error(), "Address"):
+				err = errors.New("invalid address")
+			case strings.Contains(err.Error(), "PlaceBirth"):
+				err = errors.New("invalid place birth")
+			case strings.Contains(err.Error(), "Dob"):
+				err = errors.New("invalid date of birth")
+			case strings.Contains(err.Error(), "Job"):
+				err = errors.New("invalid job")
+			case strings.Contains(err.Error(), "Status"):
+				err = errors.New("invalid status")
+			case strings.Contains(err.Error(), "Religion"):
+				err = errors.New("invalid religion")
 			default:
 				err = errors.New("invalid input")
 			}
@@ -73,7 +89,13 @@ func (cont *Controller) Create() echo.HandlerFunc {
 
 		// database
 
-		res, err := cont.r.Create(*req.ToPatient())
+		entity, err := req.ToPatient()
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
+		res, err := cont.r.Create(*entity)
 
 		if err != nil {
 			log.Warn(err)
@@ -148,7 +170,9 @@ func (cont *Controller) Update() echo.HandlerFunc {
 
 		// database
 
-		res, err := cont.r.Update(uid, *req.ToPatient())
+		entity, _ := req.ToPatient()
+
+		res, err := cont.r.Update(uid, *entity)
 
 		if err != nil {
 			log.Warn(err)

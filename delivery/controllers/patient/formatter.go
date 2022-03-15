@@ -2,6 +2,7 @@ package patient
 
 import (
 	"be/entities"
+	"errors"
 	"time"
 
 	"gorm.io/datatypes"
@@ -23,11 +24,14 @@ type Req struct {
 	Religion   string `json:"religion" form:"religion"  validate:"required"`
 }
 
-func (r *Req) ToPatient() *entities.Patient {
+func (r *Req) ToPatient() (*entities.Patient, error) {
 
 	var layout = "02-01-2006"
 
-	var dateConv, _ = time.Parse(layout, r.Dob)
+	var dateConv, err = time.Parse(layout, r.Dob)
+	if err != nil {
+		return &entities.Patient{}, errors.New("invalid date format")
+	}
 	// log.Info(dateConv)
 	return &entities.Patient{
 		UserName:   r.UserName,
@@ -43,7 +47,7 @@ func (r *Req) ToPatient() *entities.Patient {
 		Job:        r.Job,
 		Status:     r.Status,
 		Religion:   r.Religion,
-	}
+	}, nil
 }
 
 type ResponseFormat struct {
