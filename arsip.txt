@@ -1,0 +1,19 @@
+	var alphabet = "hotaruhotaruhotaru"
+	var number = "1234587482749247"
+	var all = "hotaru123dnsajndanasn"
+	var withSpace = "hotaru123               "
+	var simbol = "hotaru123/,.hotaruhotaru"
+
+	log.Info("address")
+	log.Info(utils.AddressRegex(alphabet))
+	log.Info(utils.AddressRegex(number))
+	log.Info(utils.AddressRegex(all))
+	log.Info(utils.AddressRegex(withSpace))
+	log.Info(utils.AddressRegex(simbol))
+
+	log.Info("address")
+	log.Info(utils.AddressValid(alphabet))
+	log.Info(utils.AddressValid(number))
+	log.Info(utils.AddressValid(all))
+	log.Info(utils.AddressValid(withSpace))
+	log.Info(utils.AddressValid(simbol))
