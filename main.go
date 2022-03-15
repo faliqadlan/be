@@ -29,8 +29,6 @@ func main() {
 	var db = utils.InitDB(config)
 	var awsS3Conf = aws.InitS3(config.S3_REGION, config.S3_ID, config.S3_SECRET)
 
-	// api.CreteCredentialJson(config.CLIENT_ID, config.PROJECT_ID, config.AUTH_URI, config.TOKEN_URI, config.Auth_provider_x509_cert_url, config.CLIENT_SECRET)
-
 	var googleConf = googleApi.SetupConfig(config.DB_USERNAME, config.CLIENT_ID, config.CLIENT_SECRET)
 
 	var awsS3 = s3.New(awsS3Conf)
@@ -53,6 +51,15 @@ func main() {
 	var visitCont = visit.New(visitRepo, calendar)
 
 	var googleCont = google.New(googleConf, visitRepo)
+
+	// var number = "1234567891234567abcd"
+	// res, err := strconv.Atoi(number)
+	// if err != nil {
+	// 	log.Info(res)
+	// 	log.Info(err)
+	// }
+	// log.Info(res)
+	// log.Info(err)
 
 	var e = echo.New()
 

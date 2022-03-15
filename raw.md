@@ -28,9 +28,9 @@ Maecenas vel justo venenatis, rhoncus mauris vel, elementum augue. Aenean volutp
 | ------------ | ---------| ----------- | ------------ | --------- | ------ |
 </details>
 
-| Feature User | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
+| Feature Doctor | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
 | ------------ | ---------| ----------- | ------------ | --------- | ------ |
-| POST   | /login   | -
+| POST   | /login   | -   | indentity & | 
 
   
 | Feature User | Endpoint | Query Param | Request Body | JWT Token | Fungsi |

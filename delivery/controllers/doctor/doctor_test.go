@@ -191,32 +191,37 @@ func (m *MockAuthLib) Login(userName string, password string) (map[string]interf
 }
 
 func TestCreate(t *testing.T) {
-	t.Run("success Create", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			var e = echo.New()
 
-			var reqBody, _ = json.Marshal(map[string]interface{}{
-				"userName": "doctor1",
-				"email":    "doctor@",
-				"password": "a",
-			})
+	t.Run("success", func(t *testing.T) {
+		var e = echo.New()
 
-			var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-			var res = httptest.NewRecorder()
-			req.Header.Set("Content-Type", "application/json")
-
-			context := e.NewContext(req, res)
-			context.SetPath("/doctor")
-
-			var controller = New(&mockSuccess{}, &mockTaskS3M{})
-			controller.Create()(context)
-
-			var response = ResponseFormat{}
-
-			json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-			assert.Equal(t, 201, response.Code)
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 201, response.Code)
 	})
 
 	t.Run("binding", func(t *testing.T) {
@@ -225,7 +230,13 @@ func TestCreate(t *testing.T) {
 		var reqBody, _ = json.Marshal(map[string]interface{}{
 			"userName": "doctor1",
 			"email":    "doctor@",
-			"password": 123,
+			"password": "a",
+			"name":     50,
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -250,10 +261,15 @@ func TestCreate(t *testing.T) {
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
 			"userName": "",
-			"email":    "email",
-			"password": "email",
+			"email":    "doctor@",
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
-
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
 		var res = httptest.NewRecorder()
 		req.Header.Set("Content-Type", "application/json")
@@ -276,9 +292,15 @@ func TestCreate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "username",
+			"userName": "doctor1",
 			"email":    "",
-			"password": "email",
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -303,9 +325,15 @@ func TestCreate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "username",
-			"email":    "email",
+			"userName": "doctor1",
+			"email":    "doctor@",
 			"password": "",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -334,6 +362,12 @@ func TestCreate(t *testing.T) {
 		writer.WriteField("userName", "doctor1")
 		writer.WriteField("email", "doctor")
 		writer.WriteField("password", "doctor")
+		writer.WriteField("name", "name")
+		writer.WriteField("address", "123456789123456")
+		writer.WriteField("status", "status")
+		writer.WriteField("openDay", "senin")
+		writer.WriteField("closeDay", "senin")
+		writer.WriteField("capacity", "50")
 
 		part, err := writer.CreateFormFile("file", "photo.jpg")
 		if err != nil {
@@ -370,6 +404,12 @@ func TestCreate(t *testing.T) {
 		writer.WriteField("userName", "doctor1")
 		writer.WriteField("email", "doctor")
 		writer.WriteField("password", "doctor")
+		writer.WriteField("name", "name")
+		writer.WriteField("address", "123456789123456")
+		writer.WriteField("status", "status")
+		writer.WriteField("openDay", "senin")
+		writer.WriteField("closeDay", "senin")
+		writer.WriteField("capacity", "50")
 
 		part, err := writer.CreateFormFile("file", "photo.jpg")
 		if err != nil {
@@ -404,7 +444,13 @@ func TestCreate(t *testing.T) {
 		var reqBody, _ = json.Marshal(map[string]interface{}{
 			"userName": "doctor1",
 			"email":    "doctor@",
-			"password": "doctor",
+			"password": "abc",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -432,7 +478,13 @@ func TestCreate(t *testing.T) {
 		var reqBody, _ = json.Marshal(map[string]interface{}{
 			"userName": "doctor1",
 			"email":    "doctor@",
-			"password": "doctor",
+			"password": "abc",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -460,7 +512,13 @@ func TestCreate(t *testing.T) {
 		var reqBody, _ = json.Marshal(map[string]interface{}{
 			"userName": "doctor1",
 			"email":    "doctor@",
-			"password": "doctor",
+			"password": "abc",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))

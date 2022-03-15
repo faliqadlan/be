@@ -6,13 +6,13 @@ type Req struct {
 	UserName string `json:"userName" form:"userName" validate:"required"`
 	Email    string `json:"email" form:"email" validate:"required"`
 	Password string `json:"password" form:"password" validate:"required"`
-	Name     string `json:"Name" form:"Name"`
+	Name     string `json:"Name" form:"Name" validate:"required"`
 	Image    string `json:"image" form:"image"`
-	Address  string `json:"address" form:"address"`
-	Status   string `json:"status" form:"status"`
-	OpenDay  string `json:"openDay" form:"openDay"`
-	CloseDay string `json:"closeDay" form:"closeDay"`
-	Capacity int    `json:"capacity" form:"capacity"`
+	Address  string `json:"address" form:"address" validate:"required"`
+	Status   string `json:"status" form:"status" validate:"required"`
+	OpenDay  string `json:"openDay" form:"openDay" validate:"required"`
+	CloseDay string `json:"closeDay" form:"closeDay" validate:"required"`
+	Capacity int    `json:"capacity" form:"capacity" validate:"required"`
 }
 
 func (r *Req) ToDoctor() *entities.Doctor {
