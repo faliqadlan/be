@@ -51,14 +51,14 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("error parsing date", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: shortuuid.New(), Email: "doctor@", Password: "doctor"}
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor"}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
 			t.Fatal()
 		}
 
-		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: "patient@", Password: "patient"}
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "patient"}
 		var res1, err1 = patient.New(db).Create(mock1)
 		if err1 != nil {
 			t.Log()
@@ -73,14 +73,14 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("error duplicate", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: shortuuid.New(), Email: "doctor@", Password: "doctor"}
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor"}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
 			t.Fatal()
 		}
 
-		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: "patient@", Password: "patient"}
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "patient"}
 		var res1, err1 = patient.New(db).Create(mock1)
 		if err1 != nil {
 			t.Log()
@@ -137,14 +137,14 @@ func TestCreateVal(t *testing.T) {
 	})
 
 	t.Run("success handle pending", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: "doctor2", Email: "doctor@", Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: "doctor2", Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
 			t.Fatal()
 		}
 
-		var mock1 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
+		var mock1 = entities.Patient{UserName: "patient2", Email: shortuuid.New(), Password: "patient"}
 		var res1, err1 = patient.New(db).Create(mock1)
 		if err1 != nil {
 			t.Log()
@@ -164,14 +164,14 @@ func TestCreateVal(t *testing.T) {
 	})
 
 	t.Run("duplicate entry", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: shortuuid.New(), Email: "doctor@", Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
 			t.Fatal()
 		}
 
-		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: "patient@", Password: "patient"}
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "patient"}
 		var res1, err1 = patient.New(db).Create(mock1)
 		if err1 != nil {
 			t.Log()
@@ -191,14 +191,14 @@ func TestCreateVal(t *testing.T) {
 	})
 
 	t.Run("left capacity can't below zero", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: shortuuid.New(), Email: "doctor@", Password: "doctor"}
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor"}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
 			t.Fatal()
 		}
 
-		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: "patient@", Password: "patient"}
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "patient"}
 		var res1, err1 = patient.New(db).Create(mock1)
 		if err1 != nil {
 			t.Log()
@@ -213,14 +213,14 @@ func TestCreateVal(t *testing.T) {
 	})
 
 	t.Run("invalid parent", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: shortuuid.New(), Email: "doctor@", Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
 			t.Fatal()
 		}
 
-		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: "patient@", Password: "patient"}
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "patient"}
 		var _, err1 = patient.New(db).Create(mock1)
 		if err1 != nil {
 			t.Log()
@@ -274,14 +274,14 @@ func TestUpdate(t *testing.T) {
 	})
 
 	t.Run("invalid uid", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: "doctor2", Email: "doctor@", Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: "doctor2", Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
 			t.Fatal()
 		}
 
-		var mock1 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
+		var mock1 = entities.Patient{UserName: "patient2", Email: shortuuid.New(), Password: "patient"}
 		var res1, err1 = patient.New(db).Create(mock1)
 		if err1 != nil {
 			t.Log()
@@ -341,14 +341,14 @@ func TestDelete(t *testing.T) {
 	})
 
 	t.Run("invalid uid", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: "doctor2", Email: "doctor@", Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: "doctor2", Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
 			t.Fatal()
 		}
 
-		var mock1 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
+		var mock1 = entities.Patient{UserName: "patient2", Email: shortuuid.New(), Password: "patient"}
 		var res1, err1 = patient.New(db).Create(mock1)
 		if err1 != nil {
 			t.Log()
@@ -412,7 +412,7 @@ func TestGetVisitsList(t *testing.T) {
 	})
 
 	t.Run("invalid uid", func(t *testing.T) {
-		var mock1 = entities.Doctor{UserName: "clinic2", Email: "clinic@", Password: "clinic"}
+		var mock1 = entities.Doctor{UserName: "clinic2", Email: shortuuid.New(), Password: "clinic"}
 
 		var res, err = doctor.New(db).Create(mock1)
 		if err != nil {
@@ -420,7 +420,7 @@ func TestGetVisitsList(t *testing.T) {
 			t.Fatal()
 		}
 
-		var mock2 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient", Nik: "1", Name: "name 1"}
+		var mock2 = entities.Patient{UserName: "patient2", Email: shortuuid.New(), Password: "patient", Nik: "1", Name: "name 1"}
 
 		var res2, err2 = patient.New(db).Create(mock2)
 		if err2 != nil {
@@ -479,12 +479,22 @@ func TestGetVisitsVer1(t *testing.T) {
 			t.Fatal()
 		}
 
+		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1"}); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1"}); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
 		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2", Status: "ready"}); err != nil {
 			log.Info(err)
 			t.Fatal()
 		}
 
-		mock2 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient", Nik: "1", Name: "name2"}
+		mock2 = entities.Patient{UserName: "patient2", Email: shortuuid.New(), Password: "patient", Nik: "1", Name: "name2"}
 
 		res2, err2 = patient.New(db).Create(mock2)
 		if err2 != nil {
@@ -502,7 +512,7 @@ func TestGetVisitsVer1(t *testing.T) {
 			t.Fatal()
 		}
 
-		mock2 = entities.Patient{UserName: "patient3", Email: "patient@", Password: "patient", Nik: "3", Name: "name3"}
+		mock2 = entities.Patient{UserName: "patient3", Email: shortuuid.New(), Password: "patient", Nik: "3", Name: "name3"}
 
 		res2, err2 = patient.New(db).Create(mock2)
 		if err2 != nil {

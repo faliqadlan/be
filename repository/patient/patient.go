@@ -4,8 +4,9 @@ import (
 	"be/entities"
 	"be/utils"
 	"errors"
+	"strconv"
 
-	"github.com/lithammer/shortuuid"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -43,7 +44,7 @@ func (r *Repo) Create(req entities.Patient) (entities.Patient, error) {
 
 	var uid string
 	for {
-		uid = shortuuid.New()
+		uid = strconv.Itoa(int(uuid.New().ID()))
 		var find = entities.Patient{}
 		var res = r.db.Model(&entities.Patient{}).Where("patient_uid = ?", uid).Find(&find)
 		if res.RowsAffected == 0 {

@@ -3,10 +3,10 @@ package visit
 import (
 	"be/entities"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/labstack/gommon/log"
-	"github.com/lithammer/shortuuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -30,17 +30,11 @@ func (r *Repo) Create(doctor_uid, patient_uid, date string, req entities.Visit) 
 		return entities.Visit{}, errors.New("error in time parse date")
 	}
 
+	var res = r.db.Model(&entities.Visit{}).Where("patient_uid = ?", patient_uid).Scan(&[]entities.Visit{})
+	var uid string = patient_uid + "-" + strconv.Itoa(int(res.RowsAffected)+1)
+	// log.Info(res.RowsAffected)
 	req.Date = datatypes.Date(dateConv)
 
-	var uid string
-	for {
-		uid = shortuuid.New()
-		var find = entities.Visit{}
-		var res = r.db.Model(&entities.Visit{}).Where("visit_uid = ?", uid).Find(&find)
-		if res.RowsAffected == 0 {
-			break
-		}
-	}
 	req.Visit_uid = uid
 	req.Doctor_uid = doctor_uid
 	req.Patient_uid = patient_uid
@@ -91,21 +85,12 @@ func (r *Repo) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (en
 		return entities.Visit{}, errors.New("there's another appoinment in pending")
 	}
 
-	var uid string
-	for {
-		uid = shortuuid.New()
-		var find = entities.Visit{}
-		var res = r.db.Model(&entities.Visit{}).Where("visit_uid = ?", uid).Find(&find)
-		if res.RowsAffected == 0 {
-			break
-		}
-	}
+	var res = r.db.Model(&entities.Visit{}).Where("patient_uid = ?", patient_uid).Scan(&[]entities.Visit{})
+	var uid string = patient_uid + "-" + strconv.Itoa(int(res.RowsAffected)+1)
+
 	req.Visit_uid = uid
 	req.Doctor_uid = doctor_uid
 	req.Patient_uid = patient_uid
-	// if req.Height != 0 {
-	// 	req.Bmi = req.Weight / req.Height
-	// }
 
 	tx := r.db.Begin()
 	defer func() {
