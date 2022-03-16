@@ -5,6 +5,7 @@ import (
 	"be/delivery/controllers/templates"
 	"be/delivery/middlewares"
 	"be/repository/patient"
+	logic "be/delivery/logic/patient"
 	"errors"
 	"net/http"
 	"strings"
@@ -17,6 +18,7 @@ import (
 type Controller struct {
 	r      patient.Patient
 	taskS3 s3.TaskS3M
+	logic logic.Patient
 }
 
 func New(r patient.Patient, taskS3 s3.TaskS3M) *Controller {

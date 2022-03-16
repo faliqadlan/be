@@ -1,13 +1,16 @@
 package patient
 
 import (
-	"be/delivery/controllers/patient"
 	"be/utils"
 )
 
 type Logic struct{}
 
-func (l *Logic) ValidationRegexPatient(req patient.Req) error {
+func New() *Logic {
+	return &Logic{}
+}
+
+func (l *Logic) ValidationRegexPatient(req Req) error {
 	if err := utils.UserNameValid(req.UserName); err != nil && req.UserName != "" {
 		return err
 	}
