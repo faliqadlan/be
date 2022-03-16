@@ -4,7 +4,6 @@ import (
 	"be/entities"
 	"be/utils"
 	"errors"
-	"strings"
 
 	"github.com/labstack/gommon/log"
 	"gorm.io/gorm"
@@ -54,7 +53,7 @@ func (ad *AuthDb) Login(userName string, password string) (map[string]interface{
 
 	if res.RowsAffected != 0 {
 
-		if strings.Contains(doctor.UserName, "admin") {
+		if doctor.Type == "admin" {
 			return map[string]interface{}{
 				"data": doctor.Doctor_uid,
 				"type": "admin",

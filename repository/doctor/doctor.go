@@ -59,12 +59,15 @@ func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 		log.Warn(err)
 		return entities.Doctor{}, errors.New("error in hash password")
 	}
-
+	req.Type = "doctor"
 	if res := r.db.Model(&entities.Doctor{}).Create(&req); res.Error != nil {
 		log.Warn(err)
 		return entities.Doctor{}, res.Error
 	}
 
+	// create admin
+
+	req.Type = "admin"
 	req.UserName = "admin" + req.UserName
 	for {
 		uid = shortuuid.New()
