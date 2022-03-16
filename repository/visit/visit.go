@@ -179,10 +179,12 @@ func (r *Repo) Update(visit_uid string, req entities.Visit) (entities.Visit, err
 		Height:           req.Height,
 		Bmi:              req.Bmi,
 	}); res.Error != nil || res.RowsAffected == 0 {
-		switch  {
+		switch {
 		case res.Error == nil:
+			tx.Rollback()
 			return entities.Visit{}, gorm.ErrRecordNotFound
 		default:
+			tx.Rollback()
 			return entities.Visit{}, res.Error
 		}
 	}

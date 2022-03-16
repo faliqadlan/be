@@ -140,8 +140,10 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		Capacity: req.Capacity}).Update("left_capacity", leftCapacity); res.Error != nil || res.RowsAffected == 0 {
 		switch {
 		case res.Error == nil:
+			tx.Rollback()
 			return entities.Doctor{}, gorm.ErrRecordNotFound
 		default:
+			tx.Rollback()
 			return entities.Doctor{}, res.Error
 		}
 	}
