@@ -48,9 +48,34 @@ func (cont *Controller) Create() echo.HandlerFunc {
 				err = errors.New("invalid email")
 			case strings.Contains(err.Error(), "Password"):
 				err = errors.New("invalid password")
+			case strings.Contains(err.Error(), "Name"):
+				err = errors.New("invalid name")
+			case strings.Contains(err.Error(), "Address"):
+				err = errors.New("invalid address")
+			case strings.Contains(err.Error(), "Status"):
+				err = errors.New("invalid status")
+			case strings.Contains(err.Error(), "OpenDay"):
+				err = errors.New("invalid open day")
+			case strings.Contains(err.Error(), "CloseDay"):
+				err = errors.New("invalid close day")
+			case strings.Contains(err.Error(), "Capacity"):
+				err = errors.New("invalid capacity ")
 			default:
 				err = errors.New("invalid input")
 			}
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
+		// check capacity
+
+		if req.Capacity < 0 {
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "can't assign capacity below zero", nil))
+		}
+
+		// check format user name
+
+		if err := utils.UserNameValid(req.UserName); err != nil {
+			log.Warn(err)
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
@@ -64,13 +89,6 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		// check format address
 
 		if err := utils.AddressValid(req.Address); err != nil {
-			log.Warn(err)
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
-		}
-
-		// check format user name
-
-		if err := utils.UserNameValid(req.UserName); err != nil {
 			log.Warn(err)
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
@@ -97,13 +115,15 @@ func (cont *Controller) Create() echo.HandlerFunc {
 
 		if err != nil {
 			log.Warn(err)
-			// log.Info(err.Error() == errors.New("can't assign capacity below zero").Error())
-			switch err.Error() {
-			case errors.New("can't assign capacity below zero").Error():
-
-				err = errors.New("can't assign capacity below zero")
-			case errors.New("user name is already exist").Error():
+			switch {
+			case err.Error() == errors.New("user name is already exist").Error():
 				err = errors.New("user name is already exist")
+			case strings.Contains(err.Error(), "status"):
+				err = errors.New("invalid status")
+			case strings.Contains(err.Error(), "open_day"):
+				err = errors.New("invalid open day")
+			case strings.Contains(err.Error(), "close_day"):
+				err = errors.New("invalid close day")
 			default:
 				err = errors.New("there's some problem is server")
 			}
@@ -126,6 +146,33 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		if err := c.Bind(&req); err != nil {
 			log.Warn(err)
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
+		}
+
+		// check capacity
+
+		if req.Capacity < 0 && req.Capacity != 0 {
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "can't assign capacity below zero", nil))
+		}
+
+		// check format user name
+
+		if err := utils.UserNameValid(req.UserName); err != nil && req.UserName != "" {
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
+		// check format name
+
+		if err := utils.NameValid(req.Name); err != nil && req.Name != "" {
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
+		// check format address
+
+		if err := utils.AddressValid(req.Address); err != nil && req.Address != "" {
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
 		// aws s3
@@ -168,12 +215,18 @@ func (cont *Controller) Update() echo.HandlerFunc {
 
 		if err != nil {
 			log.Warn(err)
-			switch err.Error() {
-			case errors.New("user name is already exist").Error():
+			switch {
+			case err.Error() == errors.New("user name is already exist").Error():
 				err = errors.New("user name is already exist")
-			case errors.New("can't update capacity below total pending patients").Error():
+			case err.Error() == errors.New("can't update capacity below total pending patients").Error():
 				err = errors.New("can't update capacity below total pending patients")
-			case "record not found":
+			case strings.Contains(err.Error(), "status"):
+				err = errors.New("invalid status")
+			case strings.Contains(err.Error(), "open_day"):
+				err = errors.New("invalid open day")
+			case strings.Contains(err.Error(), "close_day"):
+				err = errors.New("invalid close day")
+			case err.Error() == "record not found":
 				err = errors.New("account is not found")
 			default:
 				err = errors.New("there's some problem is server")

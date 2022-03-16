@@ -26,12 +26,12 @@ func UserNameRegex(s string) (string, error) {
 
 func NameRegex(s string) bool {
 
-	return regexp.MustCompile(`^[[:alpha:]]+$`).MatchString(s)
+	return regexp.MustCompile(`^[[:alpha:]\s]+$`).MatchString(s)
 }
 
 func AddressRegex(s string) bool {
 
-	return regexp.MustCompile(`^[a-zA-Z0-9/,.]+$`).MatchString(s)
+	return regexp.MustCompile(`^[a-zA-Z0-9/,.\s]+$`).MatchString(s)
 }
 
 func DigitRegex(s string) bool {

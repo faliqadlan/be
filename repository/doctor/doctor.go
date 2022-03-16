@@ -23,12 +23,6 @@ func New(db *gorm.DB) *Repo {
 
 func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 
-	// check capacity
-
-	if req.Capacity < 0 {
-		return entities.Doctor{}, errors.New("can't assign capacity below zero")
-	}
-
 	// check username
 
 	type userNameCheck struct {
@@ -146,7 +140,6 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		Capacity: req.Capacity}).Update("left_capacity", leftCapacity); res.Error != nil || res.RowsAffected == 0 {
 		log.Warn(res.Error)
 		tx.Rollback()
-		log.Warn(res.Error)
 		return entities.Doctor{}, gorm.ErrRecordNotFound
 	}
 

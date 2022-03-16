@@ -31,15 +31,6 @@ func TestCreate(t *testing.T) {
 		// log.Info(res)
 	})
 
-	t.Run("handle below zero capacity", func(t *testing.T) {
-		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic", Capacity: -10}
-
-		var _, err = r.Create(mock1)
-		assert.NotNil(t, err)
-		// log.Info(err)
-
-	})
-
 	t.Run("success handle username", func(t *testing.T) {
 		var mock = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
 
@@ -67,6 +58,14 @@ func TestCreate(t *testing.T) {
 		var _, err = r.Create(mock1)
 		assert.NotNil(t, err)
 		// log.Info(err)
+	})
+
+	t.Run("success handle enum", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: "patient1", Email: "doctor@", Password: "clinic", CloseDay: "daksndka"}
+
+		var _, err = r.Create(mock1)
+		assert.NotNil(t, err)
+		log.Info(err)
 	})
 }
 
@@ -148,6 +147,22 @@ func TestUpdate(t *testing.T) {
 		mock1 = entities.Doctor{Name: "clinic"}
 
 		_, err = r.Update("", mock1)
+		assert.NotNil(t, err)
+		// log.Info(err)
+	})
+
+	t.Run("error input enum", func(t *testing.T) {
+		var mock1 = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "clinic"}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Doctor{Name: "clinic", OpenDay: "ndjandsjka"}
+
+		_, err = r.Update(res.Doctor_uid, mock1)
 		assert.NotNil(t, err)
 		// log.Info(err)
 	})

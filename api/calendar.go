@@ -60,7 +60,7 @@ func Calendar(file string, conf *oauth2.Config) string {
 	calendarId := "primary"
 	event, err = srv.Events.Insert(calendarId, event).Do()
 	if err != nil {
-		log.Warn("Unable to create event. %v\n", err)
+		log.Warn(err)
 		return err.Error()
 	}
 	// log.Info(strings.Contains(err.Error(), "id"))
