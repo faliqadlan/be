@@ -65,7 +65,8 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			}
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
-
+		log.Info(req)
+		log.Info(req.Name)
 		// check capacity
 
 		if req.Capacity < 0 {
