@@ -59,6 +59,14 @@ func TestCreate(t *testing.T) {
 		assert.NotNil(t, err)
 		log.Info(err)
 	})
+
+	t.Run("error enum", func(t *testing.T) {
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "anonim", Nik: "1", Religion: "najndaj"}
+
+		var _, err = r.Create(mock1)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
 }
 
 func TestUpdate(t *testing.T) {
@@ -125,6 +133,22 @@ func TestUpdate(t *testing.T) {
 		_, err = r.Update("", mock1)
 		assert.NotNil(t, err)
 		// log.Info(err)
+	})
+
+	t.Run("error enum", func(t *testing.T) {
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "clinic", Nik: "1"}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Patient{Name: "clinic", Gender: "ihihih"}
+
+		_, err = r.Update(res.Patient_uid, mock1)
+		assert.NotNil(t, err)
+		log.Info(err)
 	})
 
 }

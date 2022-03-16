@@ -21,6 +21,60 @@ import (
 	"gorm.io/gorm"
 )
 
+func TestValidationRegexPatient(t *testing.T) {
+	t.Run("error user name", func(t *testing.T) {
+		var req Req
+
+		req.UserName = "hotaru123   "
+
+		var err = ValidationRegexPatient(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+	t.Run("error name", func(t *testing.T) {
+		var req Req
+
+		req.Name = "hotaru123   "
+
+		var err = ValidationRegexPatient(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("error address", func(t *testing.T) {
+		var req Req
+
+		req.Address = "hotaru123   *(&*&**&*&*&(*&(*&&^"
+
+		var err = ValidationRegexPatient(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("error nik", func(t *testing.T) {
+		var req Req
+
+		req.Nik = "123456789123456a"
+
+		var err = ValidationRegexPatient(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("success", func(t *testing.T) {
+		var req Req
+
+		var err = ValidationRegexPatient(req)
+
+		assert.Nil(t, err)
+		log.Info(err)
+	})
+}
+
 type mockTaskS3M struct{}
 
 func (m *mockTaskS3M) UploadFileToS3(fileHeader multipart.FileHeader) (string, error) {
@@ -639,7 +693,7 @@ func TestCreate(t *testing.T) {
 		// log.Info(response.Message)
 	})
 
-	t.Run("invalid dob format ", func(t *testing.T) {
+	t.Run("regex validation", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
@@ -647,9 +701,44 @@ func TestCreate(t *testing.T) {
 			"email":      "doctor@",
 			"password":   "a",
 			"nik":        "123456789123456",
-			"name":       "name",
+			"name":       "name(*&*(",
 			"gender":     "pria",
 			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2001",
+			"job":        "job",
+			"status":     "lainnya",
+			"religion":   "religion",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("invalid dob format ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "1234567891234567",
+			"name":       "name",
+			"gender":     "pria",
+			"address":    "addressanjsndkjsandkjans",
 			"placeBirth": "malang",
 			"dob":        "05-05-99",
 			"job":        "job",
@@ -669,7 +758,7 @@ func TestCreate(t *testing.T) {
 		var response = ResponseFormat{}
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
+		log.Info(response)
 		assert.Equal(t, 400, response.Code)
 		// log.Info(response.Message)
 	})
@@ -1004,6 +1093,34 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
+	t.Run("regex validation", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"name": "05-05-2002",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
 	t.Run("succeess update file", func(t *testing.T) {
 
 		var reqBody = new(bytes.Buffer)
@@ -1188,7 +1305,7 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": "123",
+			"name": "hotaru",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1216,7 +1333,7 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": "123",
+			"name": "hotaru",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1244,7 +1361,7 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": "123",
+			"name": "hotaru",
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))

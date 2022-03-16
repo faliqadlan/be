@@ -91,7 +91,13 @@ func (r *Repo) Update(patient_uid string, req entities.Patient) (entities.Patien
 		Address:  req.Address,
 		Status:   req.Status,
 		Religion: req.Religion}); res.Error != nil || res.RowsAffected == 0 {
-		return entities.Patient{}, gorm.ErrRecordNotFound
+		switch {
+		case res.Error == nil:
+			return entities.Patient{}, gorm.ErrRecordNotFound
+		default:
+			return entities.Patient{}, res.Error
+		}
+
 	}
 
 	return resInit, nil

@@ -138,9 +138,12 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		OpenDay:  req.OpenDay,
 		CloseDay: req.CloseDay,
 		Capacity: req.Capacity}).Update("left_capacity", leftCapacity); res.Error != nil || res.RowsAffected == 0 {
-		log.Warn(res.Error)
-		tx.Rollback()
-		return entities.Doctor{}, gorm.ErrRecordNotFound
+		switch {
+		case res.Error == nil:
+			return entities.Doctor{}, gorm.ErrRecordNotFound
+		default:
+			return entities.Doctor{}, res.Error
+		}
 	}
 
 	return resInit, tx.Commit().Error

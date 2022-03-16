@@ -1,0 +1,124 @@
+type genderEnum struct{}
+
+func (m *genderEnum) Create(patientReq entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("Error 1265: Data truncated for column 'gender' at row 1")
+}
+
+func (m *genderEnum) Update(patient_uid string, req entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("Error 1265: Data truncated for column 'gender' at row 1")
+}
+
+func (m *genderEnum) Delete(patient_uid string) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("Error 1265: Data truncated for column 'gender' at row 1")
+}
+
+func (m *genderEnum) GetProfile(patient_uid string) (patient.Profile, error) {
+	return patient.Profile{}, errors.New("Error 1265: Data truncated for column 'gender' at row 1")
+}
+
+type statusEnum struct{}
+
+func (m *statusEnum) Create(patientReq entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("Error 1265: Data truncated for column 'status' at row 1")
+}
+
+func (m *statusEnum) Update(patient_uid string, req entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("Error 1265: Data truncated for column 'status' at row 1")
+}
+
+func (m *statusEnum) Delete(patient_uid string) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("Error 1265: Data truncated for column 'gender' at row 1")
+}
+
+func (m *statusEnum) GetProfile(patient_uid string) (patient.Profile, error) {
+	return patient.Profile{}, errors.New("Error 1265: Data truncated for column 'gender' at row 1")
+}
+
+type religionEnum struct{}
+
+func (m *religionEnum) Create(patientReq entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("Error 1265: Data truncated for column 'religion' at row 1")
+}
+
+func (m *religionEnum) Update(patient_uid string, req entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("Error 1265: Data truncated for column 'religion' at row 1")
+}
+
+func (m *religionEnum) Delete(patient_uid string) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("Error 1265: Data truncated for column 'gender' at row 1")
+}
+
+func (m *religionEnum) GetProfile(patient_uid string) (patient.Profile, error) {
+	return patient.Profile{}, errors.New("Error 1265: Data truncated for column 'gender' at row 1")
+}
+
+
+func TestValidationRegexPatient(t *testing.T) {
+	t.Run("error user name", func(t *testing.T) {
+		var req patient.Req
+
+		req.UserName = "hotaru123   "
+
+		var err = ValidationRegexPatient(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+	t.Run("error name", func(t *testing.T) {
+		var req patient.Req
+
+		req.Name = "hotaru123   "
+
+		var err = ValidationRegexPatient(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("error address", func(t *testing.T) {
+		var req patient.Req
+
+		req.Address = "hotaru123   *(&*&**&*&*&(*&(*&&^"
+
+		var err = ValidationRegexPatient(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("error nik", func(t *testing.T) {
+		var req patient.Req
+
+		req.Nik = "123456789123456a"
+
+		var err = ValidationRegexPatient(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("success", func(t *testing.T) {
+		var req patient.Req
+
+		var err = ValidationRegexPatient(req)
+
+		assert.Nil(t, err)
+		log.Info(err)
+	})
+}
+
+func ValidationRegexPatient(req patient.Req) error {
+	if err := utils.UserNameValid(req.UserName); err != nil && req.UserName != "" {
+		return err
+	}
+	if err := utils.NameValid(req.Name); err != nil && req.Name != "" {
+		return err
+	}
+	if err := utils.AddressValid(req.Address); err != nil && req.Address != "" {
+		return err
+	}
+	if err := utils.NikValid(req.Nik); err != nil && req.Nik != "" {
+		return err
+	}
+	return nil
+}

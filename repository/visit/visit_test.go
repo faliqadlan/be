@@ -102,6 +102,32 @@ func TestCreate(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 
+	t.Run("error enum", func(t *testing.T) {
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor"}
+		res, err := doctor.New(db).Create(mock)
+		if err != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "patient"}
+		var res1, err1 = patient.New(db).Create(mock1)
+		if err1 != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var layDate = "02-01-2006"
+
+		var dateNow = time.Now().Local().Format(layDate)
+
+		var mock2 = entities.Visit{Complaint: "sick", Status: "djsaji"}
+
+		var _, err3 = r.Create(res.Doctor_uid, res1.Patient_uid, dateNow, mock2)
+		assert.NotNil(t, err3)
+		log.Info(err3)
+	})
+
 }
 
 func TestCreateVal(t *testing.T) {
@@ -234,6 +260,28 @@ func TestCreateVal(t *testing.T) {
 		log.Info(err3)
 	})
 
+	t.Run("error enum", func(t *testing.T) {
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
+		res, err := doctor.New(db).Create(mock)
+		if err != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "patient"}
+		var res1, err1 = patient.New(db).Create(mock1)
+		if err1 != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock2 = entities.Visit{Complaint: "sick", Status: "jsaa"}
+
+		var _, err3 = r.CreateVal(res.Doctor_uid, res1.Patient_uid, mock2)
+		assert.NotNil(t, err3)
+		log.Info(err3)
+	})
+
 }
 
 func TestUpdate(t *testing.T) {
@@ -298,6 +346,33 @@ func TestUpdate(t *testing.T) {
 		var _, err3 = r.Update(shortuuid.New(), entities.Visit{Status: "cancelled", Complaint: "update complaint", MainDiagnose: "update main diagnose", AdditionDiagnose: "update addition_diagnose", Action: "update action", Recipe: "update recipe", BloodPressure: "update blood_pressure", HeartRate: "update heart_rate", O2Saturate: "update o2_saturate", Weight: 100, Height: 100, Bmi: 100})
 		assert.NotNil(t, err3)
 		// log.Info(err3)
+	})
+
+	t.Run("error enum", func(t *testing.T) {
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
+		res, err := doctor.New(db).Create(mock)
+		if err != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "patient"}
+		var res1, err1 = patient.New(db).Create(mock1)
+		if err1 != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock2 = entities.Visit{Complaint: "sick"}
+		res2, err2 := r.CreateVal(res.Doctor_uid, res1.Patient_uid, mock2)
+		if err2 != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var _, err3 = r.Update(res2.Visit_uid, entities.Visit{Status: "njsndaj", Complaint: "update complaint", MainDiagnose: "update main diagnose", AdditionDiagnose: "update addition_diagnose", Action: "update action", Recipe: "update recipe", BloodPressure: "update blood_pressure", HeartRate: "update heart_rate", O2Saturate: "update o2_saturate", Weight: 100, Height: 100, Bmi: 100})
+		assert.NotNil(t, err3)
+		log.Info(err3)
 	})
 
 }
