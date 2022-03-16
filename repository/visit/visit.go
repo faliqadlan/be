@@ -30,7 +30,7 @@ func (r *Repo) Create(doctor_uid, patient_uid, date string, req entities.Visit) 
 		return entities.Visit{}, errors.New("error in time parse date")
 	}
 
-	var res = r.db.Model(&entities.Visit{}).Where("patient_uid = ?", patient_uid).Scan(&[]entities.Visit{})
+	var res = r.db.Unscoped().Model(&entities.Visit{}).Where("patient_uid = ?", patient_uid).Scan(&[]entities.Visit{})
 	var uid string = patient_uid + "-" + strconv.Itoa(int(res.RowsAffected)+1)
 	// log.Info(res.RowsAffected)
 	req.Date = datatypes.Date(dateConv)
@@ -85,7 +85,7 @@ func (r *Repo) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (en
 		return entities.Visit{}, errors.New("there's another appoinment in pending")
 	}
 
-	var res = r.db.Model(&entities.Visit{}).Where("patient_uid = ?", patient_uid).Scan(&[]entities.Visit{})
+	var res = r.db.Unscoped().Model(&entities.Visit{}).Where("patient_uid = ?", patient_uid).Scan(&[]entities.Visit{})
 	var uid string = patient_uid + "-" + strconv.Itoa(int(res.RowsAffected)+1)
 
 	req.Visit_uid = uid

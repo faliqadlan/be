@@ -338,6 +338,12 @@ func TestDelete(t *testing.T) {
 		assert.NotNil(t, res3)
 		assert.Equal(t, true, res3.DeletedAt.Valid)
 		// log.Info(res3)
+
+		if _, err := r.CreateVal(res.Doctor_uid, res1.Patient_uid, mock2); err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
 	})
 
 	t.Run("invalid uid", func(t *testing.T) {
