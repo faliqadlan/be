@@ -269,7 +269,8 @@ func (r *Repo) GetVisitsVer1(kind, uid, status, date, grouped string) (Visits, e
 		kind = "patients.nik = '" + uid + "'"
 	case "doctor":
 		kind = "visits.doctor_uid = '" + uid + "'"
-
+	case "visit":
+		kind = "visits.visit_uid = '" + uid + "'"
 	}
 
 	switch status {
