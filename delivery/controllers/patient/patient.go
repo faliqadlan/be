@@ -5,7 +5,6 @@ import (
 	"be/delivery/controllers/templates"
 	"be/delivery/middlewares"
 	"be/repository/patient"
-	logic "be/delivery/logic/patient"
 	"errors"
 	"net/http"
 	"strings"
@@ -18,7 +17,6 @@ import (
 type Controller struct {
 	r      patient.Patient
 	taskS3 s3.TaskS3M
-	logic logic.Patient
 }
 
 func New(r patient.Patient, taskS3 s3.TaskS3M) *Controller {
@@ -117,7 +115,20 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
-		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add patient", res.Name))
+		// generate token
+
+		token, err := middlewares.GenerateToken(res.Patient_uid)
+
+		if err != nil {
+			log.Warn(err)
+			err = errors.New("there's some problem is server")
+			return c.JSON(http.StatusNotAcceptable, templates.BadRequest(http.StatusNotAcceptable, err.Error(), nil))
+		}
+
+		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add patient", map[string]interface{}{
+			"token":    token,
+			"userName": res.UserName,
+		}))
 	}
 }
 

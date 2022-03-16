@@ -130,8 +130,19 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
+		// generate token
+
+		token, err := middlewares.GenerateToken(res.Doctor_uid)
+
+		if err != nil {
+			log.Warn(err)
+			err = errors.New("there's some problem is server")
+			return c.JSON(http.StatusNotAcceptable, templates.BadRequest(http.StatusNotAcceptable, err.Error(), nil))
+		}
+
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add Doctor", map[string]interface{}{
-			"name": res.Name,
+			"token": token,
+			"userName":res.UserName,
 		}))
 	}
 }

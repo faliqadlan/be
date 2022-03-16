@@ -59,6 +59,67 @@ func TestValidationRegexPatient(t *testing.T) {
 		log.Info(err)
 	})
 
+	t.Run("error date", func(t *testing.T) {
+		var req Req
+
+		req.Dob = "123456789123456a"
+
+		_, err := req.ToPatient()
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("succeess date", func(t *testing.T) {
+		var req Req
+
+		req.Dob = "05-05-2002"
+
+		_, err := req.ToPatient()
+
+		assert.Nil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("error gender", func(t *testing.T) {
+		var req Req
+
+		req.Gender = "123456789123456a"
+
+		var l = New()
+
+		var err = l.ValidationRegexPatient(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("error status", func(t *testing.T) {
+		var req Req
+
+		req.Status = "123456789123456a"
+
+		var l = New()
+
+		var err = l.ValidationRegexPatient(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("error religion", func(t *testing.T) {
+		var req Req
+
+		req.Religion = "123456789123456a"
+
+		var l = New()
+
+		var err = l.ValidationRegexPatient(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
 	t.Run("success", func(t *testing.T) {
 		var req Req
 
