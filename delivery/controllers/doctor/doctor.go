@@ -118,6 +118,8 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			switch {
 			case err.Error() == errors.New("user name is already exist").Error():
 				err = errors.New("user name is already exist")
+			case err.Error() == errors.New("email is already exist").Error():
+				err = errors.New("email is already exist")
 			case strings.Contains(err.Error(), "status"):
 				err = errors.New("invalid status")
 			case strings.Contains(err.Error(), "open_day"):

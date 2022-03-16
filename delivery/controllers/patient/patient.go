@@ -108,6 +108,8 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			switch err.Error() {
 			case errors.New("user name is already exist").Error():
 				err = errors.New("user name is already exist")
+			case errors.New("email is already exist").Error():
+				err = errors.New("email is already exist")
 			default:
 				err = errors.New("there's some problem is server")
 			}
