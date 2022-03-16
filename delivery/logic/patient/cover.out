@@ -1,0 +1,14 @@
+mode: set
+be/delivery/logic/patient/formatter.go:27.54,32.16 3 0
+be/delivery/logic/patient/formatter.go:36.2,50.8 1 0
+be/delivery/logic/patient/formatter.go:32.16,34.3 1 0
+be/delivery/logic/patient/patient.go:9.20,11.2 1 1
+be/delivery/logic/patient/patient.go:13.55,14.80 1 1
+be/delivery/logic/patient/patient.go:17.2,17.68 1 1
+be/delivery/logic/patient/patient.go:20.2,20.77 1 1
+be/delivery/logic/patient/patient.go:23.2,23.65 1 1
+be/delivery/logic/patient/patient.go:26.2,26.12 1 1
+be/delivery/logic/patient/patient.go:14.80,16.3 1 1
+be/delivery/logic/patient/patient.go:17.68,19.3 1 1
+be/delivery/logic/patient/patient.go:20.77,22.3 1 1
+be/delivery/logic/patient/patient.go:23.65,25.3 1 1
