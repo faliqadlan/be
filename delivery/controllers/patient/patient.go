@@ -117,7 +117,20 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
-		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add patient", res.Name))
+		// check token
+
+		token, err := middlewares.GenerateToken(res.Patient_uid)
+
+		if err != nil {
+			log.Warn(err)
+			err = errors.New("there's some problem is server")
+			return c.JSON(http.StatusNotAcceptable, templates.BadRequest(http.StatusNotAcceptable, err.Error(), nil))
+		}
+
+		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add Doctor", map[string]interface{}{
+			"token":    token,
+			"userName": res.UserName,
+		}))
 	}
 }
 
