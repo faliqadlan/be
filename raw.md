@@ -24,20 +24,36 @@ Maecenas vel justo venenatis, rhoncus mauris vel, elementum augue. Aenean volutp
 </details>
 <details>
 <summary>&nbsp;Patient</summary>
-| Feature User | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
-| ------------ | ---------| ----------- | ------------ | --------- | ------ |
+| Feature Doctor | Endpoint        | Query Param | Request Body         | JWT Token | Utility                               |
+| -------------- | --------------- | ----------- | -------------------- | --------- | ------------------------------------- |
+| POST           | /login          | -           | indentity & password | NO        | login user with indentity & passwords |
+| POST           | /doctor         | -           | \_                   | NO        | register doctor                       |
+| PUT            | /doctor         | -           | -                    | YES       | update current doctor profile         |
+| DELETE         | /doctor         | -           | -                    | YES       | delete current doctor account         |
+| GET            | /doctor/profile | \_          | -                    | YES       | get current doctor profile            |
+| GET            | /doctor/all     | -           | -                    | YES       | get all doctor                        |
 </details>
 
-| Feature Doctor | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
-| ------------ | ---------| ----------- | ------------ | --------- | ------ |
-| POST   | /login   | -   | indentity & | 
+| Feature Doctor | Endpoint        | Query Param | Request Body         | JWT Token | Utility                               |
+| -------------- | --------------- | ----------- | -------------------- | --------- | ------------------------------------- |
+| POST           | /login          | -           | indentity & password | NO        | login user with indentity & passwords |
+| POST           | /doctor         | -           | \_                   | NO        | register doctor                       |
+| PUT            | /doctor         | -           | -                    | YES       | update current doctor profile         |
+| DELETE         | /doctor         | -           | -                    | YES       | delete current doctor account         |
+| GET            | /doctor/profile | \_          | -                    | YES       | get current doctor profile            |
+| GET            | /doctor/all     | -           | -                    | YES       | get all doctor                        |
 
-  
-| Feature User | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
-| ------------ | ---------| ----------- | ------------ | --------- | ------ |
-| POST         | /users/login | - | identity & password | NO | login user with identity & passwords |
-| POST         | /users/register  | - | - | NO |  | 
-| POST         | /users/avatar  | - | avatar | YES | upload avatar for user profile |
-| GET          | /users/profile | - | - | YES | get current user profile |
-| PUT          | /users/ | - | password | YES | update current user profile |
+| Feature Patient | Endpoint         | Query Param | Request Body         | JWT Token | Utility                               |
+| --------------- | ---------------- | ----------- | -------------------- | --------- | ------------------------------------- |
+| POST            | /login           | -           | indentity & password | NO        | login user with indentity & passwords |
+| POST            | /patient         | -           | \_                   | NO        | register patient                      |
+| DELETE          | /patient         | -           | -                    | YES       | delete current patient account        |
+| PUT             | /patient         | -           | -                    | YES       | update current patient profile        |
+| GET             | /patient/profile | patient_uid | -                    | YES       | get current patient profile           |
 
+| Feature Visit | Endpoint          | Query Param                      | Request Body | JWT Token | Utility              |
+| ------------- | ----------------- | -------------------------------- | ------------ | --------- | -------------------- |
+| POST          | /Visit            | -                                | \_           | NO        | add visit            |
+| PUT           | /Visit/:visit_uid | -                                | -            | YES       | update visit detail  |
+| DELETE        | /Visit/:visit_uid | -                                | -            | YES       | delete current visit |
+| GET           | /Visit            | kind, uid, status, date, grouped | -            | YES       | get visit            |
