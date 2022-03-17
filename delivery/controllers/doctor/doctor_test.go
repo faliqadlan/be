@@ -3,6 +3,7 @@ package doctor
 import (
 	"be/configs"
 	"be/delivery/controllers/auth"
+	logic "be/delivery/logic/doctor"
 	"be/entities"
 	"be/repository/doctor"
 	"bytes"
@@ -20,6 +21,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
+
+type successLogic struct{}
+
+func (m *successLogic) ValidationRequest(req logic.Req) error {
+	return nil
+}
+
+type errorLogic struct{}
+
+func (m *errorLogic) ValidationRequest(req logic.Req) error {
+	return errors.New("")
+}
 
 type mockTaskS3M struct{}
 
@@ -52,7 +65,7 @@ func (m *failTaskS3M) DeleteFileS3(name string) string {
 type mockSuccess struct{}
 
 func (m *mockSuccess) Create(DoctorReq entities.Doctor) (entities.Doctor, error) {
-	return entities.Doctor{}, nil
+	return entities.Doctor{Doctor_uid: "abcde"}, nil
 }
 
 func (m *mockSuccess) Update(Doctor_uid string, up entities.Doctor) (entities.Doctor, error) {
@@ -280,13 +293,13 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
+		log.Info(response)
 		assert.Equal(t, 201, response.Code)
 	})
 
@@ -312,7 +325,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -343,7 +356,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -376,7 +389,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -409,346 +422,13 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
 
-		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
-	})
-
-	t.Run("validator name", func(t *testing.T) {
-		var e = echo.New()
-
-		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "doctor",
-			"name":     "",
-			"address":  "123456789123456",
-			"status":   "status",
-			"openDay":  "openDay",
-			"closeDay": "closeDay",
-			"capacity": 50,
-		})
-
-		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		var res = httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-
-		context := e.NewContext(req, res)
-		context.SetPath("/doctor")
-
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
-		controller.Create()(context)
-
-		var response = ResponseFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
-	})
-
-	t.Run("validator address", func(t *testing.T) {
-		var e = echo.New()
-
-		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "doctor",
-			"name":     "name",
-			"address":  "",
-			"status":   "status",
-			"openDay":  "openDay",
-			"closeDay": "closeDay",
-			"capacity": 50,
-		})
-
-		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		var res = httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-
-		context := e.NewContext(req, res)
-		context.SetPath("/doctor")
-
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
-		controller.Create()(context)
-
-		var response = ResponseFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
-	})
-
-	t.Run("validator status", func(t *testing.T) {
-		var e = echo.New()
-
-		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "doctor",
-			"name":     "name",
-			"address":  "123456789123456",
-			"status":   "",
-			"openDay":  "openDay",
-			"closeDay": "closeDay",
-			"capacity": 50,
-		})
-
-		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		var res = httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-
-		context := e.NewContext(req, res)
-		context.SetPath("/doctor")
-
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
-		controller.Create()(context)
-
-		var response = ResponseFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
-	})
-
-	t.Run("validator open day", func(t *testing.T) {
-		var e = echo.New()
-
-		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "doctor",
-			"name":     "name",
-			"address":  "123456789123456",
-			"status":   "status",
-			"openDay":  "",
-			"closeDay": "closeDay",
-			"capacity": 50,
-		})
-
-		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		var res = httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-
-		context := e.NewContext(req, res)
-		context.SetPath("/doctor")
-
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
-		controller.Create()(context)
-
-		var response = ResponseFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
-	})
-
-	t.Run("validator closeDay", func(t *testing.T) {
-		var e = echo.New()
-
-		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "doctor",
-			"name":     "name",
-			"address":  "123456789123456",
-			"status":   "status",
-			"openDay":  "openDay",
-			"closeDay": "",
-			"capacity": 50,
-		})
-
-		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		var res = httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-
-		context := e.NewContext(req, res)
-		context.SetPath("/doctor")
-
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
-		controller.Create()(context)
-
-		var response = ResponseFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
-	})
-
-	t.Run("validator capacity", func(t *testing.T) {
-		var e = echo.New()
-
-		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "doctor",
-			"name":     "name",
-			"address":  "123456789123456",
-			"status":   "status",
-			"openDay":  "openDay",
-			"closeDay": "clinic",
-		})
-
-		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		var res = httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-
-		context := e.NewContext(req, res)
-		context.SetPath("/doctor")
-
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
-		controller.Create()(context)
-
-		var response = ResponseFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
-	})
-
-	t.Run("can't assign capacity below zero", func(t *testing.T) {
-		var e = echo.New()
-
-		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "abc",
-			"name":     "name",
-			"address":  "123456789123456",
-			"status":   "status",
-			"openDay":  "openDay",
-			"closeDay": "closeDay",
-			"capacity": -50,
-		})
-
-		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		var res = httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-
-		context := e.NewContext(req, res)
-		context.SetPath("/doctor")
-
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
-		controller.Create()(context)
-
-		var response = ResponseFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-		// log.Info(response)
-		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
-	})
-
-	t.Run("invalid user name format", func(t *testing.T) {
-		var e = echo.New()
-
-		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1&(^^()   ",
-			"email":    "doctor@",
-			"password": "abc",
-			"name":     "name",
-			"address":  "123456789123456",
-			"status":   "status",
-			"openDay":  "openDay",
-			"closeDay": "closeDay",
-			"capacity": 50,
-		})
-
-		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		var res = httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-
-		context := e.NewContext(req, res)
-		context.SetPath("/doctor")
-
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
-		controller.Create()(context)
-
-		var response = ResponseFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-		// log.Info(response)
-		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
-	})
-
-	t.Run("invalid  name format", func(t *testing.T) {
-		var e = echo.New()
-
-		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "abc",
-			"name":     "name    *^&^",
-			"address":  "123456789123456",
-			"status":   "status",
-			"openDay":  "openDay",
-			"closeDay": "closeDay",
-			"capacity": 50,
-		})
-
-		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		var res = httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-
-		context := e.NewContext(req, res)
-		context.SetPath("/doctor")
-
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
-		controller.Create()(context)
-
-		var response = ResponseFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-		// log.Info(response)
-		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
-	})
-
-	t.Run("invalid  address format", func(t *testing.T) {
-		var e = echo.New()
-
-		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "abc",
-			"name":     "nammslkamd",
-			"address":  "123456789123456    *&^&^*^*",
-			"status":   "status",
-			"openDay":  "openDay",
-			"closeDay": "closeDay",
-			"capacity": 50,
-		})
-
-		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		var res = httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-
-		context := e.NewContext(req, res)
-		context.SetPath("/doctor")
-
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
-		controller.Create()(context)
-
-		var response = ResponseFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-		// log.Info(response)
 		assert.Equal(t, 400, response.Code)
 		// log.Info(response.Message)
 	})
@@ -784,7 +464,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -826,7 +506,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &failTaskS3M{})
+		var controller = New(&mockSuccess{}, &failTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -859,7 +539,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockFail{}, &mockTaskS3M{})
+		var controller = New(&mockFail{}, &mockTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -893,7 +573,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&createUserName{}, &mockTaskS3M{})
+		var controller = New(&createUserName{}, &mockTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -927,7 +607,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&statusEnum{}, &mockTaskS3M{})
+		var controller = New(&statusEnum{}, &mockTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -961,7 +641,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&openDayEnum{}, &mockTaskS3M{})
+		var controller = New(&openDayEnum{}, &mockTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -995,7 +675,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&closeDayEnum{}, &mockTaskS3M{})
+		var controller = New(&closeDayEnum{}, &mockTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
@@ -1040,7 +720,12 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": "doctor name",
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1051,7 +736,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1068,7 +753,12 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": 123,
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   123,
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1079,7 +769,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1092,11 +782,16 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("capacity", func(t *testing.T) {
+	t.Run("validator name", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"capacity": -60,
+			"name":     "",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1107,7 +802,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1120,11 +815,16 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("userName", func(t *testing.T) {
+	t.Run("validator address", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "ndkjsan&^*^*&^",
+			"name":     "doctor name",
+			"address":  "",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1135,7 +835,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1148,11 +848,16 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("name", func(t *testing.T) {
+	t.Run("validator status", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": "ndkjsan&^*^*&^",
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1163,7 +868,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1176,11 +881,16 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("address", func(t *testing.T) {
+	t.Run("validator open day", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"address": "ndkjsan&^*^*&^msamdksaskaadada",
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1191,7 +901,73 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("validator close day", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "open_day",
+			"closeDay": "",
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("validator capacity", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "open_day",
+			"closeDay": "closeDay",
+			"capacity": 0,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1209,9 +985,12 @@ func TestUpdate(t *testing.T) {
 		var reqBody = new(bytes.Buffer)
 
 		var writer = multipart.NewWriter(reqBody)
-		writer.WriteField("userName", "doctor1")
-		writer.WriteField("email", "doctor")
-		writer.WriteField("password", "doctor")
+		writer.WriteField("name", "name")
+		writer.WriteField("address", "123456789123456")
+		writer.WriteField("status", "status")
+		writer.WriteField("openDay", "senin")
+		writer.WriteField("closeDay", "senin")
+		writer.WriteField("capacity", "50")
 
 		part, err := writer.CreateFormFile("file", "photo.jpg")
 		if err != nil {
@@ -1230,7 +1009,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1248,10 +1027,12 @@ func TestUpdate(t *testing.T) {
 		var reqBody = new(bytes.Buffer)
 
 		var writer = multipart.NewWriter(reqBody)
-		writer.WriteField("userName", "doctor1")
-		writer.WriteField("email", "doctor")
-		writer.WriteField("password", "doctor")
-
+		writer.WriteField("name", "name")
+		writer.WriteField("address", "123456789123456")
+		writer.WriteField("status", "status")
+		writer.WriteField("openDay", "senin")
+		writer.WriteField("closeDay", "senin")
+		writer.WriteField("capacity", "50")
 		part, err := writer.CreateFormFile("file", "photo.jpg")
 		if err != nil {
 			log.Warn(err)
@@ -1269,7 +1050,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockFail{}, &mockTaskS3M{})
+		var controller = New(&mockFail{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1287,9 +1068,12 @@ func TestUpdate(t *testing.T) {
 		var reqBody = new(bytes.Buffer)
 
 		var writer = multipart.NewWriter(reqBody)
-		writer.WriteField("userName", "doctor1")
-		writer.WriteField("email", "doctor")
-		writer.WriteField("password", "doctor")
+		writer.WriteField("name", "name")
+		writer.WriteField("address", "123456789123456")
+		writer.WriteField("status", "status")
+		writer.WriteField("openDay", "senin")
+		writer.WriteField("closeDay", "senin")
+		writer.WriteField("capacity", "50")
 
 		part, err := writer.CreateFormFile("file", "photo.jpg")
 		if err != nil {
@@ -1308,7 +1092,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &failTaskS3M{})
+		var controller = New(&mockSuccess{}, &failTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1326,9 +1110,12 @@ func TestUpdate(t *testing.T) {
 		var reqBody = new(bytes.Buffer)
 
 		var writer = multipart.NewWriter(reqBody)
-		writer.WriteField("userName", "doctor1")
-		writer.WriteField("email", "doctor")
-		writer.WriteField("password", "doctor")
+		writer.WriteField("name", "name")
+		writer.WriteField("address", "123456789123456")
+		writer.WriteField("status", "status")
+		writer.WriteField("openDay", "senin")
+		writer.WriteField("closeDay", "senin")
+		writer.WriteField("capacity", "50")
 
 		part, err := writer.CreateFormFile("file", "photo.jpg")
 		if err != nil {
@@ -1347,7 +1134,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&updateFile{}, &mockTaskS3M{})
+		var controller = New(&updateFile{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1365,9 +1152,12 @@ func TestUpdate(t *testing.T) {
 		var reqBody = new(bytes.Buffer)
 
 		var writer = multipart.NewWriter(reqBody)
-		writer.WriteField("userName", "doctor1")
-		writer.WriteField("email", "doctor")
-		writer.WriteField("password", "doctor")
+		writer.WriteField("name", "name")
+		writer.WriteField("address", "123456789123456")
+		writer.WriteField("status", "status")
+		writer.WriteField("openDay", "senin")
+		writer.WriteField("closeDay", "senin")
+		writer.WriteField("capacity", "50")
 
 		part, err := writer.CreateFormFile("file", "photo.jpg")
 		if err != nil {
@@ -1386,7 +1176,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&createCapacity{}, &failTaskS3M{})
+		var controller = New(&createCapacity{}, &failTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1403,7 +1193,12 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": "hotaru",
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "available",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1414,7 +1209,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockFail{}, &mockTaskS3M{})
+		var controller = New(&mockFail{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1431,7 +1226,12 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": "hotaru",
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "available",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1442,7 +1242,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&createUserName{}, &mockTaskS3M{})
+		var controller = New(&createUserName{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1459,7 +1259,12 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": "hotaru",
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "available",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1470,7 +1275,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&createCapacity{}, &mockTaskS3M{})
+		var controller = New(&createCapacity{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1487,7 +1292,12 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": "hotaru",
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "available",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1498,7 +1308,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&recordNotFound{}, &mockTaskS3M{})
+		var controller = New(&recordNotFound{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1515,7 +1325,12 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": "hotaru",
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "available",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1526,7 +1341,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&statusEnum{}, &mockTaskS3M{})
+		var controller = New(&statusEnum{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1543,7 +1358,12 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": "hotaru",
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "available",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1554,7 +1374,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&openDayEnum{}, &mockTaskS3M{})
+		var controller = New(&openDayEnum{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1571,7 +1391,12 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name": "hotaru",
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "available",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -1582,7 +1407,7 @@ func TestUpdate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&closeDayEnum{}, &mockTaskS3M{})
+		var controller = New(&closeDayEnum{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1635,7 +1460,7 @@ func TestDelete(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Delete())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1674,7 +1499,7 @@ func TestDelete(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &failTaskS3M{})
+		var controller = New(&mockSuccess{}, &failTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Delete())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1699,7 +1524,7 @@ func TestDelete(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockFail{}, &mockTaskS3M{})
+		var controller = New(&mockFail{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Delete())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1723,7 +1548,7 @@ func TestDelete(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&recordNotFound{}, &mockTaskS3M{})
+		var controller = New(&recordNotFound{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Delete())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1776,7 +1601,7 @@ func TestGetProfile(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetProfile())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1800,7 +1625,7 @@ func TestGetProfile(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor/profile")
 
-		var controller = New(&mockFail{}, &mockTaskS3M{})
+		var controller = New(&mockFail{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetProfile())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1824,7 +1649,7 @@ func TestGetProfile(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor/profile")
 
-		var controller = New(&recordNotFound{}, &mockTaskS3M{})
+		var controller = New(&recordNotFound{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetProfile())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1876,7 +1701,7 @@ func TestGetAll(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetAll())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1900,7 +1725,7 @@ func TestGetAll(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor/profile")
 
-		var controller = New(&mockFail{}, &mockTaskS3M{})
+		var controller = New(&mockFail{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetAll())(context); err != nil {
 			log.Fatal(err)
 			return

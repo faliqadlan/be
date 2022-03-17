@@ -1,14 +1,14 @@
-package patient
-
+package doctor
 
 import (
+	"be/entities"
 	"testing"
 
 	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestValidationRegexPatient(t *testing.T) {
+func TestValidationRequest(t *testing.T) {
 	t.Run("error user name", func(t *testing.T) {
 		var req Req
 
@@ -47,54 +47,6 @@ func TestValidationRegexPatient(t *testing.T) {
 		log.Info(err)
 	})
 
-	t.Run("error nik", func(t *testing.T) {
-		var req Req
-
-		req.Nik = "123456789123456a"
-
-		var l = New()
-
-		var err = l.ValidationRequest(req)
-
-		assert.NotNil(t, err)
-		log.Info(err)
-	})
-
-	t.Run("error date", func(t *testing.T) {
-		var req Req
-
-		req.Dob = "123456789123456a"
-
-		_, err := req.ToPatient()
-
-		assert.NotNil(t, err)
-		log.Info(err)
-	})
-
-	t.Run("succeess date", func(t *testing.T) {
-		var req Req
-
-		req.Dob = "05-05-2002"
-
-		_, err := req.ToPatient()
-
-		assert.Nil(t, err)
-		log.Info(err)
-	})
-
-	t.Run("error gender", func(t *testing.T) {
-		var req Req
-
-		req.Gender = "123456789123456a"
-
-		var l = New()
-
-		var err = l.ValidationRequest(req)
-
-		assert.NotNil(t, err)
-		log.Info(err)
-	})
-
 	t.Run("error status", func(t *testing.T) {
 		var req Req
 
@@ -108,10 +60,23 @@ func TestValidationRegexPatient(t *testing.T) {
 		log.Info(err)
 	})
 
-	t.Run("error religion", func(t *testing.T) {
+	t.Run("error open day", func(t *testing.T) {
 		var req Req
 
-		req.Religion = "123456789123456a"
+		req.OpenDay = "123456789123456a"
+
+		var l = New()
+
+		var res = l.ValidationRequest(req)
+
+		assert.NotNil(t, res)
+		log.Info(res)
+	})
+
+	t.Run("error close day", func(t *testing.T) {
+		var req Req
+
+		req.CloseDay = "123456789123456a"
 
 		var l = New()
 
@@ -119,6 +84,15 @@ func TestValidationRegexPatient(t *testing.T) {
 
 		assert.NotNil(t, err)
 		log.Info(err)
+	})
+
+	t.Run("succeess to entity", func(t *testing.T) {
+		var req Req
+
+		res := req.ToDoctor()
+
+		assert.Equal(t,&entities.Doctor{} ,res)
+		log.Info(res)
 	})
 
 	t.Run("success", func(t *testing.T) {
@@ -132,4 +106,3 @@ func TestValidationRegexPatient(t *testing.T) {
 		log.Info(err)
 	})
 }
-

@@ -115,6 +115,16 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		return entities.Doctor{}, errors.New("user name is already exist")
 	}
 
+	// check email
+
+	var checkEmail = r.db.Model(&entities.Doctor{}).Where("email = ?", req.Email).Select("user_name as UserName").Scan(&userNameCheck{})
+
+	if checkEmail.RowsAffected != 0 {
+		log.Warn(checkEmail.Error)
+		tx.Rollback()
+		return entities.Doctor{}, errors.New("email is already exist")
+	}
+
 	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {
 		log.Warn(res.Error)
 		tx.Rollback()

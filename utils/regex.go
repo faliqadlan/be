@@ -34,6 +34,10 @@ func AddressRegex(s string) bool {
 	return regexp.MustCompile(`^[a-zA-Z0-9/,.\s]+$`).MatchString(s)
 }
 
+func EmailRegex(s string) bool  {
+	return regexp.MustCompile(`^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$`).MatchString(s)
+}
+
 func DigitRegex(s string) bool {
 
 	return regexp.MustCompile(`^[[:digit:]]+$`).MatchString(s)
