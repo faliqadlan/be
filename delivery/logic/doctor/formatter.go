@@ -27,6 +27,5 @@ func (r *Req) ToDoctor() *entities.Doctor {
 		OpenDay:      r.OpenDay,
 		CloseDay:     r.CloseDay,
 		Capacity:     r.Capacity,
-		LeftCapacity: r.Capacity,
 	}
 }

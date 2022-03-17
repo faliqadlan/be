@@ -4,7 +4,6 @@ import (
 	"be/entities"
 	"be/utils"
 	"errors"
-	"math"
 
 	"github.com/labstack/gommon/log"
 	"github.com/lithammer/shortuuid"
@@ -126,21 +125,6 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		return entities.Doctor{}, errors.New("email is already exist")
 	}
 
-	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {
-		log.Warn(res.Error)
-		tx.Rollback()
-		return entities.Doctor{}, gorm.ErrRecordNotFound
-	}
-	// log.Info(req.Capacity, req.LeftCapacity)
-	// log.Info(resInit.Capacity, resInit.LeftCapacity)
-	var leftCapacity = req.Capacity - int(math.Abs(float64(resInit.Capacity)-float64(resInit.LeftCapacity)))
-	// log.Info(leftCapacity)
-
-	if leftCapacity < 0 {
-		tx.Rollback()
-		return entities.Doctor{}, errors.New("can't update capacity below total pending patients")
-	}
-
 	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Updates(entities.Doctor{
 		UserName: req.UserName,
 		Email:    req.Email,
@@ -151,7 +135,7 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		Status:   req.Status,
 		OpenDay:  req.OpenDay,
 		CloseDay: req.CloseDay,
-		Capacity: req.Capacity}).Update("left_capacity", leftCapacity); res.Error != nil || res.RowsAffected == 0 {
+		Capacity: req.Capacity}); res.Error != nil || res.RowsAffected == 0 {
 		switch {
 		case res.Error == nil:
 			tx.Rollback()

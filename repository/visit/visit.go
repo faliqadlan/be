@@ -55,21 +55,6 @@ func (r *Repo) Create(doctor_uid, patient_uid, date string, req entities.Visit) 
 		return entities.Visit{}, res.Error
 	}
 
-	if req.Status == "pending" {
-
-		var doctorInit entities.Doctor
-
-		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&doctorInit); res.Error != nil {
-			tx.Rollback()
-			return entities.Visit{}, res.Error
-		}
-
-		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Update("left_capacity", doctorInit.LeftCapacity-1); res.Error != nil || res.RowsAffected == 0 {
-			tx.Rollback()
-			return entities.Visit{}, gorm.ErrRecordNotFound
-		}
-
-	}
 
 	return req, tx.Commit().Error
 
@@ -106,27 +91,6 @@ func (r *Repo) CreateVal(doctor_uid, patient_uid string, req entities.Visit) (en
 	if res := tx.Model(&entities.Visit{}).Create(&req); res.Error != nil {
 		tx.Rollback()
 		return entities.Visit{}, res.Error
-	}
-	// log.Info(req.Status)
-	if req.Status == "pending" {
-
-		var doctorInit entities.Doctor
-
-		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Find(&doctorInit); res.Error != nil || res.RowsAffected == 0 {
-			tx.Rollback()
-			return entities.Visit{}, gorm.ErrRecordNotFound
-		}
-
-		if doctorInit.LeftCapacity == 0 {
-			tx.Rollback()
-			return entities.Visit{}, errors.New("left capacity can't below zero")
-		}
-
-		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Update("left_capacity", doctorInit.LeftCapacity-1); res.Error != nil || res.RowsAffected == 0 {
-			tx.Rollback()
-			return entities.Visit{}, gorm.ErrRecordNotFound
-		}
-
 	}
 
 	return req, tx.Commit().Error
@@ -189,22 +153,6 @@ func (r *Repo) Update(visit_uid string, req entities.Visit) (entities.Visit, err
 		}
 	}
 
-	if req.Status == "ready" || req.Status == "cancelled" {
-
-		var doctorInit entities.Doctor
-
-		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", resInit.Doctor_uid).Find(&doctorInit); res.Error != nil || res.RowsAffected == 0 {
-			tx.Rollback()
-			return entities.Visit{}, gorm.ErrRecordNotFound
-		}
-
-		if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", resInit.Doctor_uid).Update("left_capacity", doctorInit.LeftCapacity+1); res.Error != nil || res.RowsAffected == 0 {
-			tx.Rollback()
-			return entities.Visit{}, gorm.ErrRecordNotFound
-		}
-
-	}
-
 	return resInit, tx.Commit().Error
 }
 
@@ -229,19 +177,6 @@ func (r *Repo) Delete(visit_uid string) (entities.Visit, error) {
 	}
 
 	if res := tx.Model(&entities.Visit{}).Where("visit_uid = ?", visit_uid).Delete(&resInit); res.Error != nil || res.RowsAffected == 0 {
-		log.Info(res.RowsAffected)
-		tx.Rollback()
-		return entities.Visit{}, gorm.ErrRecordNotFound
-	}
-
-	var doctorInit entities.Doctor
-
-	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", resInit.Doctor_uid).Find(&doctorInit); res.Error != nil || res.RowsAffected == 0 {
-		tx.Rollback()
-		return entities.Visit{}, gorm.ErrRecordNotFound
-	}
-
-	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", resInit.Doctor_uid).Update("left_capacity", doctorInit.LeftCapacity+1); res.Error != nil || res.RowsAffected == 0 {
 		log.Info(res.RowsAffected)
 		tx.Rollback()
 		return entities.Visit{}, gorm.ErrRecordNotFound

@@ -89,6 +89,9 @@ func (r *Repo) Update(patient_uid string, req entities.Patient) (entities.Patien
 		return entities.Patient{}, errors.New("email is already exist")
 	}
 
+	
+
+
 	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Updates(entities.Patient{
 		UserName:   req.UserName,
 		Email:      req.Email,

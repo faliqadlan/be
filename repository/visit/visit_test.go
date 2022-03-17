@@ -140,7 +140,7 @@ func TestCreateVal(t *testing.T) {
 	db.AutoMigrate(&entities.Visit{})
 
 	t.Run("success run create", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: "doctor1", Email: "doctor@", Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: "doctor1", Email: "doctor@", Password: "doctor", Capacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
@@ -163,7 +163,7 @@ func TestCreateVal(t *testing.T) {
 	})
 
 	t.Run("success handle pending", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: "doctor2", Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: "doctor2", Email: shortuuid.New(), Password: "doctor", Capacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
@@ -190,7 +190,7 @@ func TestCreateVal(t *testing.T) {
 	})
 
 	t.Run("duplicate entry", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor", Capacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
@@ -216,30 +216,8 @@ func TestCreateVal(t *testing.T) {
 		// log.Info(err3)
 	})
 
-	t.Run("left capacity can't below zero", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor"}
-		res, err := doctor.New(db).Create(mock)
-		if err != nil {
-			t.Log()
-			t.Fatal()
-		}
-
-		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "patient"}
-		var res1, err1 = patient.New(db).Create(mock1)
-		if err1 != nil {
-			t.Log()
-			t.Fatal()
-		}
-
-		var mock2 = entities.Visit{Complaint: "sick"}
-
-		var _, err3 = r.CreateVal(res.Doctor_uid, res1.Patient_uid, mock2)
-		assert.NotNil(t, err3)
-		// log.Info(err3)
-	})
-
 	t.Run("invalid parent", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor", Capacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
@@ -261,7 +239,7 @@ func TestCreateVal(t *testing.T) {
 	})
 
 	t.Run("error enum", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor", Capacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
@@ -294,7 +272,7 @@ func TestUpdate(t *testing.T) {
 	db.AutoMigrate(&entities.Visit{})
 
 	t.Run("success run update", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: "doctor1", Email: "doctor@", Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: "doctor1", Email: "doctor@", Password: "doctor", Capacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
@@ -322,7 +300,7 @@ func TestUpdate(t *testing.T) {
 	})
 
 	t.Run("invalid uid", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: "doctor2", Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: "doctor2", Email: shortuuid.New(), Password: "doctor", Capacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
@@ -349,7 +327,7 @@ func TestUpdate(t *testing.T) {
 	})
 
 	t.Run("error enum", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "doctor", Capacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
@@ -387,7 +365,7 @@ func TestDelete(t *testing.T) {
 	db.AutoMigrate(&entities.Visit{})
 
 	t.Run("success run delete", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: "doctor1", Email: "doctor@", Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: "doctor1", Email: "doctor@", Password: "doctor", Capacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
@@ -422,7 +400,7 @@ func TestDelete(t *testing.T) {
 	})
 
 	t.Run("invalid uid", func(t *testing.T) {
-		var mock = entities.Doctor{UserName: "doctor2", Email: shortuuid.New(), Password: "doctor", LeftCapacity: 10}
+		var mock = entities.Doctor{UserName: "doctor2", Email: shortuuid.New(), Password: "doctor", Capacity: 10}
 		res, err := doctor.New(db).Create(mock)
 		if err != nil {
 			t.Log()
