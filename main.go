@@ -17,6 +17,7 @@ import (
 	doctorRepo "be/repository/doctor"
 	patientRepo "be/repository/patient"
 	visitRepo "be/repository/visit"
+	logicDoctor "be/delivery/logic/doctor"
 
 	"be/utils"
 	"fmt"
@@ -42,7 +43,8 @@ func main() {
 	var authCont = auth.New(authRepo)
 
 	var doctorRepo = doctorRepo.New(db)
-	var doctorCont = doctor.New(doctorRepo, awsS3)
+	var doctorLogic = logicDoctor.New()
+	var doctorCont = doctor.New(doctorRepo, awsS3, doctorLogic)
 
 	var patientRepo = patientRepo.New(db)
 	var patientCont = patient.New(patientRepo, awsS3)

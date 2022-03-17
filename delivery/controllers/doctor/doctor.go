@@ -3,9 +3,9 @@ package doctor
 import (
 	"be/api/aws/s3"
 	"be/delivery/controllers/templates"
+	logic "be/delivery/logic/doctor"
 	"be/delivery/middlewares"
 	"be/repository/doctor"
-	"be/utils"
 	"errors"
 	"net/http"
 	"strings"
@@ -18,18 +18,20 @@ import (
 type Controller struct {
 	r      doctor.Doctor
 	taskS3 s3.TaskS3M
+	l      logic.Doctor
 }
 
-func New(r doctor.Doctor, taskS3 s3.TaskS3M) *Controller {
+func New(r doctor.Doctor, taskS3 s3.TaskS3M, l logic.Doctor) *Controller {
 	return &Controller{
 		r:      r,
 		taskS3: taskS3,
+		l:      l,
 	}
 }
 
 func (cont *Controller) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var req Req
+		var req logic.Req
 
 		// request
 
@@ -38,57 +40,20 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input ", nil))
 		}
 
-		var v = validator.New()
-		if err := v.Struct(req); err != nil {
-			log.Warn(err)
-			switch {
-			case strings.Contains(err.Error(), "UserName"):
-				err = errors.New("invalid userName")
-			case strings.Contains(err.Error(), "Email"):
-				err = errors.New("invalid email")
-			case strings.Contains(err.Error(), "Password"):
-				err = errors.New("invalid password")
-			case strings.Contains(err.Error(), "Name"):
-				err = errors.New("invalid name")
-			case strings.Contains(err.Error(), "Address"):
-				err = errors.New("invalid address")
-			case strings.Contains(err.Error(), "Status"):
-				err = errors.New("invalid status")
-			case strings.Contains(err.Error(), "OpenDay"):
-				err = errors.New("invalid open day")
-			case strings.Contains(err.Error(), "CloseDay"):
-				err = errors.New("invalid close day")
-			case strings.Contains(err.Error(), "Capacity"):
-				err = errors.New("invalid capacity ")
-			default:
-				err = errors.New("invalid input")
-			}
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		// validation struct
+
+		switch {
+		case req.UserName == "":
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid user name ", nil))
+		case req.Email == "":
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid email ", nil))
+		case req.Password == "":
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid password ", nil))
 		}
 
-		// check capacity
+		// validation request
 
-		if req.Capacity < 0 {
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "can't assign capacity below zero", nil))
-		}
-
-		// check format user name
-
-		if err := utils.UserNameValid(req.UserName); err != nil {
-			log.Warn(err)
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
-		}
-
-		// check format name
-
-		if err := utils.NameValid(req.Name); err != nil {
-			log.Warn(err)
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
-		}
-
-		// check format address
-
-		if err := utils.AddressValid(req.Address); err != nil {
+		if err := cont.l.ValidationRequest(req); err != nil {
 			log.Warn(err)
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
@@ -118,6 +83,8 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			switch {
 			case err.Error() == errors.New("user name is already exist").Error():
 				err = errors.New("user name is already exist")
+			case err.Error() == errors.New("email is already exist").Error():
+				err = errors.New("email is already exist")
 			case strings.Contains(err.Error(), "status"):
 				err = errors.New("invalid status")
 			case strings.Contains(err.Error(), "open_day"):
@@ -141,8 +108,8 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add Doctor", map[string]interface{}{
-			"token": token,
-			"userName":res.UserName,
+			"token":    token,
+			"userName": res.UserName,
 		}))
 	}
 }
@@ -150,7 +117,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 func (cont *Controller) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var uid = middlewares.ExtractTokenUid(c)
-		var req Req
+		var req logic.Req
 
 		// request
 
@@ -159,29 +126,33 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
 		}
 
-		// check capacity
+		// validation struct
 
-		if req.Capacity < 0 && req.Capacity != 0 {
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "can't assign capacity below zero", nil))
-		}
-
-		// check format user name
-
-		if err := utils.UserNameValid(req.UserName); err != nil && req.UserName != "" {
+		var v = validator.New()
+		if err := v.Struct(req); err != nil {
 			log.Warn(err)
+			switch {
+			case strings.Contains(err.Error(), "Name"):
+				err = errors.New("invalid name")
+			case strings.Contains(err.Error(), "Address"):
+				err = errors.New("invalid address")
+			case strings.Contains(err.Error(), "Status"):
+				err = errors.New("invalid status")
+			case strings.Contains(err.Error(), "OpenDay"):
+				err = errors.New("invalid open day")
+			case strings.Contains(err.Error(), "CloseDay"):
+				err = errors.New("invalid close day")
+			case strings.Contains(err.Error(), "Capacity"):
+				err = errors.New("invalid capacity ")
+			default:
+				err = errors.New("invalid input")
+			}
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
-		// check format name
+		// validation request
 
-		if err := utils.NameValid(req.Name); err != nil && req.Name != "" {
-			log.Warn(err)
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
-		}
-
-		// check format address
-
-		if err := utils.AddressValid(req.Address); err != nil && req.Address != "" {
+		if err := cont.l.ValidationRequest(req); err != nil {
 			log.Warn(err)
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
@@ -229,6 +200,8 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			switch {
 			case err.Error() == errors.New("user name is already exist").Error():
 				err = errors.New("user name is already exist")
+			case err.Error() == errors.New("email is already exist").Error():
+				err = errors.New("email is already exist")
 			case err.Error() == errors.New("can't update capacity below total pending patients").Error():
 				err = errors.New("can't update capacity below total pending patients")
 			case strings.Contains(err.Error(), "status"):
