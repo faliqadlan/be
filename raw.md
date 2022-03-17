@@ -23,21 +23,113 @@ Maecenas vel justo venenatis, rhoncus mauris vel, elementum augue. Aenean volutp
 <summary>ERD</summary>
 </details>
 <details>
-<summary>&nbsp;Patient</summary>
-| Feature User | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
-| ------------ | ---------| ----------- | ------------ | --------- | ------ |
+<summary>HLA</summary>
+</details>
+<details>
+<summary>Doctor</summary>
+
+| Feature Doctor | Endpoint        | Query Param | Request Body         | JWT Token | Utility                               |
+| -------------- | --------------- | ----------- | -------------------- | --------- | ------------------------------------- |
+| POST           | /login          | -           | indentity & password | NO        | login user with indentity & passwords |
+| POST           | /doctor         | -           | \_                   | NO        | register doctor                       |
+| PUT            | /doctor         | -           | -                    | YES       | update current doctor profile         |
+| DELETE         | /doctor         | -           | -                    | YES       | delete current doctor account         |
+| GET            | /doctor/profile | \_          | -                    | YES       | get current doctor profile            |
+| GET            | /doctor/all     | -           | -                    | YES       | get all doctor                        |
+
 </details>
 
-| Feature Doctor | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
-| ------------ | ---------| ----------- | ------------ | --------- | ------ |
-| POST   | /login   | -   | indentity & | 
+<details>
+<summary>Patient</summary>
 
-  
-| Feature User | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
-| ------------ | ---------| ----------- | ------------ | --------- | ------ |
-| POST         | /users/login | - | identity & password | NO | login user with identity & passwords |
-| POST         | /users/register  | - | - | NO |  | 
-| POST         | /users/avatar  | - | avatar | YES | upload avatar for user profile |
-| GET          | /users/profile | - | - | YES | get current user profile |
-| PUT          | /users/ | - | password | YES | update current user profile |
+| Feature Patient | Endpoint         | Query Param | Request Body         | JWT Token | Utility                               |
+| --------------- | ---------------- | ----------- | -------------------- | --------- | ------------------------------------- |
+| POST            | /login           | -           | indentity & password | NO        | login user with indentity & passwords |
+| POST            | /patient         | -           | \_                   | NO        | register patient                      |
+| DELETE          | /patient         | -           | -                    | YES       | delete current patient account        |
+| PUT             | /patient         | -           | -                    | YES       | update current patient profile        |
+| GET             | /patient/profile | patient_uid | -                    | YES       | get current patient profile           |
 
+</details>
+
+<details>
+<summary>Visit</summary>
+
+| Feature Visit | Endpoint          | Query Param                      | Request Body | JWT Token | Utility              |
+| ------------- | ----------------- | -------------------------------- | ------------ | --------- | -------------------- |
+| POST          | /Visit            | -                                | \_           | NO        | add visit            |
+| PUT           | /Visit/:visit_uid | -                                | -            | YES       | update visit detail  |
+| DELETE        | /Visit/:visit_uid | -                                | -            | YES       | delete current visit |
+| GET           | /Visit            | kind, uid, status, date, grouped | -            | YES       | get visit            |
+
+</details>
+<details>
+<summary>Testing</summary>
+</details>
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+# How to Use
+
+### 1. install
+
+```bash
+git clone https://github.com/MR-Clinic/be.git
+```
+
+### 2.1 create file .env
+
+```bash
+touch .env
+```
+
+### 2.2 open .env
+
+```
+nano .env
+```
+
+### 2.3 write .env
+
+```bash
+PORT=8080
+DB=mysql
+DB_Name=<database name>
+DB_PORT=3306
+DB_HOST=localhot
+DB_USERNAME=<username>/root
+DB_PASSWORD=<password>
+DB_LOC=Local
+S3_REGION=<reqion AWS S3>/ap-southeast-1
+S3_ID=<KEY ID AWS S3>
+S3_SECRET=<SECRETKEY AWS S3>
+```
+### 3.1 create credential folder
+
+```bash
+mkdir credential
+```
+
+### 3.2 place credential.json
+
+place credential.json for access google calendar API <br> here the reference link
+</br>
+[Click Here!](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id)
+
+### 3.3 create token folder
+
+```bash
+mkdir credential
+```
+
+### 3.4 place token.json
+
+place token.json for access google calendar API <br> here the reference link
+</br>
+[Click Here!](https://github.com/googleworkspace/go-samples/blob/master/calendar/quickstart/quickstart.go)
+
+### 4. run main.go
+
+```bash
+go run main.go
+```

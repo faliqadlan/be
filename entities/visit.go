@@ -12,10 +12,10 @@ type Visit struct {
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	DeletedAt        gorm.DeletedAt `gorm:"index"`
-	Visit_uid        string         `gorm:"index;type:varchar(22)"` 
-	Event_uid        string  `gorm:"index;type:varchar(26)"` 
-	Doctor_uid       string `gorm:"index;type:varchar(22)"`
-	Patient_uid      string `gorm:"index;type:varchar(22)"`
+	Visit_uid        string         `gorm:"index;type:varchar(22)"`
+	Event_uid        string         `gorm:"index;type:varchar(26)"`
+	Doctor_uid       string         `gorm:"index;type:varchar(22)"`
+	Patient_uid      string         `gorm:"index;type:varchar(22)"`
 	Date             datatypes.Date
 	Status           string `gorm:"type:enum('pending', 'ready', 'cancelled');default:'pending'"`
 	Complaint        string

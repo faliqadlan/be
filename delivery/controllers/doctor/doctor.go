@@ -40,6 +40,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input ", nil))
 		}
 
+
 		// validation struct
 
 		switch {
@@ -97,7 +98,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
-		// generate token
+		// check token
 
 		token, err := middlewares.GenerateToken(res.Doctor_uid)
 

@@ -22,5 +22,6 @@ type Doctor struct {
 	CloseDay     string `gorm:"type:enum('senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu');default:'senin'"`
 	Capacity     int
 	LeftCapacity int
+	Type         string  `gorm:"type:enum('doctor', 'admin');default:'doctor'"`
 	Visits       []Visit `gorm:"foreignKey:Doctor_uid;references:Doctor_uid"`
 }
