@@ -65,6 +65,7 @@ func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 		return entities.Doctor{}, res.Error
 	}
 
+	var reqDoctor = req
 	// create admin
 
 	req.Type = "admin"
@@ -83,7 +84,7 @@ func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 		return entities.Doctor{}, res.Error
 	}
 
-	return req, nil
+	return reqDoctor, nil
 }
 
 func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, error) {

@@ -28,7 +28,7 @@ func TestCreate(t *testing.T) {
 		var res, err = r.Create(mock1)
 		assert.Nil(t, err)
 		assert.NotNil(t, res)
-		// log.Info(res)
+		log.Info(res)
 	})
 
 	t.Run("success handle username", func(t *testing.T) {
