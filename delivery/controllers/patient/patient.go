@@ -3,6 +3,7 @@ package patient
 import (
 	"be/api/aws/s3"
 	"be/delivery/controllers/templates"
+	logic "be/delivery/logic/patient"
 	"be/delivery/middlewares"
 	"be/repository/patient"
 	"errors"
@@ -17,18 +18,20 @@ import (
 type Controller struct {
 	r      patient.Patient
 	taskS3 s3.TaskS3M
+	l      logic.Patient
 }
 
-func New(r patient.Patient, taskS3 s3.TaskS3M) *Controller {
+func New(r patient.Patient, taskS3 s3.TaskS3M, l logic.Patient) *Controller {
 	return &Controller{
 		r:      r,
 		taskS3: taskS3,
+		l:      l,
 	}
 }
 
 func (cont *Controller) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var req Req
+		var req logic.Req
 
 		// request
 
@@ -37,43 +40,20 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
 		}
 
-		var v = validator.New()
-		if err := v.Struct(req); err != nil {
-			log.Warn(err)
-			switch {
-			case strings.Contains(err.Error(), "UserName"):
-				err = errors.New("invalid userName")
-			case strings.Contains(err.Error(), "Email"):
-				err = errors.New("invalid email")
-			case strings.Contains(err.Error(), "Password"):
-				err = errors.New("invalid password")
-			case strings.Contains(err.Error(), "Nik"):
-				err = errors.New("invalid nik")
-			case strings.Contains(err.Error(), "Name"):
-				err = errors.New("invalid name")
-			case strings.Contains(err.Error(), "Gender"):
-				err = errors.New("invalid gender")
-			case strings.Contains(err.Error(), "Address"):
-				err = errors.New("invalid address")
-			case strings.Contains(err.Error(), "PlaceBirth"):
-				err = errors.New("invalid place birth")
-			case strings.Contains(err.Error(), "Dob"):
-				err = errors.New("invalid date of birth")
-			case strings.Contains(err.Error(), "Job"):
-				err = errors.New("invalid job")
-			case strings.Contains(err.Error(), "Status"):
-				err = errors.New("invalid status")
-			case strings.Contains(err.Error(), "Religion"):
-				err = errors.New("invalid religion")
-			default:
-				err = errors.New("invalid input")
-			}
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		// validation struct
+
+		switch {
+		case req.UserName == "":
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid user name ", nil))
+		case req.Email == "":
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid email ", nil))
+		case req.Password == "":
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid password ", nil))
 		}
 
-		// regex validaion
+		// validaion request
 
-		if err := ValidationRegexPatient(req); err != nil {
+		if err := cont.l.ValidationRequest(req); err != nil {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
@@ -108,6 +88,8 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			switch err.Error() {
 			case errors.New("user name is already exist").Error():
 				err = errors.New("user name is already exist")
+			case errors.New("email is already exist").Error():
+				err = errors.New("email is already exist")
 			default:
 				err = errors.New("there's some problem is server")
 			}
@@ -135,7 +117,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 func (cont *Controller) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var uid = middlewares.ExtractTokenUid(c)
-		var req Req
+		var req logic.Req
 
 		// request
 
@@ -143,18 +125,37 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
-		switch {
-		case req.Nik != "":
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, errors.New("nik can't update").Error(), nil))
-		case req.PlaceBirth != "":
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, errors.New("place birth can't update").Error(), nil))
-		case req.Dob != "":
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, errors.New("date of birth can't update").Error(), nil))
+		var v = validator.New()
+		if err := v.Struct(req); err != nil {
+			log.Warn(err)
+			switch {
+			case strings.Contains(err.Error(), "Nik"):
+				err = errors.New("invalid nik")
+			case strings.Contains(err.Error(), "Name"):
+				err = errors.New("invalid name")
+			case strings.Contains(err.Error(), "Gender"):
+				err = errors.New("invalid gender")
+			case strings.Contains(err.Error(), "Address"):
+				err = errors.New("invalid address")
+			case strings.Contains(err.Error(), "PlaceBirth"):
+				err = errors.New("invalid place birth")
+			case strings.Contains(err.Error(), "Dob"):
+				err = errors.New("invalid date of birth")
+			case strings.Contains(err.Error(), "Job"):
+				err = errors.New("invalid job")
+			case strings.Contains(err.Error(), "Status"):
+				err = errors.New("invalid status")
+			case strings.Contains(err.Error(), "Religion"):
+				err = errors.New("invalid religion")
+			default:
+				err = errors.New("invalid input")
+			}
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
-		// regex validaion
+		// validaion request
 
-		if err := ValidationRegexPatient(req); err != nil {
+		if err := cont.l.ValidationRequest(req); err != nil {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
@@ -195,7 +196,11 @@ func (cont *Controller) Update() echo.HandlerFunc {
 
 		// database
 
-		entity, _ := req.ToPatient()
+		entity, err := req.ToPatient()
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
 
 		res, err := cont.r.Update(uid, *entity)
 
@@ -204,6 +209,8 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			switch err.Error() {
 			case errors.New("user name is already exist").Error():
 				err = errors.New("user name is already exist")
+			case errors.New("email is already exist").Error():
+				err = errors.New("email is already exist")
 			case "record not found":
 				err = errors.New("account is not found")
 			default:

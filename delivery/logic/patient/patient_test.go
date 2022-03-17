@@ -15,7 +15,7 @@ func TestValidationRegexPatient(t *testing.T) {
 
 		var l = New()
 
-		var err = l.ValidationRegexPatient(req)
+		var err = l.ValidationRequest(req)
 
 		assert.NotNil(t, err)
 		log.Info(err)
@@ -27,7 +27,7 @@ func TestValidationRegexPatient(t *testing.T) {
 
 		var l = New()
 
-		var err = l.ValidationRegexPatient(req)
+		var err = l.ValidationRequest(req)
 
 		assert.NotNil(t, err)
 		log.Info(err)
@@ -40,7 +40,7 @@ func TestValidationRegexPatient(t *testing.T) {
 
 		var l = New()
 
-		var err = l.ValidationRegexPatient(req)
+		var err = l.ValidationRequest(req)
 
 		assert.NotNil(t, err)
 		log.Info(err)
@@ -53,7 +53,7 @@ func TestValidationRegexPatient(t *testing.T) {
 
 		var l = New()
 
-		var err = l.ValidationRegexPatient(req)
+		var err = l.ValidationRequest(req)
 
 		assert.NotNil(t, err)
 		log.Info(err)
@@ -88,7 +88,7 @@ func TestValidationRegexPatient(t *testing.T) {
 
 		var l = New()
 
-		var err = l.ValidationRegexPatient(req)
+		var err = l.ValidationRequest(req)
 
 		assert.NotNil(t, err)
 		log.Info(err)
@@ -101,7 +101,7 @@ func TestValidationRegexPatient(t *testing.T) {
 
 		var l = New()
 
-		var err = l.ValidationRegexPatient(req)
+		var err = l.ValidationRequest(req)
 
 		assert.NotNil(t, err)
 		log.Info(err)
@@ -114,7 +114,7 @@ func TestValidationRegexPatient(t *testing.T) {
 
 		var l = New()
 
-		var err = l.ValidationRegexPatient(req)
+		var err = l.ValidationRequest(req)
 
 		assert.NotNil(t, err)
 		log.Info(err)
@@ -125,7 +125,7 @@ func TestValidationRegexPatient(t *testing.T) {
 
 		var l = New()
 
-		var err = l.ValidationRegexPatient(req)
+		var err = l.ValidationRequest(req)
 
 		assert.Nil(t, err)
 		log.Info(err)

@@ -81,16 +81,28 @@ func (r *Repo) Update(patient_uid string, req entities.Patient) (entities.Patien
 		return entities.Patient{}, errors.New("user name is already exist")
 	}
 
+	// check email
+
+	var checkEmail = r.db.Model(&entities.Patient{}).Where("email = ?", req.Email).Select("user_name as UserName").Scan(&userNameCheck{})
+
+	if checkEmail.RowsAffected != 0 {
+		return entities.Patient{}, errors.New("email is already exist")
+	}
+
 	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Updates(entities.Patient{
-		UserName: req.UserName,
-		Email:    req.Email,
-		Password: req.Password,
-		Name:     req.Name,
-		Image:    req.Image,
-		Gender:   req.Gender,
-		Address:  req.Address,
-		Status:   req.Status,
-		Religion: req.Religion}); res.Error != nil || res.RowsAffected == 0 {
+		UserName:   req.UserName,
+		Email:      req.Email,
+		Password:   req.Password,
+		Nik:        req.Nik,
+		Name:       req.Name,
+		Image:      req.Image,
+		Gender:     req.Gender,
+		Address:    req.Address,
+		PlaceBirth: req.PlaceBirth,
+		Dob:        req.Dob,
+		Job:        req.Job,
+		Status:     req.Status,
+		Religion:   req.Religion}); res.Error != nil || res.RowsAffected == 0 {
 		switch {
 		case res.Error == nil:
 			return entities.Patient{}, gorm.ErrRecordNotFound

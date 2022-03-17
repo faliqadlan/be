@@ -11,7 +11,7 @@ func New() *Logic {
 	return &Logic{}
 }
 
-func (l *Logic) ValidationRegexPatient(req Req) error {
+func (l *Logic) ValidationRequest(req Req) error {
 
 	if err := utils.UserNameValid(req.UserName); err != nil && req.UserName != "" {
 		return err

@@ -9,9 +9,9 @@ import (
 )
 
 type Req struct {
-	UserName   string `json:"userName" form:"userName" validate:"required"`
-	Email      string `json:"email" form:"email" validate:"required"`
-	Password   string `json:"password" form:"password" validate:"required"`
+	UserName   string `json:"userName" form:"userName" `
+	Email      string `json:"email" form:"email"`
+	Password   string `json:"password" form:"password"`
 	Nik        string `json:"nik" form:"nik" validate:"required"`
 	Name       string `json:"name" form:"name"  validate:"required"`
 	Image      string `json:"image" form:"image"`
