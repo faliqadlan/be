@@ -30,7 +30,7 @@ func New(r visit.Visit, cal calendar.Calendar) *Controller {
 
 func (cont *Controller) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var uid = middlewares.ExtractTokenUid(c)
+		var uid, _ = middlewares.ExtractTokenUid(c)
 		var req Req
 
 		if err := c.Bind(&req); err != nil {

@@ -47,7 +47,7 @@ func (ac *AuthController) Login() echo.HandlerFunc {
 		}
 
 		// log.Info(checkedUser)
-		token, err := middlewares.GenerateToken(checkedUser["data"].(string))
+		token, err := middlewares.GenerateToken(checkedUser["data"].(string), checkedUser["type"].(string))
 
 		if err != nil {
 			log.Warn(err)

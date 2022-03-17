@@ -66,5 +66,7 @@ func (ad *AuthDb) Login(userName string, password string) (map[string]interface{
 		}, nil
 	}
 	log.Warn(res.Error)
-	return map[string]interface{}{"type": "all"}, gorm.ErrRecordNotFound
+	return map[string]interface{}{
+	"data":"",
+	"type": "all"}, gorm.ErrRecordNotFound
 }

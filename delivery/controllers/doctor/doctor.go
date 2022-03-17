@@ -100,7 +100,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 
 		// check token
 
-		token, err := middlewares.GenerateToken(res.Doctor_uid)
+		token, err := middlewares.GenerateToken(res.Doctor_uid, "doctor")
 
 		if err != nil {
 			log.Warn(err)
@@ -117,7 +117,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 
 func (cont *Controller) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var uid = middlewares.ExtractTokenUid(c)
+		var uid, _ = middlewares.ExtractTokenUid(c)
 		var req logic.Req
 
 		// request
@@ -225,7 +225,7 @@ func (cont *Controller) Update() echo.HandlerFunc {
 
 func (cont *Controller) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var uid = middlewares.ExtractTokenUid(c)
+		var uid, _ = middlewares.ExtractTokenUid(c)
 
 		// aws s3
 
@@ -267,8 +267,8 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 
 func (cont *Controller) GetProfile() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var uid = middlewares.ExtractTokenUid(c)
-
+		var uid, kind = middlewares.ExtractTokenUid(c)
+		log.Info(kind)
 		// database
 
 		var res, err = cont.r.GetProfile(uid)

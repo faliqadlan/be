@@ -29,7 +29,7 @@ func (r *Req) ToPatient() (*entities.Patient, error) {
 	var layout = "02-01-2006"
 
 	var dateConv, err = time.Parse(layout, r.Dob)
-	if err != nil {
+	if err != nil && r.Dob != "" {
 		return &entities.Patient{}, errors.New("invalid date format")
 	}
 	// log.Info(dateConv)

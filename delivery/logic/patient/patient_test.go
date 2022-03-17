@@ -1,6 +1,5 @@
 package patient
 
-
 import (
 	"testing"
 
@@ -82,6 +81,15 @@ func TestValidationRegexPatient(t *testing.T) {
 		log.Info(err)
 	})
 
+	t.Run("succeess no date", func(t *testing.T) {
+		var req Req
+
+		_, err := req.ToPatient()
+
+		assert.Nil(t, err)
+		log.Info(err)
+	})
+
 	t.Run("error gender", func(t *testing.T) {
 		var req Req
 
@@ -132,4 +140,3 @@ func TestValidationRegexPatient(t *testing.T) {
 		log.Info(err)
 	})
 }
-
