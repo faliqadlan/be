@@ -291,6 +291,33 @@ func (cont *Controller) GetProfile() echo.HandlerFunc {
 	}
 }
 
+func (cont *Controller) GetCheck() echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		var userName = c.QueryParam("userName")
+		var email = c.QueryParam("email")
+
+		// var uid, kind = middlewares.ExtractTokenUid(c)
+		// log.Info(kind)
+		// database
+
+		var res, err = cont.r.GetProfile("", userName, email)
+
+		if err != nil {
+			log.Warn(err)
+			switch err.Error() {
+			case "record not found":
+				err = errors.New("account is not found")
+			default:
+				err = errors.New("there's some problem is server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
+		}
+
+		return c.JSON(http.StatusOK, templates.Success(nil, "success get profile Doctor", res))
+	}
+}
+
 func (cont *Controller) GetAll() echo.HandlerFunc {
 	return func(c echo.Context) error {
 

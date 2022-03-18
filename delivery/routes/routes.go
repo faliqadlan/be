@@ -13,7 +13,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc *patient.Controller, vc *visit.Controller, gc* google.Controller) {
+func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc *patient.Controller, vc *visit.Controller, gc *google.Controller) {
 	e.Use(middleware.CORS())
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -33,18 +33,22 @@ func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc
 	// doctor =================================
 
 	e.POST("/doctor", dc.Create())
-	e.GET("/doctor/profile", dc.GetProfile())
 
 	// patient
 
 	e.POST("/patient", pc.Create())
-	e.GET("/patient/profile", pc.GetProfile())
 
 	// google
 
 	e.GET("/google/login", gc.GoogleLogin())
 	e.GET("google/callback", gc.GoogleCalendar())
-	
+
+	// no jwt for check email or username
+
+	var f = e.Group("")
+
+	f.GET("/doctor/check", dc.GetCheck())
+	f.GET("/patient/check", pc.GetCheck())
 
 	// with jwt
 

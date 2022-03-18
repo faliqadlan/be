@@ -295,3 +295,30 @@ func (cont *Controller) GetProfile() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, templates.Success(http.StatusOK, "success get profile patient", res))
 	}
 }
+
+func (cont *Controller) GetCheck() echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		var userName = c.QueryParam("userName")
+		var email = c.QueryParam("email")
+
+		var uid string
+
+		// database
+		// log.Info(uid)
+		var res, err = cont.r.GetProfile(uid, userName, email)
+
+		if err != nil {
+			log.Warn(err)
+			switch err.Error() {
+			case "record not found":
+				err = errors.New("account is not found")
+			default:
+				err = errors.New("there's some problem is server")
+			}
+			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
+		}
+
+		return c.JSON(http.StatusOK, templates.Success(http.StatusOK, "success get profile patient", res))
+	}
+}
