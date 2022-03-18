@@ -70,15 +70,6 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
-		switch {
-		case req.UserName == "":
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid user name ", nil))
-		case req.Email == "":
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid email ", nil))
-		case req.Password == "":
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid password ", nil))
-		}
-
 		// validaion request
 
 		if err := cont.l.ValidationRequest(req); err != nil {

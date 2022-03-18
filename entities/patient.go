@@ -24,6 +24,6 @@ type Patient struct {
 	Dob         datatypes.Date
 	Job         string
 	Status      string  `gorm:"type:enum('belumKawin', 'kawin', 'ceraiHidup', 'ceraiMati', 'lainnya');default:'lainnya'"`
-	Religion    string  `gorm:"type:enum('islam', 'kristen', 'katolik', 'budha', 'hindu', 'konghuchu', 'lainnya');default:'lainnya'"`
+	Religion    string  `gorm:"type:enum('islam', 'kristen', 'katolik', 'protestan', 'budha', 'hindu', 'konghuchu', 'lainnya');default:'lainnya'"`
 	Visits      []Visit `gorm:"foreignKey:Patient_uid;references:Patient_uid"`
 }
