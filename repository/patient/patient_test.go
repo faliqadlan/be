@@ -242,7 +242,17 @@ func TestGetProfile(t *testing.T) {
 			t.Fatal()
 		}
 
-		var res1, err1 = r.GetProfile(res.Patient_uid)
+		var res1, err1 = r.GetProfile(res.Patient_uid, "", "")
+		assert.Nil(t, err1)
+		assert.NotNil(t, res1)
+		// log.Info(res1.Dob)
+
+		res1, err1 = r.GetProfile("", mock1.UserName, "")
+		assert.Nil(t, err1)
+		assert.NotNil(t, res1)
+		// log.Info(res1.Dob)
+
+		res1, err1 = r.GetProfile("", "", mock1.Email)
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
 		// log.Info(res1.Dob)
@@ -257,7 +267,7 @@ func TestGetProfile(t *testing.T) {
 			t.Fatal()
 		}
 
-		var _, err1 = r.GetProfile("")
+		var _, err1 = r.GetProfile(shortuuid.New(), "", "")
 		assert.NotNil(t, err1)
 		// log.Info(res1)
 	})

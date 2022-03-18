@@ -76,7 +76,7 @@ func (m *mockSuccess) Delete(patient_uid string) (entities.Patient, error) {
 	return entities.Patient{}, nil
 }
 
-func (m *mockSuccess) GetProfile(patient_uid string) (patient.Profile, error) {
+func (m *mockSuccess) GetProfile(patient_uid, userName, email string) (patient.Profile, error) {
 	return patient.Profile{Image: "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/testing"}, nil
 }
 
@@ -94,7 +94,7 @@ func (m *defaultImage) Delete(patient_uid string) (entities.Patient, error) {
 	return entities.Patient{}, nil
 }
 
-func (m *defaultImage) GetProfile(patient_uid string) (patient.Profile, error) {
+func (m *defaultImage) GetProfile(patient_uid, userName, email string) (patient.Profile, error) {
 	return patient.Profile{Image: "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png"}, nil
 }
 
@@ -112,7 +112,7 @@ func (m *mockFail) Delete(patient_uid string) (entities.Patient, error) {
 	return entities.Patient{}, errors.New("")
 }
 
-func (m *mockFail) GetProfile(patient_uid string) (patient.Profile, error) {
+func (m *mockFail) GetProfile(patient_uid, userName, email string) (patient.Profile, error) {
 	return patient.Profile{}, errors.New("")
 }
 
@@ -130,7 +130,7 @@ func (m *recordNotFound) Delete(patient_uid string) (entities.Patient, error) {
 	return entities.Patient{}, gorm.ErrRecordNotFound
 }
 
-func (m *recordNotFound) GetProfile(patient_uid string) (patient.Profile, error) {
+func (m *recordNotFound) GetProfile(patient_uid, userName, email string) (patient.Profile, error) {
 	return patient.Profile{}, gorm.ErrRecordNotFound
 }
 
@@ -148,7 +148,7 @@ func (m *userNameCheck) Delete(patient_uid string) (entities.Patient, error) {
 	return entities.Patient{}, errors.New("user name is already exist")
 }
 
-func (m *userNameCheck) GetProfile(patient_uid string) (patient.Profile, error) {
+func (m *userNameCheck) GetProfile(patient_uid, userName, email string) (patient.Profile, error) {
 	return patient.Profile{}, errors.New("user name is already exist")
 }
 

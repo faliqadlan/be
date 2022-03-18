@@ -42,6 +42,34 @@ func (cont *Controller) Create() echo.HandlerFunc {
 
 		// validation struct
 
+		var v = validator.New()
+		if err := v.Struct(req); err != nil {
+			log.Warn(err)
+			switch {
+			case strings.Contains(err.Error(), "Nik"):
+				err = errors.New("invalid nik")
+			case strings.Contains(err.Error(), "Name"):
+				err = errors.New("invalid name")
+			case strings.Contains(err.Error(), "Gender"):
+				err = errors.New("invalid gender")
+			case strings.Contains(err.Error(), "Address"):
+				err = errors.New("invalid address")
+			case strings.Contains(err.Error(), "PlaceBirth"):
+				err = errors.New("invalid place birth")
+			case strings.Contains(err.Error(), "Dob"):
+				err = errors.New("invalid date of birth")
+			case strings.Contains(err.Error(), "Job"):
+				err = errors.New("invalid job")
+			case strings.Contains(err.Error(), "Status"):
+				err = errors.New("invalid status")
+			case strings.Contains(err.Error(), "Religion"):
+				err = errors.New("invalid religion")
+			default:
+				err = errors.New("invalid input")
+			}
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
 		switch {
 		case req.UserName == "":
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid user name ", nil))
@@ -125,34 +153,6 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
-		var v = validator.New()
-		if err := v.Struct(req); err != nil {
-			log.Warn(err)
-			switch {
-			case strings.Contains(err.Error(), "Nik"):
-				err = errors.New("invalid nik")
-			case strings.Contains(err.Error(), "Name"):
-				err = errors.New("invalid name")
-			case strings.Contains(err.Error(), "Gender"):
-				err = errors.New("invalid gender")
-			case strings.Contains(err.Error(), "Address"):
-				err = errors.New("invalid address")
-			case strings.Contains(err.Error(), "PlaceBirth"):
-				err = errors.New("invalid place birth")
-			case strings.Contains(err.Error(), "Dob"):
-				err = errors.New("invalid date of birth")
-			case strings.Contains(err.Error(), "Job"):
-				err = errors.New("invalid job")
-			case strings.Contains(err.Error(), "Status"):
-				err = errors.New("invalid status")
-			case strings.Contains(err.Error(), "Religion"):
-				err = errors.New("invalid religion")
-			default:
-				err = errors.New("invalid input")
-			}
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
-		}
-
 		// validaion request
 
 		if err := cont.l.ValidationRequest(req); err != nil {
@@ -166,7 +166,7 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			log.Warn(err)
 		}
 		if err == nil {
-			res1, err := cont.r.GetProfile(uid)
+			res1, err := cont.r.GetProfile(uid, "", "")
 			if err != nil {
 				log.Warn(err)
 				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
@@ -229,7 +229,7 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 
 		// aws s3
 
-		res1, err := cont.r.GetProfile(uid)
+		res1, err := cont.r.GetProfile(uid, "", "")
 		if err != nil {
 			log.Error(err)
 		}
@@ -267,6 +267,10 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 
 func (cont *Controller) GetProfile() echo.HandlerFunc {
 	return func(c echo.Context) error {
+
+		var userName = c.QueryParam("userName")
+		var email = c.QueryParam("email")
+
 		var uid string
 
 		if uid = c.QueryParam("patient_uid"); uid == "" {
@@ -275,7 +279,7 @@ func (cont *Controller) GetProfile() echo.HandlerFunc {
 
 		// database
 		// log.Info(uid)
-		var res, err = cont.r.GetProfile(uid)
+		var res, err = cont.r.GetProfile(uid, userName, email)
 
 		if err != nil {
 			log.Warn(err)
