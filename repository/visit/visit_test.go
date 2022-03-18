@@ -297,6 +297,11 @@ func TestUpdate(t *testing.T) {
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
 		// log.Info(res3)
+
+		// res3, err3 = r.Update(res2.Visit_uid, entities.Visit{Status: "completed", Complaint: "update complaint", MainDiagnose: "update main diagnose", AdditionDiagnose: "update addition_diagnose", Action: "update action", Recipe: "update recipe", BloodPressure: "update blood_pressure", HeartRate: "update heart_rate", O2Saturate: "update o2_saturate", Weight: 100, Height: 100, Bmi: 100})
+		// assert.Nil(t, err3)
+		// assert.NotNil(t, res3)
+		// // log.Info(res3)
 	})
 
 	t.Run("invalid uid", func(t *testing.T) {
@@ -348,7 +353,7 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		var _, err3 = r.Update(res2.Visit_uid, entities.Visit{Status: "njsndaj", Complaint: "update complaint", MainDiagnose: "update main diagnose", AdditionDiagnose: "update addition_diagnose", Action: "update action", Recipe: "update recipe", BloodPressure: "update blood_pressure", HeartRate: "update heart_rate", O2Saturate: "update o2_saturate", Weight: 100, Height: 100, Bmi: 100})
+		var _, err3 = r.Update(res2.Visit_uid, entities.Visit{Status: "njsndaj", Complaint: "update complaint", AdditionDiagnose: "update addition_diagnose", Action: "update action", Recipe: "update recipe", BloodPressure: "update blood_pressure", HeartRate: "update heart_rate", O2Saturate: "update o2_saturate", Weight: 100, Height: 100, Bmi: 100})
 		assert.NotNil(t, err3)
 		log.Info(err3)
 	})
@@ -471,30 +476,30 @@ func TestGetVisitsList(t *testing.T) {
 	})
 
 	t.Run("invalid uid", func(t *testing.T) {
-		var mock1 = entities.Doctor{UserName: "clinic2", Email: shortuuid.New(), Password: "clinic"}
+		// var mock1 = entities.Doctor{UserName: "clinic2", Email: shortuuid.New(), Password: "clinic"}
 
-		var res, err = doctor.New(db).Create(mock1)
-		if err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
+		// var res, err = doctor.New(db).Create(mock1)
+		// if err != nil {
+		// 	log.Info(err)
+		// 	t.Fatal()
+		// }
 
-		var mock2 = entities.Patient{UserName: "patient2", Email: shortuuid.New(), Password: "patient", Nik: "1", Name: "name 1"}
+		// var mock2 = entities.Patient{UserName: "patient2", Email: shortuuid.New(), Password: "patient", Nik: "1", Name: "name 1"}
 
-		var res2, err2 = patient.New(db).Create(mock2)
-		if err2 != nil {
-			log.Info(err2)
-			t.Fatal()
-		}
+		// var res2, err2 = patient.New(db).Create(mock2)
+		// if err2 != nil {
+		// 	log.Info(err2)
+		// 	t.Fatal()
+		// }
 
-		var layDate = "02-01-2006"
+		// var layDate = "02-01-2006"
 
-		var dateNow = time.Now().Local().Format(layDate)
-		_, err = r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1"})
-		if err != nil {
-			log.Info(err)
-			t.Fatal()
-		}
+		// var dateNow = time.Now().Local().Format(layDate)
+		// _, err = r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1"})
+		// if err != nil {
+		// 	log.Info(err)
+		// 	t.Fatal()
+		// }
 
 		var _, err3 = r.GetVisitList(shortuuid.New())
 		assert.NotNil(t, err3)

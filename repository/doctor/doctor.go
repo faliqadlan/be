@@ -160,13 +160,23 @@ func (r *Repo) Delete(doctor_uid string) (entities.Doctor, error) {
 	return resInit, nil
 }
 
-func (r *Repo) GetProfile(doctor_uid string) (ProfileResp, error) {
+func (r *Repo) GetProfile(doctor_uid, userName, email string) (ProfileResp, error) {
+
+	switch  {
+	case doctor_uid != "":
+		doctor_uid = "doctor_uid = '" + doctor_uid + "'"
+	case userName != "":
+		doctor_uid = "user_name = '" + userName + "'"
+	case email != "":
+		doctor_uid = "email = '" + email + "'"
+	}
+
 
 	var profileResp ProfileResp
 
 	var query = "doctor_uid as Doctor_uid, user_name as UserName, email as Email, name as Name, image as Image, address as Address, status as Status, open_day as OpenDay, close_day as CloseDay, capacity as Capacity "
 
-	if res := r.db.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Select(query /* , doctor_uid */).Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
+	if res := r.db.Model(&entities.Doctor{}).Where(doctor_uid).Select(query).Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
 		log.Warn(res.Error)
 		return ProfileResp{}, gorm.ErrRecordNotFound
 	}

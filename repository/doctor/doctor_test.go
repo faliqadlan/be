@@ -119,14 +119,7 @@ func TestUpdate(t *testing.T) {
 	})
 
 	t.Run("success handle email", func(t *testing.T) {
-		var mock = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
-
-		if _, err := patient.New(db).Create(mock); err != nil {
-			t.Log()
-			t.Fatal()
-		}
-
-		var mock1 = entities.Doctor{UserName: "clinic2", Email: shortuuid.New(), Password: "clinic"}
+		var mock1 = entities.Doctor{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "clinic"}
 
 		var res, err = r.Create(mock1)
 		if err != nil {
@@ -134,11 +127,11 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		mock1 = entities.Doctor{Name: "clinic", UserName: "patient2"}
+		mock1 = entities.Doctor{Name: "clinic", Email: mock1.Email}
 
 		_, err = r.Update(res.Doctor_uid, mock1)
 		assert.NotNil(t, err)
-		// log.Info(err)
+		log.Info(err)
 	})
 
 	t.Run("error input uid", func(t *testing.T) {
@@ -235,7 +228,17 @@ func TestGetProfile(t *testing.T) {
 			t.Fatal()
 		}
 
-		var res1, err1 = r.GetProfile(res.Doctor_uid)
+		var res1, err1 = r.GetProfile(res.Doctor_uid, "", "")
+		assert.Nil(t, err1)
+		assert.NotNil(t, res1)
+		// log.Info(res1)
+
+		res1, err1 = r.GetProfile("", mock1.UserName, "")
+		assert.Nil(t, err1)
+		assert.NotNil(t, res1)
+		// log.Info(res1)
+
+		res1, err1 = r.GetProfile("", "", mock1.Email)
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
 		// log.Info(res1)
@@ -250,7 +253,7 @@ func TestGetProfile(t *testing.T) {
 			t.Fatal()
 		}
 
-		var _, err1 = r.GetProfile(res.Status)
+		var _, err1 = r.GetProfile(res.Status, "", "")
 		assert.NotNil(t, err1)
 		// log.Info(res1)
 	})

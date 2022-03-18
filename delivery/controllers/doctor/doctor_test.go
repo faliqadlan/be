@@ -76,7 +76,7 @@ func (m *mockSuccess) Delete(Doctor_uid string) (entities.Doctor, error) {
 	return entities.Doctor{}, nil
 }
 
-func (m *mockSuccess) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
+func (m *mockSuccess) GetProfile(doctor_uid, userName, email string) (doctor.ProfileResp, error) {
 	return doctor.ProfileResp{Image: "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/testing"}, nil
 }
 
@@ -98,7 +98,7 @@ func (m *mockFail) Delete(Doctor_uid string) (entities.Doctor, error) {
 	return entities.Doctor{}, errors.New("")
 }
 
-func (m *mockFail) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
+func (m *mockFail) GetProfile(doctor_uid, userName, email string) (doctor.ProfileResp, error) {
 	return doctor.ProfileResp{}, errors.New("")
 }
 
@@ -120,7 +120,7 @@ func (m *createCapacity) Delete(Doctor_uid string) (entities.Doctor, error) {
 	return entities.Doctor{}, errors.New("")
 }
 
-func (m *createCapacity) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
+func (m *createCapacity) GetProfile(doctor_uid, userName, email string) (doctor.ProfileResp, error) {
 	return doctor.ProfileResp{Image: "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png"}, nil
 }
 
@@ -142,7 +142,7 @@ func (m *createUserName) Delete(Doctor_uid string) (entities.Doctor, error) {
 	return entities.Doctor{}, errors.New("")
 }
 
-func (m *createUserName) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
+func (m *createUserName) GetProfile(doctor_uid, userName, email string) (doctor.ProfileResp, error) {
 	return doctor.ProfileResp{}, errors.New("")
 }
 
@@ -164,7 +164,7 @@ func (m *recordNotFound) Delete(Doctor_uid string) (entities.Doctor, error) {
 	return entities.Doctor{}, gorm.ErrRecordNotFound
 }
 
-func (m *recordNotFound) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
+func (m *recordNotFound) GetProfile(doctor_uid, userName, email string) (doctor.ProfileResp, error) {
 	return doctor.ProfileResp{}, gorm.ErrRecordNotFound
 }
 
@@ -186,7 +186,7 @@ func (m *statusEnum) Delete(Doctor_uid string) (entities.Doctor, error) {
 	return entities.Doctor{}, gorm.ErrRecordNotFound
 }
 
-func (m *statusEnum) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
+func (m *statusEnum) GetProfile(doctor_uid, userName, email string) (doctor.ProfileResp, error) {
 	return doctor.ProfileResp{}, gorm.ErrRecordNotFound
 }
 
@@ -208,7 +208,7 @@ func (m *openDayEnum) Delete(Doctor_uid string) (entities.Doctor, error) {
 	return entities.Doctor{}, gorm.ErrRecordNotFound
 }
 
-func (m *openDayEnum) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
+func (m *openDayEnum) GetProfile(doctor_uid, userName, email string) (doctor.ProfileResp, error) {
 	return doctor.ProfileResp{}, gorm.ErrRecordNotFound
 }
 
@@ -230,7 +230,7 @@ func (m *closeDayEnum) Delete(Doctor_uid string) (entities.Doctor, error) {
 	return entities.Doctor{}, gorm.ErrRecordNotFound
 }
 
-func (m *closeDayEnum) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
+func (m *closeDayEnum) GetProfile(doctor_uid, userName, email string) (doctor.ProfileResp, error) {
 	return doctor.ProfileResp{}, gorm.ErrRecordNotFound
 }
 
@@ -252,7 +252,7 @@ func (m *updateFile) Delete(Doctor_uid string) (entities.Doctor, error) {
 	return entities.Doctor{}, nil
 }
 
-func (m *updateFile) GetProfile(doctor_uid string) (doctor.ProfileResp, error) {
+func (m *updateFile) GetProfile(doctor_uid, userName, email string) (doctor.ProfileResp, error) {
 	return doctor.ProfileResp{Image: "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png"}, nil
 }
 

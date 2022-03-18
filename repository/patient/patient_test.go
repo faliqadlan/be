@@ -6,10 +6,12 @@ import (
 	"be/repository/doctor"
 	"be/utils"
 	"testing"
+	"time"
 
 	"github.com/labstack/gommon/log"
 	"github.com/lithammer/shortuuid"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/datatypes"
 )
 
 func TestCreate(t *testing.T) {
@@ -53,7 +55,7 @@ func TestCreate(t *testing.T) {
 			t.Fatal()
 		}
 
-		var mock1 = entities.Patient{UserName: "patient2", Email: "patient@", Password: "clinic", Nik: "1"}
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: "patient@", Password: "clinic", Nik: "1"}
 
 		var _, err = r.Create(mock1)
 		assert.NotNil(t, err)
@@ -96,6 +98,14 @@ func TestUpdate(t *testing.T) {
 		// log.Info(res.ClinicName)
 
 		_, err = r.Update(res.Patient_uid, mock1)
+		assert.NotNil(t, err)
+		// log.Info(err)
+
+		_, err = r.Update(res.Patient_uid, entities.Patient{PlaceBirth: "malang"})
+		assert.NotNil(t, err)
+		// log.Info(err)
+
+		_, err = r.Update(res.Patient_uid, entities.Patient{Dob: datatypes.Date(time.Now())})
 		assert.NotNil(t, err)
 		// log.Info(err)
 	})

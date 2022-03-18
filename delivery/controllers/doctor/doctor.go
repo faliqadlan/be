@@ -40,16 +40,39 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input ", nil))
 		}
 
+		// validation struct
+
+		// switch {
+		// case req.UserName == "":
+		// 	return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid user name ", nil))
+		// case req.Email == "":
+		// 	return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid email ", nil))
+		// case req.Password == "":
+		// 	return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid password ", nil))
+		// }
 
 		// validation struct
 
-		switch {
-		case req.UserName == "":
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid user name ", nil))
-		case req.Email == "":
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid email ", nil))
-		case req.Password == "":
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid password ", nil))
+		var v = validator.New()
+		if err := v.Struct(req); err != nil {
+			log.Warn(err)
+			switch {
+			case strings.Contains(err.Error(), "Name"):
+				err = errors.New("invalid name")
+			case strings.Contains(err.Error(), "Address"):
+				err = errors.New("invalid address")
+			case strings.Contains(err.Error(), "Status"):
+				err = errors.New("invalid status")
+			case strings.Contains(err.Error(), "OpenDay"):
+				err = errors.New("invalid open day")
+			case strings.Contains(err.Error(), "CloseDay"):
+				err = errors.New("invalid close day")
+			case strings.Contains(err.Error(), "Capacity"):
+				err = errors.New("invalid capacity ")
+			default:
+				err = errors.New("invalid input")
+			}
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
 		// validation request
@@ -127,30 +150,6 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
 		}
 
-		// validation struct
-
-		var v = validator.New()
-		if err := v.Struct(req); err != nil {
-			log.Warn(err)
-			switch {
-			case strings.Contains(err.Error(), "Name"):
-				err = errors.New("invalid name")
-			case strings.Contains(err.Error(), "Address"):
-				err = errors.New("invalid address")
-			case strings.Contains(err.Error(), "Status"):
-				err = errors.New("invalid status")
-			case strings.Contains(err.Error(), "OpenDay"):
-				err = errors.New("invalid open day")
-			case strings.Contains(err.Error(), "CloseDay"):
-				err = errors.New("invalid close day")
-			case strings.Contains(err.Error(), "Capacity"):
-				err = errors.New("invalid capacity ")
-			default:
-				err = errors.New("invalid input")
-			}
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
-		}
-
 		// validation request
 
 		if err := cont.l.ValidationRequest(req); err != nil {
@@ -165,7 +164,7 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			log.Warn(err)
 		}
 		if err == nil {
-			res1, err := cont.r.GetProfile(uid)
+			res1, err := cont.r.GetProfile(uid, "", "")
 			if err != nil {
 				log.Warn(err)
 				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, errors.New("there's some problem is server"), nil))
@@ -229,7 +228,7 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 
 		// aws s3
 
-		res1, err := cont.r.GetProfile(uid)
+		res1, err := cont.r.GetProfile(uid, "", "")
 		if err != nil {
 			log.Error(err)
 		}
@@ -267,11 +266,15 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 
 func (cont *Controller) GetProfile() echo.HandlerFunc {
 	return func(c echo.Context) error {
+
+		var userName = c.QueryParam("userName")
+		var email = c.QueryParam("email")
+
 		var uid, kind = middlewares.ExtractTokenUid(c)
 		log.Info(kind)
 		// database
 
-		var res, err = cont.r.GetProfile(uid)
+		var res, err = cont.r.GetProfile(uid, userName, email)
 
 		if err != nil {
 			log.Warn(err)

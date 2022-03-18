@@ -31,6 +31,7 @@ func (r *Repo) Create(doctor_uid, patient_uid, date string, req entities.Visit) 
 	}
 
 	var res = r.db.Unscoped().Model(&entities.Visit{}).Where("patient_uid = ?", patient_uid).Scan(&[]entities.Visit{})
+	log.Info(res.Error)
 	var uid string = patient_uid + "-" + strconv.Itoa(int(res.RowsAffected)+1)
 	// log.Info(res.RowsAffected)
 	req.Date = datatypes.Date(dateConv)
