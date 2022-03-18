@@ -33,10 +33,12 @@ func RoutesPath(e *echo.Echo, ac *auth.AuthController, dc *doctor.Controller, pc
 	// doctor =================================
 
 	e.POST("/doctor", dc.Create())
+	e.GET("/doctor/profile", dc.GetProfile())
 
 	// patient
 
 	e.POST("/patient", pc.Create())
+	e.GET("/patient/profile", pc.GetProfile())
 
 	// google
 
