@@ -80,7 +80,7 @@ func TestUpdate(t *testing.T) {
 	db.AutoMigrate(&entities.Patient{})
 
 	t.Run("success update", func(t *testing.T) {
-		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic",  Capacity: 15}
+		var mock1 = entities.Doctor{UserName: "clinic1", Email: "clinic@", Password: "clinic", Capacity: 15}
 
 		var res, err = r.Create(mock1)
 		if err != nil {
@@ -96,6 +96,29 @@ func TestUpdate(t *testing.T) {
 		// log.Info(res.ClinicName)
 	})
 	t.Run("success handle username", func(t *testing.T) {
+		var mock = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
+
+		if _, err := patient.New(db).Create(mock); err != nil {
+			t.Log()
+			t.Fatal()
+		}
+
+		var mock1 = entities.Doctor{UserName: "clinic2", Email: shortuuid.New(), Password: "clinic"}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Doctor{Name: "clinic", UserName: "patient2"}
+
+		_, err = r.Update(res.Doctor_uid, mock1)
+		assert.NotNil(t, err)
+		// log.Info(err)
+	})
+
+	t.Run("success handle email", func(t *testing.T) {
 		var mock = entities.Patient{UserName: "patient2", Email: "patient@", Password: "patient"}
 
 		if _, err := patient.New(db).Create(mock); err != nil {

@@ -88,12 +88,16 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		mock1 = entities.Patient{Name: "clinic"}
+		mock1 = entities.Patient{Nik: "clinic"}
 
 		res, err = r.Update(res.Patient_uid, mock1)
 		assert.Nil(t, err)
 		assert.NotNil(t, res)
 		// log.Info(res.ClinicName)
+
+		_, err = r.Update(res.Patient_uid, mock1)
+		assert.NotNil(t, err)
+		// log.Info(err)
 	})
 
 	t.Run("success handle username", func(t *testing.T) {
@@ -113,6 +117,22 @@ func TestUpdate(t *testing.T) {
 		}
 
 		mock1 = entities.Patient{Name: "clinic", UserName: "patient2"}
+
+		_, err = r.Update(res.Patient_uid, mock1)
+		assert.NotNil(t, err)
+		// log.Info(err)
+	})
+
+	t.Run("success handle email", func(t *testing.T) {
+		var mock1 = entities.Patient{UserName: shortuuid.New(), Email: shortuuid.New(), Password: "clinic", Nik: "1"}
+
+		var res, err = r.Create(mock1)
+		if err != nil {
+			log.Info(err)
+			t.Fatal()
+		}
+
+		mock1 = entities.Patient{Name: "clinic", Email: mock1.Email}
 
 		_, err = r.Update(res.Patient_uid, mock1)
 		assert.NotNil(t, err)

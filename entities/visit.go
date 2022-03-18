@@ -17,7 +17,7 @@ type Visit struct {
 	Doctor_uid       string         `gorm:"index;type:varchar(22)"`
 	Patient_uid      string         `gorm:"index;type:varchar(22)"`
 	Date             datatypes.Date
-	Status           string `gorm:"type:enum('pending', 'ready', 'cancelled');default:'pending'"`
+	Status           string `gorm:"type:enum('pending', 'ready', 'completed', 'cancelled');default:'pending'"`
 	Complaint        string
 	MainDiagnose     string
 	AdditionDiagnose string
