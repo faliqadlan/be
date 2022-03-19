@@ -31,6 +31,18 @@ func TestCreate(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, res)
 		// log.Info(res)
+
+		if res, err := r.Create(entities.Patient{Nik: "123456"}); err != nil {
+			assert.Nil(t, err)
+			assert.NotNil(t, res)
+			// log.Info(res)
+		}
+
+		if res, err := r.Create(entities.Patient{Nik: "123456"}); err != nil {
+			assert.Nil(t, err)
+			assert.NotNil(t, res)
+			// log.Info(res)
+		}
 	})
 
 	t.Run("success handle username", func(t *testing.T) {

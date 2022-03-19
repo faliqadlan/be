@@ -5,10 +5,8 @@ import (
 	"be/utils"
 	"errors"
 	"strconv"
-	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -24,6 +22,27 @@ func New(db *gorm.DB) *Repo {
 
 func (r *Repo) Create(req entities.Patient) (entities.Patient, error) {
 
+	var uid string
+	for {
+		uid = strconv.Itoa(int(uuid.New().ID()))
+		var find = entities.Patient{}
+		var res = r.db.Model(&entities.Patient{}).Where("patient_uid = ?", uid).Find(&find)
+		if res.RowsAffected == 0 {
+			break
+		}
+	}
+	// log.Info(uid)
+	if req.UserName == "" {
+		req.UserName = uid
+	}
+	if req.Email == "" {
+		req.Email = uid
+	}
+	if req.Password == "" {
+		req.Password = uid
+	}
+	// log.Info(req.UserName)
+	// log.Info(req.Email)
 	// check username
 
 	type userNameCheck struct {
@@ -44,15 +63,6 @@ func (r *Repo) Create(req entities.Patient) (entities.Patient, error) {
 		return entities.Patient{}, errors.New("email is already exist")
 	}
 
-	var uid string
-	for {
-		uid = strconv.Itoa(int(uuid.New().ID()))
-		var find = entities.Patient{}
-		var res = r.db.Model(&entities.Patient{}).Where("patient_uid = ?", uid).Find(&find)
-		if res.RowsAffected == 0 {
-			break
-		}
-	}
 	var err error
 	req.Password, err = utils.HashPassword(req.Password)
 	if err != nil {
@@ -91,22 +101,22 @@ func (r *Repo) Update(patient_uid string, req entities.Patient) (entities.Patien
 		return entities.Patient{}, errors.New("email is already exist")
 	}
 
-	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {
-		return entities.Patient{}, gorm.ErrRecordNotFound
-	}
+	// if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Find(&resInit); res.Error != nil || res.RowsAffected == 0 {
+	// 	return entities.Patient{}, gorm.ErrRecordNotFound
+	// }
 
-	var timeInit time.Time
-	if resInit.CreatedAt != resInit.UpdatedAt {
-		switch {
-		case req.Nik != "":
-			return entities.Patient{}, errors.New("nik can't updated")
-		case req.PlaceBirth != "":
-			return entities.Patient{}, errors.New("place birth can't updated")
-		case req.Dob != datatypes.Date(timeInit):
-			return entities.Patient{}, errors.New("date of birth can't updated")
+	// var timeInit time.Time
+	// if resInit.CreatedAt != resInit.UpdatedAt {
+	// 	switch {
+	// 	case req.Nik != "":
+	// 		return entities.Patient{}, errors.New("nik can't updated")
+	// 	case req.PlaceBirth != "":
+	// 		return entities.Patient{}, errors.New("place birth can't updated")
+	// 	case req.Dob != datatypes.Date(timeInit):
+	// 		return entities.Patient{}, errors.New("date of birth can't updated")
 
-		}
-	}
+	// 	}
+	// }
 
 	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Updates(entities.Patient{
 		UserName:   req.UserName,
