@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/google/uuid"
+	"github.com/labstack/gommon/log"
 	"gorm.io/gorm"
 )
 
@@ -118,6 +119,15 @@ func (r *Repo) Update(patient_uid string, req entities.Patient) (entities.Patien
 	// 	}
 	// }
 
+	if req.Password != "" {
+		password, err := utils.HashPassword(req.Password)
+		req.Password = password
+		if err != nil {
+			log.Warn(err)
+			return entities.Patient{}, errors.New("error in hash password")
+		}
+	}
+
 	if res := r.db.Model(&entities.Patient{}).Where("patient_uid = ?", patient_uid).Updates(entities.Patient{
 		UserName:   req.UserName,
 		Email:      req.Email,
@@ -169,6 +179,15 @@ func (r *Repo) GetProfile(patient_uid, userName, email string) (Profile, error) 
 
 	if res := r.db.Model(&entities.Patient{}).Where(patient_uid).Select("patient_uid as Patient_uid, nik as Nik, name as Name, image as Image, gender as Gender, address as Address, place_birth as PlaceBirth, date_format(dob, '%d-%m-%Y') as Dob, religion as Religion, status as Status, job as Job").Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
 		return Profile{}, gorm.ErrRecordNotFound
+	}
+
+	switch profileResp.Status {
+	case "belumKawin":
+		profileResp.Status = "belum kawin"
+	case "ceraiHidup":
+		profileResp.Status = "cerai hidup"
+	case "ceraiMati":
+		profileResp.Status = "cerai mati"
 	}
 
 	return profileResp, nil

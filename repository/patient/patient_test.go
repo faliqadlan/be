@@ -270,7 +270,7 @@ func TestGetProfile(t *testing.T) {
 		// log.Info(res1.Dob)
 	})
 
-	t.Run("error input uit", func(t *testing.T) {
+	t.Run("error input uid", func(t *testing.T) {
 		var mock1 = entities.Patient{UserName: "clinic2", Email: shortuuid.New(), Password: "clinic", Nik: "1"}
 
 		var _, err = r.Create(mock1)

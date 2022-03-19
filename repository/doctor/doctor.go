@@ -54,11 +54,13 @@ func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 	req.Doctor_uid = uid
 	req.Doctor_uid_ref = uid
 	var err error
+
 	req.Password, err = utils.HashPassword(req.Password)
 	if err != nil {
 		log.Warn(err)
 		return entities.Doctor{}, errors.New("error in hash password")
 	}
+
 	req.Type = "doctor"
 	if res := r.db.Model(&entities.Doctor{}).Create(&req); res.Error != nil {
 		log.Warn(err)
@@ -124,6 +126,17 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 		log.Warn(checkEmail.Error)
 		tx.Rollback()
 		return entities.Doctor{}, errors.New("email is already exist")
+	}
+
+	// hash password
+
+	if req.Password != "" {
+		password, err := utils.HashPassword(req.Password)
+		req.Password = password
+		if err != nil {
+			log.Warn(err)
+			return entities.Doctor{}, errors.New("error in hash password")
+		}
 	}
 
 	if res := tx.Model(&entities.Doctor{}).Where("doctor_uid = ?", doctor_uid).Updates(entities.Doctor{

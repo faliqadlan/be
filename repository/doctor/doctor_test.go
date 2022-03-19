@@ -88,7 +88,7 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		mock1 = entities.Doctor{Name: "clinic", Capacity: 10}
+		mock1 = entities.Doctor{Name: "clinic", Capacity: 10, Password: "new(type)"}
 
 		res, err = r.Update(res.Doctor_uid, mock1)
 		assert.Nil(t, err)
