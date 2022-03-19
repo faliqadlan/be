@@ -66,4 +66,5 @@ var religions = map[string]int{
 	"hindu":     4,
 	"konghuchu": 5,
 	"lainnya":   6,
+	"protestan": 7,
 }

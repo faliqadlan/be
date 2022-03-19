@@ -52,6 +52,7 @@ func (r *Repo) Create(req entities.Doctor) (entities.Doctor, error) {
 		}
 	}
 	req.Doctor_uid = uid
+	req.Doctor_uid_ref = uid
 	var err error
 	req.Password, err = utils.HashPassword(req.Password)
 	if err != nil {
@@ -162,7 +163,7 @@ func (r *Repo) Delete(doctor_uid string) (entities.Doctor, error) {
 
 func (r *Repo) GetProfile(doctor_uid, userName, email string) (ProfileResp, error) {
 
-	switch  {
+	switch {
 	case doctor_uid != "":
 		doctor_uid = "doctor_uid = '" + doctor_uid + "'"
 	case userName != "":
@@ -171,10 +172,9 @@ func (r *Repo) GetProfile(doctor_uid, userName, email string) (ProfileResp, erro
 		doctor_uid = "email = '" + email + "'"
 	}
 
-
 	var profileResp ProfileResp
 
-	var query = "doctor_uid as Doctor_uid, user_name as UserName, email as Email, name as Name, image as Image, address as Address, status as Status, open_day as OpenDay, close_day as CloseDay, capacity as Capacity "
+	var query = "doctor_uid as Doctor_uid, user_name as UserName, email as Email, name as Name, image as Image, address as Address, status as Status, open_day as OpenDay, close_day as CloseDay, capacity as Capacity, doctor_uid_ref as Doctor_uid_ref "
 
 	if res := r.db.Model(&entities.Doctor{}).Where(doctor_uid).Select(query).Find(&profileResp); res.Error != nil || res.RowsAffected == 0 {
 		log.Warn(res.Error)
