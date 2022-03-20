@@ -98,6 +98,10 @@ func (m *mockSuccess) GetProfile(patient_uid, userName, email string) (patient.P
 	return patient.Profile{Image: "https://karen-givi-bucket.s3.ap-southeast-1.amazonaws.com/testing"}, nil
 }
 
+func (m *mockSuccess) GetAll() (patient.All, error) {
+	return patient.All{}, nil
+}
+
 type defaultImage struct{}
 
 func (m *defaultImage) Create(patientReq entities.Patient) (entities.Patient, error) {
@@ -114,6 +118,10 @@ func (m *defaultImage) Delete(patient_uid string) (entities.Patient, error) {
 
 func (m *defaultImage) GetProfile(patient_uid, userName, email string) (patient.Profile, error) {
 	return patient.Profile{Image: "https://www.teralogistics.com/wp-content/uploads/2020/12/default.png"}, nil
+}
+
+func (m *defaultImage) GetAll() (patient.All, error) {
+	return patient.All{}, nil
 }
 
 type mockFail struct{}
@@ -134,6 +142,10 @@ func (m *mockFail) GetProfile(patient_uid, userName, email string) (patient.Prof
 	return patient.Profile{}, errors.New("")
 }
 
+func (m *mockFail) GetAll() (patient.All, error) {
+	return patient.All{}, nil
+}
+
 type recordNotFound struct{}
 
 func (m *recordNotFound) Create(patientReq entities.Patient) (entities.Patient, error) {
@@ -150,6 +162,10 @@ func (m *recordNotFound) Delete(patient_uid string) (entities.Patient, error) {
 
 func (m *recordNotFound) GetProfile(patient_uid, userName, email string) (patient.Profile, error) {
 	return patient.Profile{}, gorm.ErrRecordNotFound
+}
+
+func (m *recordNotFound) GetAll() (patient.All, error) {
+	return patient.All{}, nil
 }
 
 type userNameCheck struct{}
@@ -170,6 +186,10 @@ func (m *userNameCheck) GetProfile(patient_uid, userName, email string) (patient
 	return patient.Profile{}, errors.New("user name is already exist")
 }
 
+func (m *userNameCheck) GetAll() (patient.All, error) {
+	return patient.All{}, nil
+}
+
 type emailCheck struct{}
 
 func (m *emailCheck) Create(patientReq entities.Patient) (entities.Patient, error) {
@@ -186,6 +206,10 @@ func (m *emailCheck) Delete(patient_uid string) (entities.Patient, error) {
 
 func (m *emailCheck) GetProfile(patient_uid, userName, email string) (patient.Profile, error) {
 	return patient.Profile{}, errors.New("user name is already exist")
+}
+
+func (m *emailCheck) GetAll() (patient.All, error) {
+	return patient.All{}, nil
 }
 
 type MockAuthLib struct{}

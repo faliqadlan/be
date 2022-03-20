@@ -272,6 +272,18 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 func (cont *Controller) GetProfile() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
+		var all = c.QueryParam("all")
+
+		if all == "all" {
+			res, err := cont.r.GetAll()
+			if err != nil {
+				log.Warn(err)
+				return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, "there's some problem in server", nil))
+			}
+
+			return c.JSON(http.StatusOK, templates.Success(http.StatusOK, "success get all patient", res))
+		}
+
 		var userName = c.QueryParam("userName")
 		var email = c.QueryParam("email")
 
@@ -291,7 +303,7 @@ func (cont *Controller) GetProfile() echo.HandlerFunc {
 			case "record not found":
 				err = errors.New("account is not found")
 			default:
-				err = errors.New("there's some problem is server")
+				err = errors.New("there's some problem in server")
 			}
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}

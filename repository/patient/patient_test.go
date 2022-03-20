@@ -284,3 +284,46 @@ func TestGetProfile(t *testing.T) {
 		// log.Info(res1)
 	})
 }
+
+func TestGetAll(t *testing.T) {
+	var config = configs.GetConfig()
+	var db = utils.InitDB(config)
+	var r = New(db)
+	db.Migrator().DropTable(&entities.Patient{})
+	db.Migrator().DropTable(&entities.Doctor{})
+	db.Migrator().DropTable(&entities.Visit{})
+	db.AutoMigrate(&entities.Doctor{})
+	db.AutoMigrate(&entities.Patient{})
+
+	t.Run("success get all", func(t *testing.T) {
+		if _, err := r.Create(entities.Patient{Name: "name 1", Nik: "nik 1"}); err != nil {
+			log.Info(err)
+			log.Fatal()
+		}
+
+		if _, err := r.Create(entities.Patient{Name: "name 2", Nik: "nik 2"}); err != nil {
+			log.Info(err)
+			log.Fatal()
+		}
+
+		if _, err := r.Create(entities.Patient{Name: "name 3", Nik: "nik 3"}); err != nil {
+			log.Info(err)
+			log.Fatal()
+		}
+
+		if _, err := r.Create(entities.Patient{Name: "name 1", Nik: "nik 1"}); err != nil {
+			log.Info(err)
+			log.Fatal()
+		}
+
+		if _, err := r.Create(entities.Patient{Name: "name 2", Nik: "nik 2"}); err != nil {
+			log.Info(err)
+			log.Fatal()
+		}
+
+		res, err := r.GetAll()
+		assert.Nil(t, err)
+		assert.NotNil(t, res)
+		// log.Info(res)
+	})
+}
