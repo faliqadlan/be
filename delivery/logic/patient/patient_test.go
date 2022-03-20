@@ -226,6 +226,33 @@ func TestValidationRegexPatient(t *testing.T) {
 		assert.NotNil(t, err)
 		log.Info(err)
 	})
+
+	t.Run("error email", func(t *testing.T) {
+		var req Req
+
+		req.Email = "hotaru123   "
+
+		var l = New()
+
+		var err = l.ValidationRequest(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("succeess email", func(t *testing.T) {
+		var req Req
+
+		req.Email = "hotaru123@mail.com"
+
+		var l = New()
+
+		var err = l.ValidationRequest(req)
+
+		assert.Nil(t, err)
+		log.Info(err)
+	})
+
 	t.Run("error name", func(t *testing.T) {
 		var req Req
 

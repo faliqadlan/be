@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"net/mail"
 	"regexp"
 )
 
@@ -32,10 +33,6 @@ func NameRegex(s string) bool {
 func AddressRegex(s string) bool {
 
 	return regexp.MustCompile(`^[a-zA-Z0-9/,.\s]+$`).MatchString(s)
-}
-
-func EmailRegex(s string) bool  {
-	return regexp.MustCompile(`^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$`).MatchString(s)
 }
 
 func DigitRegex(s string) bool {
@@ -86,6 +83,14 @@ func NikValid(s string) error {
 		if !DigitRegex(s) {
 			return errors.New("invalid nik format")
 		}
+	}
+	return nil
+}
+
+func EmailValid(s string) error  {
+	_, err := mail.ParseAddress(s)
+	if err != nil {
+		return errors.New("invalid email format")
 	}
 	return nil
 }

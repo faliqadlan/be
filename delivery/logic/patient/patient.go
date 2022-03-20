@@ -52,6 +52,10 @@ func (l *Logic) ValidationRequest(req Req) error {
 		return err
 	}
 
+	if err := utils.EmailValid(req.Email); err != nil && req.Email != "" {
+		return err
+	}
+
 	if err := utils.NikValid(req.Nik); err != nil && req.Nik != "" {
 		return err
 	}
