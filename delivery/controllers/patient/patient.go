@@ -304,7 +304,7 @@ func (cont *Controller) GetCheck() echo.HandlerFunc {
 
 		// database
 		// log.Info(uid)
-		var res, err = cont.r.GetProfile(uid, userName, email)
+		var _, err = cont.r.GetProfile(uid, userName, email)
 
 		if err != nil {
 			log.Warn(err)
@@ -317,6 +317,6 @@ func (cont *Controller) GetCheck() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
-		return c.JSON(http.StatusOK, templates.Success(http.StatusOK, "success get profile patient", res))
+		return c.JSON(http.StatusOK, templates.Success(http.StatusOK, "success get profile patient", nil))
 	}
 }

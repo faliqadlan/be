@@ -1853,3 +1853,104 @@ func TestGetProfile(t *testing.T) {
 	})
 
 }
+
+func TestGetCheck(t *testing.T) {
+	var jwt string
+	t.Run("success login", func(t *testing.T) {
+		e := echo.New()
+
+		reqBody, _ := json.Marshal(map[string]string{
+			"userName": "anonim@123",
+			"password": "anonim123",
+		})
+
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		res := httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/login")
+
+		authCont := auth.New(&MockAuthLib{})
+		authCont.Login()(context)
+
+		resp := auth.LoginRespFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
+
+		jwt = resp.Data["token"].(string)
+	})
+
+	t.Run("success", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetCheck())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 200, response.Code)
+	})
+
+	t.Run("recordNotFound", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&recordNotFound{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetCheck())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
+	t.Run("internal server", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockFail{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetCheck())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
+}
