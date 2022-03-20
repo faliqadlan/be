@@ -37,7 +37,7 @@ func (r *Repo) Create(req entities.Patient) (entities.Patient, error) {
 		req.UserName = uid
 	}
 	if req.Email == "" {
-		req.Email = uid +"@gmail.com"
+		req.Email = uid + "@gmail.com"
 	}
 	if req.Password == "" {
 		req.Password = uid
@@ -90,7 +90,7 @@ func (r *Repo) Update(patient_uid string, req entities.Patient) (entities.Patien
 
 	var checkUserName = r.db.Raw("? union all ? ", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", req.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", req.UserName)).Scan(&userNameCheck{})
 
-	if checkUserName.RowsAffected != 0 {
+	if checkUserName.RowsAffected != 0 && req.UserName != "" {
 		return entities.Patient{}, errors.New("user name is already exist")
 	}
 
@@ -98,7 +98,7 @@ func (r *Repo) Update(patient_uid string, req entities.Patient) (entities.Patien
 
 	var checkEmail = r.db.Model(&entities.Patient{}).Where("email = ?", req.Email).Select("user_name as UserName").Scan(&userNameCheck{})
 
-	if checkEmail.RowsAffected != 0 {
+	if checkEmail.RowsAffected != 0 && req.Email != "" {
 		return entities.Patient{}, errors.New("email is already exist")
 	}
 
@@ -200,7 +200,6 @@ func (r *Repo) GetAll() (All, error) {
 	if res := r.db.Model(&entities.Patient{}).Group("nik").Find(&patientAll.Patients); res.Error != nil || res.RowsAffected == 0 {
 		return All{}, gorm.ErrRecordNotFound
 	}
-
 
 	return patientAll, nil
 }

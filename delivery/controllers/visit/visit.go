@@ -135,7 +135,7 @@ func (cont *Controller) Update() echo.HandlerFunc {
 			log.Warn(err)
 			switch err.Error() {
 			case errors.New("record not found").Error():
-				err = errors.New("account is not found")
+				err = errors.New("data is not found")
 			default:
 				err = errors.New("there's problem in server")
 			}
@@ -187,7 +187,7 @@ func (cont *Controller) Delete() echo.HandlerFunc {
 			log.Warn(err)
 			switch err.Error() {
 			case errors.New("record not found").Error():
-				err = errors.New("account is not found")
+				err = errors.New("data is not found")
 			default:
 				err = errors.New("there's problem in server")
 			}

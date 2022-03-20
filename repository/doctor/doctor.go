@@ -112,7 +112,7 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 
 	var checkUserName = tx.Raw("? union all ? ", r.db.Model(&entities.Patient{}).Select("user_name").Where("user_name = ?", req.UserName), r.db.Model(&entities.Doctor{}).Select("user_name").Where("user_name = ?", req.UserName)).Scan(&userNameCheck{})
 
-	if checkUserName.RowsAffected != 0 {
+	if checkUserName.RowsAffected != 0  && req.UserName != ""{
 		log.Warn(checkUserName.Error)
 		tx.Rollback()
 		return entities.Doctor{}, errors.New("user name is already exist")
@@ -122,7 +122,7 @@ func (r *Repo) Update(doctor_uid string, req entities.Doctor) (entities.Doctor, 
 
 	var checkEmail = r.db.Model(&entities.Doctor{}).Where("email = ?", req.Email).Select("user_name as UserName").Scan(&userNameCheck{})
 
-	if checkEmail.RowsAffected != 0 {
+	if checkEmail.RowsAffected != 0 && req.Email != ""{
 		log.Warn(checkEmail.Error)
 		tx.Rollback()
 		return entities.Doctor{}, errors.New("email is already exist")
