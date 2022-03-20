@@ -28,9 +28,27 @@ func (m *successLogic) ValidationRequest(req logic.Req) error {
 	return nil
 }
 
+func (m *successLogic) ValidationStruct(req logic.Req) error {
+	return nil
+}
+
 type errorLogic struct{}
 
 func (m *errorLogic) ValidationRequest(req logic.Req) error {
+	return errors.New("")
+}
+
+func (m *errorLogic) ValidationStruct(req logic.Req) error {
+	return errors.New("")
+}
+
+type errorLogicStruct struct{}
+
+func (m *errorLogicStruct) ValidationRequest(req logic.Req) error {
+	return nil
+}
+
+func (m *errorLogicStruct) ValidationStruct(req logic.Req) error {
 	return errors.New("")
 }
 
@@ -152,6 +170,24 @@ func (m *userNameCheck) GetProfile(patient_uid, userName, email string) (patient
 	return patient.Profile{}, errors.New("user name is already exist")
 }
 
+type emailCheck struct{}
+
+func (m *emailCheck) Create(patientReq entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("email is already exist")
+}
+
+func (m *emailCheck) Update(patient_uid string, req entities.Patient) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("email is already exist")
+}
+
+func (m *emailCheck) Delete(patient_uid string) (entities.Patient, error) {
+	return entities.Patient{}, errors.New("user name is already exist")
+}
+
+func (m *emailCheck) GetProfile(patient_uid, userName, email string) (patient.Profile, error) {
+	return patient.Profile{}, errors.New("user name is already exist")
+}
+
 type MockAuthLib struct{}
 
 func (m *MockAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
@@ -232,11 +268,11 @@ func TestCreate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("validator username ", func(t *testing.T) {
+	t.Run("binding username ", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName":   "",
+			"userName":   50,
 			"email":      "doctor@",
 			"password":   "a",
 			"nik":        "123",
@@ -267,12 +303,12 @@ func TestCreate(t *testing.T) {
 		// log.Info(response.Message)
 	})
 
-	t.Run("validator email ", func(t *testing.T) {
+	t.Run("binding email ", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
 			"userName":   "doctor1",
-			"email":      "",
+			"email":      50,
 			"password":   "a",
 			"nik":        "123",
 			"name":       "subejo",
@@ -302,13 +338,13 @@ func TestCreate(t *testing.T) {
 		// log.Info(response.Message)
 	})
 
-	t.Run("validator password ", func(t *testing.T) {
+	t.Run("binding password ", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
 			"userName":   "doctor1",
 			"email":      "doctor@",
-			"password":   "",
+			"password":   50,
 			"nik":        "123",
 			"name":       "subejo",
 			"gender":     "pria",
@@ -337,20 +373,20 @@ func TestCreate(t *testing.T) {
 		// log.Info(response.Message)
 	})
 
-	t.Run("invalid dob format ", func(t *testing.T) {
+	t.Run("binding nik ", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
 			"userName":   "doctor1",
 			"email":      "doctor@",
-			"password":   "a",
-			"nik":        "1234567891234567",
-			"name":       "name",
+			"password":   "password",
+			"nik":        50,
+			"name":       "subejo",
 			"gender":     "pria",
-			"address":    "addressanjsndkjsandkjans",
+			"address":    "address",
 			"placeBirth": "malang",
-			"dob":        "05-05-99",
-			"job":        "job",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
 			"status":     "lainnya",
 			"religion":   "lainnya",
 		})
@@ -367,7 +403,357 @@ func TestCreate(t *testing.T) {
 		var response = ResponseFormat{}
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-		log.Info(response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("binding name ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "password",
+			"nik":        "123",
+			"name":       50,
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("binding gender ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "password",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     50,
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("binding address ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "password",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    50,
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("binding placeBirth ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "password",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": 50,
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("binding dob ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "password",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        50,
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("binding job ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "password",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        50,
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("binding status ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "password",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     50,
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("binding religion ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "password",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "status",
+			"religion":   50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("validator struct ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "password",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "status",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &errorLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("validator request ", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "password",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "status",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &errorLogicStruct{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
 		assert.Equal(t, 400, response.Code)
 		// log.Info(response.Message)
 	})
@@ -487,6 +873,42 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 
 		var controller = New(&userNameCheck{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
+	})
+
+	t.Run("email", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "a",
+			"nik":        "1234567891234567",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "123456789123456",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&emailCheck{}, &mockTaskS3M{}, &successLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}

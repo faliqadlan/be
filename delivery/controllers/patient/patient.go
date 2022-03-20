@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
@@ -36,37 +35,40 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		// request
 
 		if err := c.Bind(&req); err != nil {
-			log.Warn(err)
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
-		}
-
-		// validation struct
-
-		var v = validator.New()
-		if err := v.Struct(req); err != nil {
-			log.Warn(err)
 			switch {
-			case strings.Contains(err.Error(), "Nik"):
+			case strings.Contains(err.Error(), "userName"):
+				err = errors.New("invalid user name")
+			case strings.Contains(err.Error(), "email"):
+				err = errors.New("invalid email")
+			case strings.Contains(err.Error(), "password"):
+				err = errors.New("invalid password")
+			case strings.Contains(err.Error(), "nik"):
 				err = errors.New("invalid nik")
-			case strings.Contains(err.Error(), "Name"):
+			case strings.Contains(err.Error(), "name"):
 				err = errors.New("invalid name")
-			case strings.Contains(err.Error(), "Gender"):
+			case strings.Contains(err.Error(), "gender"):
 				err = errors.New("invalid gender")
-			case strings.Contains(err.Error(), "Address"):
+			case strings.Contains(err.Error(), "address"):
 				err = errors.New("invalid address")
-			case strings.Contains(err.Error(), "PlaceBirth"):
+			case strings.Contains(err.Error(), "placeBirth"):
 				err = errors.New("invalid place birth")
-			case strings.Contains(err.Error(), "Dob"):
-				err = errors.New("invalid date of birth")
-			case strings.Contains(err.Error(), "Job"):
+			case strings.Contains(err.Error(), "dob"):
+				err = errors.New("invalid date of birth ")
+			case strings.Contains(err.Error(), "job"):
 				err = errors.New("invalid job")
-			case strings.Contains(err.Error(), "Status"):
+			case strings.Contains(err.Error(), "status"):
 				err = errors.New("invalid status")
-			case strings.Contains(err.Error(), "Religion"):
+			case strings.Contains(err.Error(), "religion"):
 				err = errors.New("invalid religion")
 			default:
 				err = errors.New("invalid input")
 			}
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
+		// validation struct
+
+		if err := cont.l.ValidationStruct(req); err != nil {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
@@ -116,18 +118,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
-		// generate token
-
-		token, err := middlewares.GenerateToken(res.Patient_uid, "patient")
-
-		if err != nil {
-			log.Warn(err)
-			err = errors.New("there's some problem is server")
-			return c.JSON(http.StatusNotAcceptable, templates.BadRequest(http.StatusNotAcceptable, err.Error(), nil))
-		}
-
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add patient", map[string]interface{}{
-			"token":    token,
 			"userName": res.UserName,
 		}))
 	}
@@ -141,6 +132,34 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		// request
 
 		if err := c.Bind(&req); err != nil {
+			switch {
+			case strings.Contains(err.Error(), "userName"):
+				err = errors.New("invalid user name")
+			case strings.Contains(err.Error(), "email"):
+				err = errors.New("invalid email")
+			case strings.Contains(err.Error(), "password"):
+				err = errors.New("invalid password")
+			case strings.Contains(err.Error(), "nik"):
+				err = errors.New("invalid nik")
+			case strings.Contains(err.Error(), "name"):
+				err = errors.New("invalid name")
+			case strings.Contains(err.Error(), "gender"):
+				err = errors.New("invalid gender")
+			case strings.Contains(err.Error(), "address"):
+				err = errors.New("invalid address")
+			case strings.Contains(err.Error(), "placeBirth"):
+				err = errors.New("invalid place birth")
+			case strings.Contains(err.Error(), "dob"):
+				err = errors.New("invalid date of birth ")
+			case strings.Contains(err.Error(), "job"):
+				err = errors.New("invalid job")
+			case strings.Contains(err.Error(), "status"):
+				err = errors.New("invalid status")
+			case strings.Contains(err.Error(), "religion"):
+				err = errors.New("invalid religion")
+			default:
+				err = errors.New("invalid input")
+			}
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 

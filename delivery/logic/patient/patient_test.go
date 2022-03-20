@@ -7,6 +7,272 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestValidationStruct(t *testing.T) {
+	t.Run("validator userName", func(t *testing.T) {
+		var req = Req{
+			UserName:   "",
+			Email:      "email",
+			Password:   "password",
+			Nik:        "nik",
+			Name:       "name",
+			Gender:     "gender",
+			Address:    "address",
+			PlaceBirth: "placeBirth",
+			Dob:        "dob",
+			Status:     "status",
+			Religion:   "religion",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator email", func(t *testing.T) {
+		var req = Req{
+			UserName:   "userName",
+			Email:      "",
+			Password:   "password",
+			Nik:        "nik",
+			Name:       "name",
+			Gender:     "gender",
+			Address:    "address",
+			PlaceBirth: "placeBirth",
+			Dob:        "dob",
+			Status:     "status",
+			Religion:   "religion",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator password", func(t *testing.T) {
+		var req = Req{
+			UserName:   "userName",
+			Email:      "email",
+			Password:   "",
+			Nik:        "nik",
+			Name:       "name",
+			Gender:     "gender",
+			Address:    "address",
+			PlaceBirth: "placeBirth",
+			Dob:        "dob",
+			Status:     "status",
+			Religion:   "religion",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator nik", func(t *testing.T) {
+		var req = Req{
+			UserName:   "userName",
+			Email:      "email",
+			Password:   "password",
+			Nik:        "",
+			Name:       "name",
+			Gender:     "gender",
+			Address:    "address",
+			PlaceBirth: "placeBirth",
+			Dob:        "dob",
+			Status:     "status",
+			Religion:   "religion",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator name", func(t *testing.T) {
+		var req = Req{
+			UserName:   "userName",
+			Email:      "email",
+			Password:   "password",
+			Nik:        "nik",
+			Name:       "",
+			Gender:     "gender",
+			Address:    "address",
+			PlaceBirth: "placeBirth",
+			Dob:        "dob",
+			Status:     "status",
+			Religion:   "religion",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator gender", func(t *testing.T) {
+		var req = Req{
+			UserName:   "userName",
+			Email:      "email",
+			Password:   "password",
+			Nik:        "nik",
+			Name:       "name",
+			Gender:     "",
+			Address:    "address",
+			PlaceBirth: "placeBirth",
+			Dob:        "dob",
+			Status:     "status",
+			Religion:   "religion",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator address", func(t *testing.T) {
+		var req = Req{
+			UserName:   "userName",
+			Email:      "email",
+			Password:   "password",
+			Nik:        "nik",
+			Name:       "name",
+			Gender:     "gender",
+			Address:    "",
+			PlaceBirth: "placeBirth",
+			Dob:        "dob",
+			Status:     "status",
+			Religion:   "religion",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator placeBirth", func(t *testing.T) {
+		var req = Req{
+			UserName:   "userName",
+			Email:      "email",
+			Password:   "password",
+			Nik:        "nik",
+			Name:       "name",
+			Gender:     "gender",
+			Address:    "address",
+			PlaceBirth: "",
+			Dob:        "dob",
+			Status:     "status",
+			Religion:   "religion",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator dob", func(t *testing.T) {
+		var req = Req{
+			UserName:   "userName",
+			Email:      "email",
+			Password:   "password",
+			Nik:        "nik",
+			Name:       "name",
+			Gender:     "gender",
+			Address:    "address",
+			PlaceBirth: "placeBirth",
+			Dob:        "",
+			Status:     "status",
+			Religion:   "religion",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator job", func(t *testing.T) {
+		var req = Req{
+			UserName:   "userName",
+			Email:      "email",
+			Password:   "password",
+			Nik:        "nik",
+			Name:       "name",
+			Gender:     "gender",
+			Address:    "address",
+			PlaceBirth: "placeBirth",
+			Dob:        "dob",
+			Job:        "",
+			Status:     "status",
+			Religion:   "religion",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator status", func(t *testing.T) {
+		var req = Req{
+			UserName:   "userName",
+			Email:      "email",
+			Password:   "password",
+			Nik:        "nik",
+			Name:       "name",
+			Gender:     "gender",
+			Address:    "address",
+			PlaceBirth: "placeBirth",
+			Dob:        "dob",
+			Job:        "job",
+			Status:     "",
+			Religion:   "religion",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator religion", func(t *testing.T) {
+		var req = Req{
+			UserName:   "userName",
+			Email:      "email",
+			Password:   "password",
+			Nik:        "nik",
+			Name:       "name",
+			Gender:     "gender",
+			Address:    "address",
+			PlaceBirth: "placeBirth",
+			Dob:        "dob",
+			Job:        "job",
+			Status:     "status",
+			Religion:   "",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator succeess", func(t *testing.T) {
+		var req = Req{
+			UserName:   "userName",
+			Email:      "email",
+			Password:   "password",
+			Nik:        "nik",
+			Name:       "name",
+			Gender:     "gender",
+			Address:    "address",
+			PlaceBirth: "placeBirth",
+			Dob:        "dob",
+			Job:        "job",
+			Status:     "status",
+			Religion:   "religion",
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.Nil(t, err)
+		log.Info(err)
+	})
+}
+
 func TestValidationRegexPatient(t *testing.T) {
 	t.Run("error user name", func(t *testing.T) {
 		var req Req

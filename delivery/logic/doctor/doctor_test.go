@@ -170,6 +170,24 @@ func TestValidationStruct(t *testing.T) {
 		assert.NotNil(t, err)
 		log.Info(err)
 	})
+
+	t.Run("validator success", func(t *testing.T) {
+		var req = Req{
+			UserName: "userName",
+			Email:    "email",
+			Password: "password",
+			Name:     "name",
+			Address:  "address",
+			Status:   "status",
+			OpenDay:  "openDay",
+			CloseDay: "closeDay",
+			Capacity: 80,
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.Nil(t, err)
+		log.Info(err)
+	})
 }
 
 func TestValidationRequest(t *testing.T) {
