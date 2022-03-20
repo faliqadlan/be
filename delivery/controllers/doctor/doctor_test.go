@@ -27,11 +27,26 @@ type successLogic struct{}
 func (m *successLogic) ValidationRequest(req logic.Req) error {
 	return nil
 }
+func (m *successLogic) ValidationStruct(req logic.Req) error {
+	return nil
+}
 
 type errorLogic struct{}
 
 func (m *errorLogic) ValidationRequest(req logic.Req) error {
 	return errors.New("")
+}
+func (m *errorLogic) ValidationStruct(req logic.Req) error {
+	return errors.New("")
+}
+
+type errorLogicRequest struct{}
+
+func (m *errorLogicRequest) ValidationRequest(req logic.Req) error {
+	return errors.New("")
+}
+func (m *errorLogicRequest) ValidationStruct(req logic.Req) error {
+	return nil
 }
 
 type mockTaskS3M struct{}
@@ -147,6 +162,28 @@ func (m *createUserName) GetProfile(doctor_uid, userName, email string) (doctor.
 }
 
 func (m *createUserName) GetAll() (doctor.All, error) {
+	return doctor.All{}, errors.New("")
+}
+
+type createEmail struct{}
+
+func (m *createEmail) Create(DoctorReq entities.Doctor) (entities.Doctor, error) {
+	return entities.Doctor{}, errors.New("email is already exist")
+}
+
+func (m *createEmail) Update(Doctor_uid string, up entities.Doctor) (entities.Doctor, error) {
+	return entities.Doctor{}, errors.New("email is already exist")
+}
+
+func (m *createEmail) Delete(Doctor_uid string) (entities.Doctor, error) {
+	return entities.Doctor{}, errors.New("")
+}
+
+func (m *createEmail) GetProfile(doctor_uid, userName, email string) (doctor.ProfileResp, error) {
+	return doctor.ProfileResp{}, errors.New("")
+}
+
+func (m *createEmail) GetAll() (doctor.All, error) {
 	return doctor.All{}, errors.New("")
 }
 
@@ -299,11 +336,103 @@ func TestCreate(t *testing.T) {
 		var response = ResponseFormat{}
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-		log.Info(response)
 		assert.Equal(t, 201, response.Code)
 	})
 
-	t.Run("binding", func(t *testing.T) {
+	t.Run("binding user name", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": 50,
+			"email":    "doctor@",
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("binding email", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
+			"email":    50,
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("binding password", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": 50,
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("binding name", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
@@ -331,15 +460,170 @@ func TestCreate(t *testing.T) {
 		var response = ResponseFormat{}
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("validator userName", func(t *testing.T) {
+	t.Run("binding address", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "",
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": "a",
+			"name":     "name",
+			"address":  50,
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("binding status", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   50,
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("binding openDay", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  50,
+			"closeDay": "closeDay",
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("binding closeDay", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "open_day",
+			"closeDay": 50,
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("binding capacity", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": "sepuluh",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+		// log.Info(response)
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("validator struct", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
 			"email":    "doctor@",
 			"password": "a",
 			"name":     "name",
@@ -349,6 +633,7 @@ func TestCreate(t *testing.T) {
 			"closeDay": "closeDay",
 			"capacity": 50,
 		})
+
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
 		var res = httptest.NewRecorder()
 		req.Header.Set("Content-Type", "application/json")
@@ -356,23 +641,22 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &errorLogic{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
+		// log.Info(response)
 		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
 	})
 
-	t.Run("validator email", func(t *testing.T) {
+	t.Run("validator request", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
 			"userName": "doctor1",
-			"email":    "",
+			"email":    "doctor@",
 			"password": "a",
 			"name":     "name",
 			"address":  "123456789123456",
@@ -389,48 +673,14 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &errorLogicRequest{})
 		controller.Create()(context)
 
 		var response = ResponseFormat{}
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
+		// log.Info(response)
 		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
-	})
-
-	t.Run("validator password", func(t *testing.T) {
-		var e = echo.New()
-
-		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"userName": "doctor1",
-			"email":    "doctor@",
-			"password": "",
-			"name":     "name",
-			"address":  "123456789123456",
-			"status":   "status",
-			"openDay":  "openDay",
-			"closeDay": "closeDay",
-			"capacity": 50,
-		})
-
-		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		var res = httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-
-		context := e.NewContext(req, res)
-		context.SetPath("/doctor")
-
-		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
-		controller.Create()(context)
-
-		var response = ResponseFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-		assert.Equal(t, 400, response.Code)
-		// log.Info(response.Message)
 	})
 
 	t.Run("file", func(t *testing.T) {
@@ -585,6 +835,40 @@ func TestCreate(t *testing.T) {
 		// log.Info(response.Message)
 	})
 
+	t.Run("email is already exist", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": "abc",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&createEmail{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		// log.Info(response)
+		assert.Equal(t, 500, response.Code)
+		// log.Info(response.Message)
+	})
+
 	t.Run("status enum", func(t *testing.T) {
 		var e = echo.New()
 
@@ -720,7 +1004,10 @@ func TestUpdate(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name":     "doctor name",
+			"userName": "doctor1",
+			"email":    "doctor@",
+			"password": "a",
+			"name":     "name",
 			"address":  "123456789123456",
 			"status":   "status",
 			"openDay":  "openDay",
@@ -749,44 +1036,14 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 202, response.Code)
 	})
 
-	t.Run("binding", func(t *testing.T) {
+	t.Run("binding userName", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name":     "doctor name",
-			"address":  "123456789123456",
-			"status":   123,
-			"openDay":  "openDay",
-			"closeDay": "closeDay",
-			"capacity": 50,
-		})
-
-		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-		var res = httptest.NewRecorder()
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
-
-		context := e.NewContext(req, res)
-		context.SetPath("/doctor")
-
-		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
-		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
-			log.Fatal(err)
-			return
-		}
-
-		var response = ResponseFormat{}
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &response)
-
-		assert.Equal(t, 400, response.Code)
-	})
-
-	t.Run("validator name", func(t *testing.T) {
-		var e = echo.New()
-
-		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name":     "",
+			"userName": 50,
+			"email":    "doctor",
+			"password": "a",
+			"name":     "name",
 			"address":  "123456789123456",
 			"status":   "status",
 			"openDay":  "openDay",
@@ -815,12 +1072,15 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("validator address", func(t *testing.T) {
+	t.Run("binding email", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name":     "doctor name",
-			"address":  "",
+			"userName": "userName",
+			"email":    50,
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
 			"status":   "status",
 			"openDay":  "openDay",
 			"closeDay": "closeDay",
@@ -848,13 +1108,16 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("validator status", func(t *testing.T) {
+	t.Run("binding password", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name":     "doctor name",
+			"userName": "userName",
+			"email":    "doctor",
+			"password": 50,
+			"name":     "name",
 			"address":  "123456789123456",
-			"status":   "",
+			"status":   "status",
 			"openDay":  "openDay",
 			"closeDay": "closeDay",
 			"capacity": 50,
@@ -881,14 +1144,17 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("validator open day", func(t *testing.T) {
+	t.Run("binding name", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name":     "doctor name",
+			"userName": "userName",
+			"email":    "doctor",
+			"password": "a",
+			"name":     50,
 			"address":  "123456789123456",
 			"status":   "status",
-			"openDay":  "",
+			"openDay":  "openDay",
 			"closeDay": "closeDay",
 			"capacity": 50,
 		})
@@ -914,15 +1180,18 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("validator close day", func(t *testing.T) {
+	t.Run("binding address", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name":     "doctor name",
-			"address":  "123456789123456",
+			"userName": "userName",
+			"email":    "doctor",
+			"password": "a",
+			"name":     "name",
+			"address":  50,
 			"status":   "status",
-			"openDay":  "open_day",
-			"closeDay": "",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
 			"capacity": 50,
 		})
 
@@ -947,16 +1216,19 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 	})
 
-	t.Run("validator capacity", func(t *testing.T) {
+	t.Run("binding status", func(t *testing.T) {
 		var e = echo.New()
 
 		var reqBody, _ = json.Marshal(map[string]interface{}{
-			"name":     "doctor name",
+			"userName": "userName",
+			"email":    "doctor",
+			"password": "a",
+			"name":     "name",
 			"address":  "123456789123456",
-			"status":   "status",
-			"openDay":  "open_day",
+			"status":   50,
+			"openDay":  "openDay",
 			"closeDay": "closeDay",
-			"capacity": 0,
+			"capacity": 50,
 		})
 
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
@@ -968,6 +1240,150 @@ func TestUpdate(t *testing.T) {
 		context.SetPath("/doctor")
 
 		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("binding openDay", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "userName",
+			"email":    "doctor",
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  50,
+			"closeDay": "closeDay",
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("binding closeDay", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "userName",
+			"email":    "doctor",
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": 50,
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("binding capacity", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "userName",
+			"email":    "doctor",
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": "sepuluh",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("validation request", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName": "userName",
+			"email":    "doctor",
+			"password": "a",
+			"name":     "name",
+			"address":  "123456789123456",
+			"status":   "status",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &errorLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1243,6 +1659,39 @@ func TestUpdate(t *testing.T) {
 		context.SetPath("/doctor")
 
 		var controller = New(&createUserName{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
+	t.Run("email is already exist", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"name":     "doctor name",
+			"address":  "123456789123456",
+			"status":   "available",
+			"openDay":  "openDay",
+			"closeDay": "closeDay",
+			"capacity": 50,
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&createEmail{}, &mockTaskS3M{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1663,6 +2112,108 @@ func TestGetProfile(t *testing.T) {
 	})
 
 }
+
+func TestGetCheck(t *testing.T) {
+	var jwt string
+	t.Run("success login", func(t *testing.T) {
+		e := echo.New()
+
+		reqBody, _ := json.Marshal(map[string]string{
+			"userName": "anonim@123",
+			"password": "anonim123",
+		})
+
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		res := httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/login")
+
+		authCont := auth.New(&MockAuthLib{})
+		authCont.Login()(context)
+
+		resp := auth.LoginRespFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
+
+		jwt = resp.Data["token"].(string)
+	})
+
+	t.Run("success", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetCheck())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 200, response.Code)
+	})
+
+	t.Run("internal server", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor/profile")
+
+		var controller = New(&mockFail{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetCheck())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
+	t.Run("recordNotFound", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor/profile")
+
+		var controller = New(&recordNotFound{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetCheck())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
+}
+
 func TestGetAll(t *testing.T) {
 	var jwt string
 	t.Run("success login", func(t *testing.T) {

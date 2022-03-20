@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
@@ -37,41 +36,35 @@ func (cont *Controller) Create() echo.HandlerFunc {
 
 		if err := c.Bind(&req); err != nil {
 			log.Warn(err)
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input ", nil))
-		}
-
-		// validation struct
-
-		// switch {
-		// case req.UserName == "":
-		// 	return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid user name ", nil))
-		// case req.Email == "":
-		// 	return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid email ", nil))
-		// case req.Password == "":
-		// 	return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid password ", nil))
-		// }
-
-		// validation struct
-
-		var v = validator.New()
-		if err := v.Struct(req); err != nil {
-			log.Warn(err)
 			switch {
+			case strings.Contains(err.Error(), "userName"):
+				err = errors.New("invalid user name")
+			case strings.Contains(err.Error(), "email"):
+				err = errors.New("invalid email")
+			case strings.Contains(err.Error(), "password"):
+				err = errors.New("invalid password")
 			case strings.Contains(err.Error(), "Name"):
 				err = errors.New("invalid name")
-			case strings.Contains(err.Error(), "Address"):
+			case strings.Contains(err.Error(), "address"):
 				err = errors.New("invalid address")
-			case strings.Contains(err.Error(), "Status"):
+			case strings.Contains(err.Error(), "status"):
 				err = errors.New("invalid status")
-			case strings.Contains(err.Error(), "OpenDay"):
+			case strings.Contains(err.Error(), "openDay"):
 				err = errors.New("invalid open day")
-			case strings.Contains(err.Error(), "CloseDay"):
+			case strings.Contains(err.Error(), "closeDay"):
 				err = errors.New("invalid close day")
-			case strings.Contains(err.Error(), "Capacity"):
+			case strings.Contains(err.Error(), "capacity"):
 				err = errors.New("invalid capacity ")
 			default:
 				err = errors.New("invalid input")
 			}
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
+		// validation struct
+
+		if err := cont.l.ValidationStruct(req); err != nil {
+			log.Warn(err)
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
@@ -121,18 +114,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
-		// check token
-
-		token, err := middlewares.GenerateToken(res.Doctor_uid, "doctor")
-
-		if err != nil {
-			log.Warn(err)
-			err = errors.New("there's some problem is server")
-			return c.JSON(http.StatusNotAcceptable, templates.BadRequest(http.StatusNotAcceptable, err.Error(), nil))
-		}
-
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add Doctor", map[string]interface{}{
-			"token":    token,
 			"userName": res.UserName,
 		}))
 	}
@@ -147,7 +129,29 @@ func (cont *Controller) Update() echo.HandlerFunc {
 
 		if err := c.Bind(&req); err != nil {
 			log.Warn(err)
-			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
+			switch {
+			case strings.Contains(err.Error(), "userName"):
+				err = errors.New("invalid user name")
+			case strings.Contains(err.Error(), "email"):
+				err = errors.New("invalid email")
+			case strings.Contains(err.Error(), "password"):
+				err = errors.New("invalid password")
+			case strings.Contains(err.Error(), "Name"):
+				err = errors.New("invalid name")
+			case strings.Contains(err.Error(), "address"):
+				err = errors.New("invalid address")
+			case strings.Contains(err.Error(), "status"):
+				err = errors.New("invalid status")
+			case strings.Contains(err.Error(), "openDay"):
+				err = errors.New("invalid open day")
+			case strings.Contains(err.Error(), "closeDay"):
+				err = errors.New("invalid close day")
+			case strings.Contains(err.Error(), "capacity"):
+				err = errors.New("invalid capacity ")
+			default:
+				err = errors.New("invalid input")
+			}
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
 		// validation request
@@ -301,7 +305,7 @@ func (cont *Controller) GetCheck() echo.HandlerFunc {
 		// log.Info(kind)
 		// database
 
-		var res, err = cont.r.GetProfile("", userName, email)
+		var _, err = cont.r.GetProfile("", userName, email)
 
 		if err != nil {
 			log.Warn(err)
@@ -314,7 +318,7 @@ func (cont *Controller) GetCheck() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, templates.InternalServerError(nil, err.Error(), nil))
 		}
 
-		return c.JSON(http.StatusOK, templates.Success(nil, "success get profile Doctor", res))
+		return c.JSON(http.StatusOK, templates.Success(nil, "success get profile Doctor", nil))
 	}
 }
 

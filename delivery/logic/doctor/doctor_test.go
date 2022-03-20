@@ -8,6 +8,170 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestValidationStruct(t *testing.T) {
+	t.Run("validator userName", func(t *testing.T) {
+		var req = Req{
+			UserName: "",
+			Email:    "email",
+			Password: "password",
+			Name:     "name",
+			Address:  "address",
+			Status:   "status",
+			OpenDay:  "openDay",
+			CloseDay: "closeDay",
+			Capacity: 50,
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator email", func(t *testing.T) {
+		var req = Req{
+			UserName: "userName",
+			Email:    "",
+			Password: "password",
+			Name:     "name",
+			Address:  "address",
+			Status:   "status",
+			OpenDay:  "openDay",
+			CloseDay: "closeDay",
+			Capacity: 50,
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator password", func(t *testing.T) {
+		var req = Req{
+			UserName: "userName",
+			Email:    "email",
+			Password: "",
+			Name:     "name",
+			Address:  "address",
+			Status:   "status",
+			OpenDay:  "openDay",
+			CloseDay: "closeDay",
+			Capacity: 50,
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator name", func(t *testing.T) {
+		var req = Req{
+			UserName: "userName",
+			Email:    "email",
+			Password: "password",
+			Name:     "",
+			Address:  "address",
+			Status:   "status",
+			OpenDay:  "openDay",
+			CloseDay: "closeDay",
+			Capacity: 70,
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator address", func(t *testing.T) {
+		var req = Req{
+			UserName: "userName",
+			Email:    "email",
+			Password: "password",
+			Name:     "name",
+			Address:  "",
+			Status:   "status",
+			OpenDay:  "openDay",
+			CloseDay: "closeDay",
+			Capacity: 50,
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator status", func(t *testing.T) {
+		var req = Req{
+			UserName: "userName",
+			Email:    "email",
+			Password: "password",
+			Name:     "name",
+			Address:  "address",
+			Status:   "",
+			OpenDay:  "openDay",
+			CloseDay: "closeDay",
+			Capacity: 50,
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator openDay", func(t *testing.T) {
+		var req = Req{
+			UserName: "userName",
+			Email:    "email",
+			Password: "password",
+			Name:     "name",
+			Address:  "address",
+			Status:   "status",
+			OpenDay:  "",
+			CloseDay: "closeDay",
+			Capacity: 50,
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator closeDay", func(t *testing.T) {
+		var req = Req{
+			UserName: "userName",
+			Email:    "email",
+			Password: "password",
+			Name:     "name",
+			Address:  "address",
+			Status:   "status",
+			OpenDay:  "openDay",
+			CloseDay: "",
+			Capacity: 50,
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("validator capacity", func(t *testing.T) {
+		var req = Req{
+			UserName: "userName",
+			Email:    "email",
+			Password: "password",
+			Name:     "name",
+			Address:  "address",
+			Status:   "status",
+			OpenDay:  "openDay",
+			CloseDay: "closeDay",
+			Capacity: 0,
+		}
+		var l = New()
+		var err = l.ValidationStruct(req)
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+}
+
 func TestValidationRequest(t *testing.T) {
 	t.Run("error user name", func(t *testing.T) {
 		var req Req
@@ -38,6 +202,19 @@ func TestValidationRequest(t *testing.T) {
 		var req Req
 
 		req.Address = "hotaru123   *(&*&**&*&*&(*&(*&&^"
+
+		var l = New()
+
+		var err = l.ValidationRequest(req)
+
+		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("error capacity", func(t *testing.T) {
+		var req Req
+
+		req.Capacity = -10
 
 		var l = New()
 
@@ -91,7 +268,7 @@ func TestValidationRequest(t *testing.T) {
 
 		res := req.ToDoctor()
 
-		assert.Equal(t,&entities.Doctor{} ,res)
+		assert.Equal(t, &entities.Doctor{}, res)
 		log.Info(res)
 	})
 
