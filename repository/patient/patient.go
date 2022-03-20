@@ -37,7 +37,7 @@ func (r *Repo) Create(req entities.Patient) (entities.Patient, error) {
 		req.UserName = uid
 	}
 	if req.Email == "" {
-		req.Email = uid
+		req.Email = uid +"@gmail.com"
 	}
 	if req.Password == "" {
 		req.Password = uid

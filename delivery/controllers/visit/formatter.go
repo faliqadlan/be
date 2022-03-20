@@ -32,7 +32,7 @@ func (r *Req) ToVisit() (*entities.Visit, error) {
 	var layout = "02-01-2006"
 
 	var dateConv, err = time.Parse(layout, r.Date)
-	if err != nil {
+	if err != nil && r.Date != "" {
 		return &entities.Visit{}, errors.New("invalid date format")
 	}
 
