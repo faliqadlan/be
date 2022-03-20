@@ -23,9 +23,9 @@ type Req struct {
 	HeartRate        string `json:"heartRate" form:"heartRate"`
 	RespiratoryRate  string `json:"respiratoryRate" form:"respiratoryRate"`
 	O2Saturate       string `json:"o2Saturate" form:"o2Saturate"`
-	Weight           int    `json:"weight" form:"weight"`
-	Height           int    `json:"height" form:"height"`
-	Bmi              int    `json:"bmi" form:"bmi"`
+	Weight           string    `json:"weight" form:"weight"`
+	Height           string    `json:"height" form:"height"`
+	Bmi              string    `json:"bmi" form:"bmi"`
 }
 
 func (r *Req) ToVisit() (*entities.Visit, error) {

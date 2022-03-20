@@ -293,7 +293,7 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		var res3, err3 = r.Update(res2.Visit_uid, entities.Visit{Status: "cancelled", Complaint: "update complaint", MainDiagnose: "update main diagnose", AdditionDiagnose: "update addition_diagnose", Action: "update action", Recipe: "update recipe", BloodPressure: "update blood_pressure", HeartRate: "update heart_rate", O2Saturate: "update o2_saturate", Weight: 100, Height: 100, Bmi: 100})
+		var res3, err3 = r.Update(res2.Visit_uid, entities.Visit{Status: "cancelled", Complaint: "update complaint", MainDiagnose: "update main diagnose", AdditionDiagnose: "update addition_diagnose", Action: "update action", Recipe: "update recipe", BloodPressure: "update blood_pressure", HeartRate: "update heart_rate", O2Saturate: "update o2_saturate", Weight: "100", Height: "100", Bmi: "100"})
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
 		// log.Info(res3)
@@ -326,7 +326,7 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		var _, err3 = r.Update(shortuuid.New(), entities.Visit{Status: "cancelled", Complaint: "update complaint", MainDiagnose: "update main diagnose", AdditionDiagnose: "update addition_diagnose", Action: "update action", Recipe: "update recipe", BloodPressure: "update blood_pressure", HeartRate: "update heart_rate", O2Saturate: "update o2_saturate", Weight: 100, Height: 100, Bmi: 100})
+		var _, err3 = r.Update(shortuuid.New(), entities.Visit{Status: "cancelled", Complaint: "update complaint", MainDiagnose: "update main diagnose", AdditionDiagnose: "update addition_diagnose", Action: "update action", Recipe: "update recipe", BloodPressure: "update blood_pressure", HeartRate: "update heart_rate", O2Saturate: "update o2_saturate", Weight: "100", Height: "100", Bmi: "100"})
 		assert.NotNil(t, err3)
 		// log.Info(err3)
 	})
@@ -353,7 +353,7 @@ func TestUpdate(t *testing.T) {
 			t.Fatal()
 		}
 
-		var _, err3 = r.Update(res2.Visit_uid, entities.Visit{Status: "njsndaj", Complaint: "update complaint", AdditionDiagnose: "update addition_diagnose", Action: "update action", Recipe: "update recipe", BloodPressure: "update blood_pressure", HeartRate: "update heart_rate", O2Saturate: "update o2_saturate", Weight: 100, Height: 100, Bmi: 100})
+		var _, err3 = r.Update(res2.Visit_uid, entities.Visit{Status: "njsndaj", Complaint: "update complaint", AdditionDiagnose: "update addition_diagnose", Action: "update action", Recipe: "update recipe", BloodPressure: "update blood_pressure", HeartRate: "update heart_rate", O2Saturate: "update o2_saturate", Weight: "100", Height: "100", Bmi: "100"})
 		assert.NotNil(t, err3)
 		log.Info(err3)
 	})

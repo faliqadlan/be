@@ -27,7 +27,7 @@ type Visit struct {
 	HeartRate        string
 	RespiratoryRate  string
 	O2Saturate       string
-	Weight           int
-	Height           int
-	Bmi              int
+	Weight           string
+	Height           string
+	Bmi              string
 }

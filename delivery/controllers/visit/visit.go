@@ -62,6 +62,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 
 		entity, err := req.ToVisit()
 		if req.Date != "" {
+			log.Warn(err)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 			}
@@ -119,6 +120,7 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		var req Req
 
 		if err := c.Bind(&req); err != nil {
+			log.Warn(err)
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
 		}
 
