@@ -55,6 +55,8 @@ func (cont *Controller) Create() echo.HandlerFunc {
 				err = errors.New("invalid close day")
 			case strings.Contains(err.Error(), "capacity"):
 				err = errors.New("invalid capacity ")
+			case strings.Contains(err.Error(), "strconv.ParseInt"):
+				err = errors.New("invalid input capacity")
 			default:
 				err = errors.New("invalid input")
 			}
@@ -148,6 +150,8 @@ func (cont *Controller) Update() echo.HandlerFunc {
 				err = errors.New("invalid close day")
 			case strings.Contains(err.Error(), "capacity"):
 				err = errors.New("invalid capacity ")
+			case strings.Contains(err.Error(), "strconv.ParseInt"):
+				err = errors.New("invalid input capacity")
 			default:
 				err = errors.New("invalid input")
 			}

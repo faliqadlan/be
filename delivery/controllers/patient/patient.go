@@ -133,24 +133,6 @@ func (cont *Controller) Update() echo.HandlerFunc {
 
 		if err := c.Bind(&req); err != nil {
 			switch {
-			case strings.Contains(err.Error(), "nik"):
-				err = errors.New("invalid nik")
-			case strings.Contains(err.Error(), "name"):
-				err = errors.New("invalid name")
-			case strings.Contains(err.Error(), "gender"):
-				err = errors.New("invalid gender")
-			case strings.Contains(err.Error(), "address"):
-				err = errors.New("invalid address")
-			case strings.Contains(err.Error(), "placeBirth"):
-				err = errors.New("invalid place birth")
-			case strings.Contains(err.Error(), "dob"):
-				err = errors.New("invalid date of birth ")
-			case strings.Contains(err.Error(), "job"):
-				err = errors.New("invalid job")
-			case strings.Contains(err.Error(), "status"):
-				err = errors.New("invalid status")
-			case strings.Contains(err.Error(), "religion"):
-				err = errors.New("invalid religion")
 			default:
 				err = errors.New("invalid input")
 			}

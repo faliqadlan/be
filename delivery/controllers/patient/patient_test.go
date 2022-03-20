@@ -45,11 +45,11 @@ func (m *errorLogic) ValidationStruct(req logic.Req) error {
 type errorLogicStruct struct{}
 
 func (m *errorLogicStruct) ValidationRequest(req logic.Req) error {
-	return nil
+	return errors.New("")
 }
 
 func (m *errorLogicStruct) ValidationStruct(req logic.Req) error {
-	return errors.New("")
+	return nil
 }
 
 type mockTaskS3M struct{}
@@ -143,7 +143,7 @@ func (m *mockFail) GetProfile(patient_uid, userName, email string) (patient.Prof
 }
 
 func (m *mockFail) GetAll() (patient.All, error) {
-	return patient.All{}, nil
+	return patient.All{}, errors.New("")
 }
 
 type recordNotFound struct{}
@@ -782,6 +782,41 @@ func TestCreate(t *testing.T) {
 		// log.Info(response.Message)
 	})
 
+	t.Run("parsing dob", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"userName":   "doctor1",
+			"email":      "doctor@",
+			"password":   "password",
+			"nik":        "123",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "address",
+			"placeBirth": "malang",
+			"dob":        "05-05-00",
+			"job":        "lainnya",
+			"status":     "status",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
 	t.Run("succeess upload file", func(t *testing.T) {
 
 		var reqBody = new(bytes.Buffer)
@@ -1054,6 +1089,78 @@ func TestUpdate(t *testing.T) {
 			"address":    "123456789123456",
 			"placeBirth": "malang",
 			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("validation request", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"nik":        "1234567891234567",
+			"name":       "name",
+			"gender":     "pria",
+			"address":    "123456789123456",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &errorLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("parsing dob", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"nik":        "1234567891234567",
+			"name":       "name",
+			"gender":     "pria",
+			"address":    "123456789123456",
+			"placeBirth": "malang",
+			"dob":        "05-05-00",
 			"job":        "lainnya",
 			"status":     "lainnya",
 			"religion":   "lainnya",
@@ -1377,6 +1484,42 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, 500, response.Code)
 	})
 
+	t.Run("emailCheck", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"nik":        "1234567891234567",
+			"name":       "subejo",
+			"gender":     "pria",
+			"address":    "123456789123456",
+			"placeBirth": "malang",
+			"dob":        "05-05-2000",
+			"job":        "lainnya",
+			"status":     "lainnya",
+			"religion":   "lainnya",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&emailCheck{}, &mockTaskS3M{}, &successLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Update())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
+	})
+
 	t.Run("internal server", func(t *testing.T) {
 		var e = echo.New()
 
@@ -1590,6 +1733,52 @@ func TestGetProfile(t *testing.T) {
 		json.Unmarshal([]byte(res.Body.Bytes()), &response)
 
 		assert.Equal(t, 200, response.Code)
+	})
+
+	t.Run("success query param all", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/patient/profile")
+		context.QueryParams().Add("all", "all")
+		// log.Info(context.QueryString())
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.GetProfile()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 200, response.Code)
+	})
+
+	t.Run("error query param all", func(t *testing.T) {
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(nil))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+		context.SetPath("/patient/profile")
+		context.QueryParams().Add("all", "all")
+		// log.Info(context.QueryString())
+
+		var controller = New(&mockFail{}, &mockTaskS3M{}, &successLogic{})
+		controller.GetProfile()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 500, response.Code)
 	})
 
 	t.Run("success query param", func(t *testing.T) {
