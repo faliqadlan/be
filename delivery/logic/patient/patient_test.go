@@ -8,66 +8,6 @@ import (
 )
 
 func TestValidationStruct(t *testing.T) {
-	t.Run("validator userName", func(t *testing.T) {
-		var req = Req{
-			UserName:   "",
-			Email:      "email",
-			Password:   "password",
-			Nik:        "nik",
-			Name:       "name",
-			Gender:     "gender",
-			Address:    "address",
-			PlaceBirth: "placeBirth",
-			Dob:        "dob",
-			Status:     "status",
-			Religion:   "religion",
-		}
-		var l = New()
-		var err = l.ValidationStruct(req)
-		assert.NotNil(t, err)
-		log.Info(err)
-	})
-
-	t.Run("validator email", func(t *testing.T) {
-		var req = Req{
-			UserName:   "userName",
-			Email:      "",
-			Password:   "password",
-			Nik:        "nik",
-			Name:       "name",
-			Gender:     "gender",
-			Address:    "address",
-			PlaceBirth: "placeBirth",
-			Dob:        "dob",
-			Status:     "status",
-			Religion:   "religion",
-		}
-		var l = New()
-		var err = l.ValidationStruct(req)
-		assert.NotNil(t, err)
-		log.Info(err)
-	})
-
-	t.Run("validator password", func(t *testing.T) {
-		var req = Req{
-			UserName:   "userName",
-			Email:      "email",
-			Password:   "",
-			Nik:        "nik",
-			Name:       "name",
-			Gender:     "gender",
-			Address:    "address",
-			PlaceBirth: "placeBirth",
-			Dob:        "dob",
-			Status:     "status",
-			Religion:   "religion",
-		}
-		var l = New()
-		var err = l.ValidationStruct(req)
-		assert.NotNil(t, err)
-		log.Info(err)
-	})
-
 	t.Run("validator nik", func(t *testing.T) {
 		var req = Req{
 			UserName:   "userName",

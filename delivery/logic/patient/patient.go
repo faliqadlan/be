@@ -20,12 +20,6 @@ func (l *Logic) ValidationStruct(req Req) error {
 	if err := v.Struct(req); err != nil {
 		log.Warn(err)
 		switch {
-		case strings.Contains(err.Error(), "UserName"):
-			err = errors.New("invalid userName")
-		case strings.Contains(err.Error(), "Email"):
-			err = errors.New("invalid email")
-		case strings.Contains(err.Error(), "Password"):
-			err = errors.New("invalid password")
 		case strings.Contains(err.Error(), "Nik"):
 			err = errors.New("invalid nik")
 		case strings.Contains(err.Error(), "Name"):

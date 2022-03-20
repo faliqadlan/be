@@ -133,12 +133,6 @@ func (cont *Controller) Update() echo.HandlerFunc {
 
 		if err := c.Bind(&req); err != nil {
 			switch {
-			case strings.Contains(err.Error(), "userName"):
-				err = errors.New("invalid user name")
-			case strings.Contains(err.Error(), "email"):
-				err = errors.New("invalid email")
-			case strings.Contains(err.Error(), "password"):
-				err = errors.New("invalid password")
 			case strings.Contains(err.Error(), "nik"):
 				err = errors.New("invalid nik")
 			case strings.Contains(err.Error(), "name"):
