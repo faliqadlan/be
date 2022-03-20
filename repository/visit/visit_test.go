@@ -571,7 +571,7 @@ func TestGetVisitsVer1(t *testing.T) {
 			t.Fatal()
 		}
 
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain2"}); err != nil {
+		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, time.Now().AddDate(0, 0, 3).Local().Format(layDate), entities.Visit{Complaint: "complain2"}); err != nil {
 			log.Info(err)
 			t.Fatal()
 		}
@@ -584,7 +584,7 @@ func TestGetVisitsVer1(t *testing.T) {
 			t.Fatal()
 		}
 
-		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, dateNow, entities.Visit{Complaint: "complain1", Status: "cancelled"}); err != nil {
+		if _, err := r.Create(res.Doctor_uid, res2.Patient_uid, time.Now().AddDate(0, 0, 2).Local().Format(layDate), entities.Visit{Complaint: "complain1", Status: "cancelled"}); err != nil {
 			log.Info(err)
 			t.Fatal()
 		}
@@ -598,7 +598,7 @@ func TestGetVisitsVer1(t *testing.T) {
 		assert.Nil(t, err3)
 		assert.NotNil(t, res3)
 		// log.Info(res3.Visits[0].RespiratoryRate)
-		// log.Info(res3)
+		log.Info(res3)
 		log.Info(len(res3.Visits))
 
 		res3, err3 = r.GetVisitsVer1("doctor", res.Doctor_uid, "pending", "", "patient")
