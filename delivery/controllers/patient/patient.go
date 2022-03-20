@@ -119,7 +119,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusCreated, templates.Success(http.StatusCreated, "success add patient", map[string]interface{}{
-			"userName": res.UserName,
+			"patient_uid": res.Patient_uid,
 		}))
 	}
 }
