@@ -197,7 +197,7 @@ func (r *Repo) GetAll() (All, error) {
 
 	var patientAll All
 
-	if res := r.db.Model(&entities.Patient{}).Group("nik").Select("patient_uid as Patient_uid, nik as Nik, name as Name").Find(&patientAll.Patients); res.Error != nil || res.RowsAffected == 0 {
+	if res := r.db.Model(&entities.Patient{}).Group("nik").Find(&patientAll.Patients); res.Error != nil || res.RowsAffected == 0 {
 		return All{}, gorm.ErrRecordNotFound
 	}
 

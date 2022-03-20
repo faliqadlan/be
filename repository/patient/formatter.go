@@ -25,6 +25,7 @@ type PatientAll struct {
 	Patient_uid string `json:"patient_uid"`
 	Nik         string `json:"nik"`
 	Name        string `json:"name"`
+	Gender      string `json:"gender"`
 }
 
 type All struct {
