@@ -2,6 +2,8 @@ package patient
 
 type Profile struct {
 	Patient_uid string `json:"patient_uid"`
+	UserName    string `json:"userName"`
+	Email       string `json:"email"`
 	Nik         string `json:"nik"`
 	Name        string `json:"name"`
 	Image       string `json:"image"`
