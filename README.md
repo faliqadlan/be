@@ -10,14 +10,14 @@
 ## About The Project
 
 <p>
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce erat ipsum, auctor eu condimentum quis, sagittis in risus. Nulla facilisi. Mauris et malesuada lorem. Nam eget accumsan velit, id aliquet magna. Sed quis ornare nibh. Cras sodales elit ex, ut tempus mi porta id. Donec finibus pulvinar est, sed tempor eros lacinia aliquet. Maecenas et dui sit amet ipsum luctus eleifend sed at nisl. Nam et ligula ac massa feugiat porttitor non eget ipsum. Sed velit mi, pellentesque id velit non, commodo mollis turpis. Praesent volutpat, mi sed ultricies finibus, nisi dolor eleifend augue, congue luctus ipsum diam eget lacus. In eget nulla diam. Curabitur auctor tortor lectus, in dictum turpis aliquet id. Ut sed pellentesque ligula. Aliquam erat volutpat. Pellentesque in nulla ac tellus consequat accumsan.
-</p>
-
-<p>
-Maecenas vel justo venenatis, rhoncus mauris vel, elementum augue. Aenean volutpat est quis mi pharetra pharetra. Sed accumsan molestie mattis. Vestibulum id erat risus. Nunc placerat et arcu quis euismod. Fusce accumsan nibh nisi, id interdum sapien lacinia quis. Fusce eu enim hendrerit, laoreet lectus sed, egestas est. Aliquam bibendum vestibulum nibh, facilisis maximus magna convallis a.
+  mrClinic is a simple project to help the user as a patient get a medical record realtime, help the user to make an appointment with doctor, and help the doctor organize the medical record.
 </p>
 
 [OPEN API](https://app.swaggerhub.com/apis/faliqadlan/mrClinic/1.0.0)
+
+Front-End repository
+
+[Click Here!](https://github.com/MR-Clinic/Frontend)
 
 <details>
 <summary>ERD</summary>
@@ -138,5 +138,7 @@ go run main.go
 ```
 
 # Contact
+
+[![Gmail](https://img.shields.io/badge/gmail-faliq67%40gmail.com-red?logo=Gmail)](https://mail.google.com/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
