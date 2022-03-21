@@ -292,6 +292,6 @@ func TestGetAll(t *testing.T) {
 		var res1, err1 = r.GetAll()
 		assert.Nil(t, err1)
 		assert.NotNil(t, res1)
-		// log.Info(res1)
+		log.Info(res1)
 	})
 }

@@ -200,7 +200,7 @@ func (r *Repo) GetProfile(doctor_uid, userName, email string) (ProfileResp, erro
 func (r *Repo) GetAll() (All, error) {
 	var all All
 
-	if res := r.db.Model(&entities.Doctor{}).Find(&all.Doctors); res.Error != nil {
+	if res := r.db.Model(&entities.Doctor{}).Where("type = 'doctor'").Find(&all.Doctors); res.Error != nil {
 		log.Warn(res.Error)
 		return All{}, res.Error
 	}
