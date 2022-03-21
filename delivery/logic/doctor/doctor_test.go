@@ -243,6 +243,19 @@ func TestValidationRequest(t *testing.T) {
 		log.Info(err)
 	})
 
+	t.Run("name with point", func(t *testing.T) {
+		var req Req
+
+		req.Name = "hotaru. ichijio "
+
+		var l = New()
+
+		var err = l.ValidationRequest(req)
+
+		assert.Nil(t, err)
+		log.Info(err)
+	})
+
 	t.Run("error address", func(t *testing.T) {
 		var req Req
 
@@ -253,6 +266,19 @@ func TestValidationRequest(t *testing.T) {
 		var err = l.ValidationRequest(req)
 
 		assert.NotNil(t, err)
+		log.Info(err)
+	})
+
+	t.Run("address with -", func(t *testing.T) {
+		var req Req
+
+		req.Address = "hotaru123 -./, nsjdnasj"
+
+		var l = New()
+
+		var err = l.ValidationRequest(req)
+
+		assert.Nil(t, err)
 		log.Info(err)
 	})
 

@@ -36,7 +36,7 @@ func (r *Req) ToVisit() (*entities.Visit, error) {
 		return &entities.Visit{}, errors.New("invalid date format")
 	}
 	// log.Info(time.Since(dateConv), r.Date)
-	// if time.Since(dateConv) > 0 && r.Date != "" && time.Now() {
+	// if time.Since(dateConv) > 0 && r.Date != "" && time.Now().Format(layout) != r.Date {
 	// 	return &entities.Visit{}, errors.New("invalid date is in the past")
 	// }
 	return &entities.Visit{
