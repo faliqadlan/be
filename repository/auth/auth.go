@@ -36,6 +36,7 @@ func (ad *AuthDb) Login(userName string, password string) (map[string]interface{
 
 		return map[string]interface{}{
 			"data": patient.Patient_uid,
+			"doctor_uid": "null",
 			"type": "patient",
 		}, nil
 	}
@@ -56,12 +57,14 @@ func (ad *AuthDb) Login(userName string, password string) (map[string]interface{
 		if doctor.Type == "admin" {
 			return map[string]interface{}{
 				"data": doctor.Doctor_uid,
+				"doctor_uid":doctor.Doctor_uid_ref,
 				"type": "admin",
 			}, nil
 		}
 
 		return map[string]interface{}{
 			"data": doctor.Doctor_uid,
+			"doctor_uid":doctor.Doctor_uid_ref,
 			"type": "doctor",
 		}, nil
 	}

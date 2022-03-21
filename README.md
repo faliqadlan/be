@@ -21,9 +21,11 @@ Maecenas vel justo venenatis, rhoncus mauris vel, elementum augue. Aenean volutp
 
 <details>
 <summary>ERD</summary>
+<img src="image/erd.jpeg">
 </details>
 <details>
 <summary>HLA</summary>
+<img src="image/hla.jpeg">
 </details>
 <details>
 <summary>Doctor</summary>
@@ -65,6 +67,7 @@ Maecenas vel justo venenatis, rhoncus mauris vel, elementum augue. Aenean volutp
 </details>
 <details>
 <summary>Testing</summary>
+<img src="image/unit-test.png">
 </details>
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -133,5 +136,7 @@ place token.json for access google calendar API <br> here the reference link
 ```bash
 go run main.go
 ```
+
+# Contact
 
 <p align="right">(<a href="#top">back to top</a>)</p>

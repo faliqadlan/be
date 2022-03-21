@@ -62,19 +62,19 @@ func TestToVIsit(t *testing.T) {
 		log.Info(err)
 	})
 
-	t.Run("error past date", func(t *testing.T) {
+	// t.Run("error past date", func(t *testing.T) {
 
-		var req Req
+	// 	var req Req
 
-		var layout = "02-01-2006"
+	// 	var layout = "02-01-2006"
 
-		req.Date = time.Now().AddDate(0,0,-1).Format(layout)
+	// 	req.Date = time.Now().AddDate(0,0,-1).Format(layout)
 
-		_, err := req.ToVisit()
+	// 	_, err := req.ToVisit()
 
-		assert.NotNil(t, err)
-		log.Info(err)
-	})
+	// 	assert.NotNil(t, err)
+	// 	log.Info(err)
+	// })
 
 	t.Run("succeess", func(t *testing.T) {
 
