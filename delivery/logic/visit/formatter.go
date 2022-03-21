@@ -35,10 +35,10 @@ func (r *Req) ToVisit() (*entities.Visit, error) {
 	if err != nil && r.Date != "" {
 		return &entities.Visit{}, errors.New("invalid date format")
 	}
-
-	if time.Since(dateConv) > 0 {
-		return &entities.Visit{}, errors.New("invalid date is in the past")
-	}
+	// log.Info(time.Since(dateConv), r.Date)
+	// if time.Since(dateConv) > 0 && r.Date != "" && time.Now() {
+	// 	return &entities.Visit{}, errors.New("invalid date is in the past")
+	// }
 	return &entities.Visit{
 		Event_uid:        r.Event_uid,
 		Date:             datatypes.Date(dateConv),
