@@ -48,6 +48,10 @@ func (l *Logic) ValidationStruct(req Req) error {
 
 func (l *Logic) ValidationRequest(req Req) error {
 
+	if (Req{}) == req {
+		return errors.New("data is empyty")
+	}
+
 	if err := utils.UserNameValid(req.UserName); err != nil && req.UserName != "" {
 		return err
 	}

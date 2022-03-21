@@ -317,14 +317,14 @@ func TestValidationRequest(t *testing.T) {
 		log.Info(res)
 	})
 
-	t.Run("success", func(t *testing.T) {
+	t.Run("error data empyty", func(t *testing.T) {
 		var req Req
 
 		var l = New()
 
 		var err = l.ValidationRequest(req)
 
-		assert.Nil(t, err)
+		assert.NotNil(t, err)
 		log.Info(err)
 	})
 }

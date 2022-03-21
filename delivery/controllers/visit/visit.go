@@ -3,6 +3,7 @@ package visit
 import (
 	"be/api/google/calendar"
 	"be/delivery/controllers/templates"
+	logic "be/delivery/logic/visit"
 	"be/delivery/middlewares"
 	"be/entities"
 	"be/repository/visit"
@@ -19,12 +20,14 @@ import (
 type Controller struct {
 	r   visit.Visit
 	cal calendar.Calendar
+	l   logic.Visit
 }
 
-func New(r visit.Visit, cal calendar.Calendar) *Controller {
+func New(r visit.Visit, cal calendar.Calendar, l logic.Visit) *Controller {
 	return &Controller{
 		r:   r,
 		cal: cal,
+		l:   l,
 	}
 }
 
@@ -37,7 +40,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			uid, _ = middlewares.ExtractTokenUid(c)
 		}
 
-		var req Req
+		var req logic.Req
 
 		if err := c.Bind(&req); err != nil {
 			log.Warn(err)
@@ -57,6 +60,10 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			default:
 				err = errors.New("invalid input")
 			}
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
+		if err := cont.l.ValidationRequest(req); err != nil {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
@@ -117,7 +124,7 @@ func (cont *Controller) Create() echo.HandlerFunc {
 func (cont *Controller) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var uid = c.Param("visit_uid")
-		var req Req
+		var req logic.Req
 
 		if err := c.Bind(&req); err != nil {
 			log.Warn(err)
@@ -128,6 +135,11 @@ func (cont *Controller) Update() echo.HandlerFunc {
 		case req.Date != "":
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "date can't updated, must cancel the appoinment", nil))
 		}
+
+		if err := cont.l.ValidationRequest(req); err != nil {
+			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
+		}
+
 		// log.Info(uid)
 		entity, _ := req.ToVisit()
 

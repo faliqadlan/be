@@ -32,6 +32,11 @@ func (r *Req) ToPatient() (*entities.Patient, error) {
 	if err != nil && r.Dob != "" {
 		return &entities.Patient{}, errors.New("invalid date format")
 	}
+
+	if time.Since(dateConv) < 0 {
+		return &entities.Patient{}, errors.New("invalid date is in the future")
+	}
+
 	// log.Info(dateConv)
 	return &entities.Patient{
 		UserName:   r.UserName,

@@ -16,10 +16,23 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	logic "be/delivery/logic/visit"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/calendar/v3"
 	"gorm.io/gorm"
 )
+
+type successLogic struct{}
+
+func (l *successLogic) ValidationRequest(req logic.Req ) error {
+	return nil
+}
+
+type errorLogic struct{}
+
+func (l *errorLogic) ValidationRequest(req logic.Req ) error {
+	return errors.New("")
+}
 
 type mockSuccess struct{}
 
@@ -323,7 +336,7 @@ func TestCreate(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
 
-		var controller = New(&mockSuccess{}, &MockCal{})
+		var controller = New(&mockSuccess{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -352,7 +365,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &MockCal{})
+		var controller = New(&mockSuccess{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -381,7 +394,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &MockCal{})
+		var controller = New(&mockSuccess{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -411,7 +424,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &MockCal{})
+		var controller = New(&mockSuccess{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -441,7 +454,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &MockCal{})
+		var controller = New(&mockSuccess{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -454,6 +467,37 @@ func TestCreate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 		// log.Info(response.Message)
 	})
+
+	t.Run("ValidationRequest", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"doctor_uid": "doctor_uid",
+			"date":       "05-05-00",
+			"complaint":  "comlaint",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", jwt))
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &MockCal{}, &errorLogic{})
+		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+		// log.Info(response.Message)
+	})
+
 
 	t.Run("invalid date format", func(t *testing.T) {
 		var e = echo.New()
@@ -471,7 +515,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &MockCal{})
+		var controller = New(&mockSuccess{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -502,7 +546,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&spesificError{}, &MockCal{})
+		var controller = New(&spesificError{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -534,7 +578,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&leftCapacity{}, &MockCal{})
+		var controller = New(&leftCapacity{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -566,7 +610,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&invalidDoctorUid{}, &MockCal{})
+		var controller = New(&invalidDoctorUid{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -598,7 +642,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&invalidPatientUid{}, &MockCal{})
+		var controller = New(&invalidPatientUid{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -630,7 +674,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockFail{}, &MockCal{})
+		var controller = New(&mockFail{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -662,7 +706,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&errorVisitList{}, &errorCreateEvent{})
+		var controller = New(&errorVisitList{}, &errorCreateEvent{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -694,7 +738,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &errorCreateEvent{})
+		var controller = New(&mockSuccess{}, &errorCreateEvent{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -726,7 +770,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &errorInsertEvent{})
+		var controller = New(&mockSuccess{}, &errorInsertEvent{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -758,7 +802,7 @@ func TestCreate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&errorUpdateEventId{}, &MockCal{})
+		var controller = New(&errorUpdateEventId{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.Create())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -795,7 +839,7 @@ func TestUpdate(t *testing.T) {
 		context.SetParamValues("visit 123")
 		// log.Info(context.ParamNames())
 
-		var controller = New(&mockSuccess{}, &MockCal{})
+		var controller = New(&mockSuccess{}, &MockCal{}, &successLogic{})
 		controller.Update()(context)
 
 		var response = ResponseFormat{}
@@ -818,7 +862,30 @@ func TestUpdate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &MockCal{})
+		var controller = New(&mockSuccess{}, &MockCal{}, &successLogic{})
+		controller.Update()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("ValidationRequest", func(t *testing.T) {
+		var e = echo.New()
+
+		var reqBody, _ = json.Marshal(map[string]interface{}{
+			"complaint": "comlaint",
+		})
+
+		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+
+		var controller = New(&mockSuccess{}, &MockCal{}, &errorLogic{})
 		controller.Update()(context)
 
 		var response = ResponseFormat{}
@@ -841,7 +908,7 @@ func TestUpdate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &MockCal{})
+		var controller = New(&mockSuccess{}, &MockCal{}, &successLogic{})
 		controller.Update()(context)
 
 		var response = ResponseFormat{}
@@ -864,7 +931,7 @@ func TestUpdate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&spesificError{}, &MockCal{})
+		var controller = New(&spesificError{}, &MockCal{}, &successLogic{})
 		controller.Update()(context)
 
 		var response = ResponseFormat{}
@@ -889,7 +956,7 @@ func TestUpdate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockFail{}, &MockCal{})
+		var controller = New(&mockFail{}, &MockCal{}, &successLogic{})
 		controller.Update()(context)
 
 		var response = ResponseFormat{}
@@ -914,7 +981,7 @@ func TestUpdate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&errorVisitList{}, &MockCal{})
+		var controller = New(&errorVisitList{}, &MockCal{}, &successLogic{})
 		controller.Update()(context)
 
 		var response = ResponseFormat{}
@@ -939,7 +1006,7 @@ func TestUpdate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &errorCreateEvent{})
+		var controller = New(&mockSuccess{}, &errorCreateEvent{}, &successLogic{})
 		controller.Update()(context)
 
 		var response = ResponseFormat{}
@@ -964,7 +1031,7 @@ func TestUpdate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &errorInsertEvent{})
+		var controller = New(&mockSuccess{}, &errorInsertEvent{}, &successLogic{})
 		controller.Update()(context)
 
 		var response = ResponseFormat{}
@@ -990,7 +1057,7 @@ func TestUpdate(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &errorCancelEvent{})
+		var controller = New(&mockSuccess{}, &errorCancelEvent{}, &successLogic{})
 		controller.Update()(context)
 
 		var response = ResponseFormat{}
@@ -1020,7 +1087,7 @@ func TestDelete(t *testing.T) {
 		context.SetParamValues("visit 123")
 		// log.Info(context.ParamNames())
 
-		var controller = New(&mockSuccess{}, &MockCal{})
+		var controller = New(&mockSuccess{}, &MockCal{}, &successLogic{})
 		controller.Delete()(context)
 
 		var response = ResponseFormat{}
@@ -1039,7 +1106,7 @@ func TestDelete(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&spesificError{}, &MockCal{})
+		var controller = New(&spesificError{}, &MockCal{}, &successLogic{})
 		controller.Delete()(context)
 
 		var response = ResponseFormat{}
@@ -1060,7 +1127,7 @@ func TestDelete(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockFail{}, &MockCal{})
+		var controller = New(&mockFail{}, &MockCal{}, &successLogic{})
 		controller.Delete()(context)
 
 		var response = ResponseFormat{}
@@ -1081,7 +1148,7 @@ func TestDelete(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockSuccess{}, &errorInsertEvent{})
+		var controller = New(&mockSuccess{}, &errorInsertEvent{}, &successLogic{})
 		controller.Delete()(context)
 
 		var response = ResponseFormat{}
@@ -1134,7 +1201,7 @@ func TestGetVisits(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.QueryParams().Add("status", "pending")
 
-		var controller = New(&mockSuccess{}, &MockCal{})
+		var controller = New(&mockSuccess{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetVisits())(context); err != nil {
 			log.Fatal(err)
 			return
@@ -1157,7 +1224,7 @@ func TestGetVisits(t *testing.T) {
 
 		context := e.NewContext(req, res)
 
-		var controller = New(&mockFail{}, &MockCal{})
+		var controller = New(&mockFail{}, &MockCal{}, &successLogic{})
 		if err := middleware.JWT([]byte(configs.JWT_SECRET))(controller.GetVisits())(context); err != nil {
 			log.Fatal(err)
 			return

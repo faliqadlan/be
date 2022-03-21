@@ -19,6 +19,7 @@ import (
 	visitRepo "be/repository/visit"
 	logicDoctor "be/delivery/logic/doctor"
 	logicPatient "be/delivery/logic/patient"
+	logicVisit "be/delivery/logic/visit"
 
 	"be/utils"
 	"fmt"
@@ -53,8 +54,8 @@ func main() {
 
 	var visitRepo = visitRepo.New(db)
 	var calendar = calendar.New(visitRepo, srv)
-	var visitCont = visit.New(visitRepo, calendar)
-
+	var visitLogic = logicVisit.New()
+	var visitCont = visit.New(visitRepo, calendar, visitLogic)
 	var googleCont = google.New(googleConf, visitRepo)
 
 	var e = echo.New()
