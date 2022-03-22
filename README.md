@@ -69,6 +69,8 @@ Front-End repository
 <summary>Testing</summary>
 <img src="image/unit-test.png">
 </details>
+
+<details>
 <summary>Folder Structure</summary>
 <img src="image/folder-structure.png">
 </details>
