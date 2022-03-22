@@ -40,6 +40,10 @@ func DigitRegex(s string) bool {
 	return regexp.MustCompile(`^[[:digit:]]+$`).MatchString(s)
 }
 
+// func EmailRegex(s string) bool {
+// 	return regexp.Compile('')
+// }
+
 func NameValid(s string) error {
 	if len(s) < 4 || len(s) > 255 {
 		return errors.New("invalid length name")
@@ -87,8 +91,9 @@ func NikValid(s string) error {
 	return nil
 }
 
-func EmailValid(s string) error  {
+func EmailValid(s string) error {
 	_, err := mail.ParseAddress(s)
+	// log.Info(res)
 	if err != nil {
 		return errors.New("invalid email format")
 	}

@@ -21,11 +21,11 @@ Front-End repository
 
 <details>
 <summary>ERD</summary>
-<img src="image/erd.jpeg">
+<img src="image/erd.png">
 </details>
 <details>
 <summary>HLA</summary>
-<img src="image/hla.jpeg">
+<img src="image/hla.png">
 </details>
 <details>
 <summary>Doctor</summary>
@@ -68,6 +68,9 @@ Front-End repository
 <details>
 <summary>Testing</summary>
 <img src="image/unit-test.png">
+</details>
+<summary>Folder Structure</summary>
+<img src="image/folder-structure.png">
 </details>
 
 <p align="right">(<a href="#top">back to top</a>)</p>

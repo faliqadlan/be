@@ -42,10 +42,14 @@ func (cont *Controller) Create() echo.HandlerFunc {
 
 		var req logic.Req
 
+		// binding request
+
 		if err := c.Bind(&req); err != nil {
 			log.Warn(err)
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, "invalid input", nil))
 		}
+
+		// validator struct
 
 		var v = validator.New()
 		if err := v.Struct(req); err != nil {
@@ -63,9 +67,13 @@ func (cont *Controller) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
 
+		// validation request
+
 		if err := cont.l.ValidationRequest(req); err != nil {
 			return c.JSON(http.StatusBadRequest, templates.BadRequest(nil, err.Error(), nil))
 		}
+
+		// database
 
 		entity, err := req.ToVisit()
 		if req.Date != "" {
