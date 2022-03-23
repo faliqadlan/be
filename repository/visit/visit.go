@@ -132,7 +132,7 @@ func (r *Repo) Update(visit_uid string, req entities.Visit) (entities.Visit, err
 	if req.MainDiagnose != "" {
 		req.Status = "completed"
 	}
-	log.Info(req)
+	// log.Info(req)
 	// log.Info(req.Event_uid)
 	if res := tx.Model(&entities.Visit{}).Where("visit_uid = ?", visit_uid).Updates(entities.Visit{
 		Event_uid:        req.Event_uid,
