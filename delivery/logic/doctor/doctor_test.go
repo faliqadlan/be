@@ -343,7 +343,7 @@ func TestValidationRequest(t *testing.T) {
 		log.Info(res)
 	})
 
-	t.Run("error data empyty", func(t *testing.T) {
+	t.Run("error data empty", func(t *testing.T) {
 		var req Req
 
 		var l = New()

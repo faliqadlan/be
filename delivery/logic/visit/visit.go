@@ -10,7 +10,7 @@ func New() *Logic {
 
 func (l *Logic) ValidationRequest(req Req) error {
 	if (Req{}) == req {
-		return errors.New("data is empyty")
+		return errors.New("data is empty")
 	}
 
 	if _, ok := statueses[req.Status]; !ok && req.Status != "" {

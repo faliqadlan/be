@@ -373,7 +373,7 @@ func TestValidationRegexPatient(t *testing.T) {
 		log.Info(err)
 	})
 
-	t.Run("error data is empyty", func(t *testing.T) {
+	t.Run("error data is empty", func(t *testing.T) {
 		var req Req
 
 		var l = New()

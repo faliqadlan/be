@@ -24,7 +24,7 @@ func TestToVIsit(t *testing.T) {
 		log.Info(err)
 	})
 
-	t.Run("error empyty", func(t *testing.T) {
+	t.Run("error empty", func(t *testing.T) {
 
 		var req Req
 
