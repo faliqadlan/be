@@ -6,7 +6,7 @@ type VisitResp struct {
 	Status           string `json:"status" form:"status"`
 	Complaint        string `json:"complaint" form:"complaint"`
 	MainDiagnose     string `json:"mainDiagnose" form:"mainDiagnose"`
-	AdditionDiagnose string `json:"addiditonDiagnose" form:"addiditonDiagnose"`
+	AdditionDiagnose string `json:"additionDiagnose" form:"additionDiagnose"`
 	Action           string `json:"action" form:"action"`
 	Recipe           string `json:"recipe" form:"recipe"`
 	BloodPressure    string `json:"bloodPressuse" form:"bloodPressuse"`
