@@ -9,15 +9,16 @@
 
 ## About The Project
 
+![logo](./image/Logo.png)
 <p>
-  mrClinic is a simple project to help the user as a patient get a medical record realtime, help the user to make an appointment with doctor, and help the doctor organize the medical record.
+  this project help the user as a patient get a medical record realtime, help the user to make an appointment with doctor, and help the doctor organize the data
 </p>
 
 [OPEN API](https://app.swaggerhub.com/apis/faliqadlan/mrClinic/1.0.0)
 
-Front-End repository
+[Front-End repository](https://github.com/MR-Clinic/Frontend)
 
-[Click Here!](https://github.com/MR-Clinic/Frontend)
+[Quality-Assurance repository](https://github.com/MR-Clinic/Quality-Assurance)
 
 <details>
 <summary>ERD</summary>
@@ -145,5 +146,8 @@ go run main.go
 # Contact
 
 [![Gmail](https://img.shields.io/badge/gmail-faliq67%40gmail.com-red?logo=Gmail)](https://mail.google.com/)
+[![Github](https://img.shields.io/badge/github-faliqadlan-lightgrey?logo=Github)](https://github.com/faliqadlan)
+[![LinkedIn](https://img.shields.io/badge/linkedIn-faliqadlan-blue?logo=LinkedIn)](https://www.linkedin.com/in/faliqa/)
+
 
 <p align="right">(<a href="#top">back to top</a>)</p>
