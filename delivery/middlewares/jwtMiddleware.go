@@ -11,7 +11,7 @@ import (
 
 func GenerateToken(uid, kind string) (string, error) {
 	if uid == "" {
-		return "cannot Generate token", errors.New("uid is empyty")
+		return "cannot Generate token", errors.New("uid is empty")
 	}
 
 	codes := jwt.MapClaims{

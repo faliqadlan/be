@@ -14,9 +14,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	logic "be/delivery/logic/visit"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	logic "be/delivery/logic/visit"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/calendar/v3"
 	"gorm.io/gorm"
@@ -24,13 +25,13 @@ import (
 
 type successLogic struct{}
 
-func (l *successLogic) ValidationRequest(req logic.Req ) error {
+func (l *successLogic) ValidationRequest(req logic.Req) error {
 	return nil
 }
 
 type errorLogic struct{}
 
-func (l *errorLogic) ValidationRequest(req logic.Req ) error {
+func (l *errorLogic) ValidationRequest(req logic.Req) error {
 	return errors.New("")
 }
 
@@ -214,8 +215,9 @@ type MockAuthLib struct{}
 
 func (m *MockAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
 	return map[string]interface{}{
-		"data": "abc",
-		"type": "clinic",
+		"data":       "abc",
+		"doctor_uid": "abcde",
+		"type":       "clinic",
 	}, nil
 }
 
@@ -497,7 +499,6 @@ func TestCreate(t *testing.T) {
 		assert.Equal(t, 400, response.Code)
 		// log.Info(response.Message)
 	})
-
 
 	t.Run("invalid date format", func(t *testing.T) {
 		var e = echo.New()

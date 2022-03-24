@@ -217,6 +217,7 @@ type MockAuthLib struct{}
 func (m *MockAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
 	return map[string]interface{}{
 		"data": "abc",
+		"doctor_uid":"abcde",
 		"type": "clinic",
 	}, nil
 }

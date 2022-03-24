@@ -302,6 +302,7 @@ type MockAuthLib struct{}
 func (m *MockAuthLib) Login(userName string, password string) (map[string]interface{}, error) {
 	return map[string]interface{}{
 		"data": "abc",
+		"doctor_uid":"abcde",
 		"type": "clinic",
 	}, nil
 }
@@ -605,6 +606,40 @@ func TestCreate(t *testing.T) {
 		var req = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
 		var res = httptest.NewRecorder()
 		req.Header.Set("Content-Type", "application/json")
+
+		context := e.NewContext(req, res)
+		context.SetPath("/doctor")
+
+		var controller = New(&mockSuccess{}, &mockTaskS3M{}, &successLogic{})
+		controller.Create()(context)
+
+		var response = ResponseFormat{}
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+		// log.Info(response)
+		assert.Equal(t, 400, response.Code)
+	})
+
+	t.Run("binding capacity form", func(t *testing.T) {
+		var reqBody = new(bytes.Buffer)
+
+		var writer = multipart.NewWriter(reqBody)
+		writer.WriteField("userName", "doctor1")
+		writer.WriteField("email", "doctor")
+		writer.WriteField("password", "doctor")
+		writer.WriteField("name", "name")
+		writer.WriteField("address", "123456789123456")
+		writer.WriteField("status", "status")
+		writer.WriteField("openDay", "senin")
+		writer.WriteField("closeDay", "senin")
+		writer.WriteField("capacity", "sepuluh")
+		writer.Close()
+
+		var e = echo.New()
+
+		var req = httptest.NewRequest(http.MethodPost, "/", reqBody)
+		var res = httptest.NewRecorder()
+		req.Header.Set("Content-Type", writer.FormDataContentType())
 
 		context := e.NewContext(req, res)
 		context.SetPath("/doctor")
